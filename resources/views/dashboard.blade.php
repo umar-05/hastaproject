@@ -26,12 +26,20 @@
             <a href="#" class="hover:text-hasta-red transition">Contact Us</a>
         </nav>
 
+        <div class="flex items-center space-x-4">
+    @auth
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="bg-hasta-red hover:bg-hasta-redHover text-white font-bold py-2 px-8 rounded transition">
                 Logout
             </button>
         </form>
+    @else
+        <a href="{{ route('login') }}" class="bg-hasta-red hover:bg-hasta-redHover text-white font-bold py-2 px-8 rounded transition">
+            Login
+        </a>
+    @endauth
+</div>
     </header>
 
     <main class="max-w-7xl mx-auto px-8">
