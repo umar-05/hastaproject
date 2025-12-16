@@ -14,6 +14,15 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            // --- ADD THESE CUSTOM COLORS ---
+            colors: {
+                hasta: {
+                    red: '#c13939',      // The main deep red color
+                    redHover: '#a83232', // A slightly darker red for hovers
+                    yellow: '#f5a623',   // The accent yellow color
+                }
+            }
+            // -------------------------------
         },
     },
 
