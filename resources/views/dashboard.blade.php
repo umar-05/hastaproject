@@ -45,7 +45,7 @@
     <main class="max-w-7xl mx-auto px-8">
 
         <section class="relative bg-hasta-red rounded-[40px] p-12 md:p-16 overflow-hidden mb-16 text-white">
-            <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none opacity-30 md:opacity-100 mix-blend-overlay" style="background-image: url('{{ asset('images/hero-car.png') }}');"> </div>
+            <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none opacity-30 md:opacity-100 mix-blend-overlay" style="background-image: url('{{ asset('images/herocar.png') }}');"> </div>
             
             <div class="relative z-10 max-w-xl">
     <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6 drop-shadow-lg">

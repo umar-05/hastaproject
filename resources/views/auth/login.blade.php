@@ -356,12 +356,8 @@
                     @enderror
                 </div>
 
-                <!-- Remember Me & Forgot Password -->
+                <!-- Forgot Password -->
                 <div class="form-options">
-                    <div class="remember-me">
-                        <input type="checkbox" id="remember" name="remember">
-                        <label for="remember">Remember me</label>
-                    </div>
                     <a href="{{ route('password.request') }}" class="forgot-password">Forgot Password?</a>
                 </div>
 
