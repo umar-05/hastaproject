@@ -27,26 +27,27 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+public function store(Request $request): RedirectResponse
 {
-    
-$request->validate([
-        'username' => ['required', 'string', 'max:255', 'unique:users'], // Validating username
-        'phone' => ['required', 'string', 'max:20'],              // Validating phone
-        'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+    $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'matric_number' => ['required', 'string', 'max:50', 'unique:users'],
+        'faculty' => ['required', 'string', 'max:255'],
     ]);
 
+    // create user and store in $user
     $user = User::create([
-        'username' => $request->username,
-        'name' => $request->username,
-        'phone_number' => $request->phone_number,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
+        'name' => $request->name,
+        'matric_number' => $request->matric_number,
+        'faculty' => $request->faculty,
     ]);
 
+    // fire registered event
     event(new Registered($user));
 
-    return redirect(route('login'))->with('success', 'You have signed up!'); // <-- NEW
+    // optional: login the user immediately
+    Auth::login($user);
+
+    return redirect(route('login'))->with('success', 'You have signed up!');
 }
 }
