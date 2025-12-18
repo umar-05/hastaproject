@@ -6,43 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
     {
-    Schema::create('users', function (Blueprint $table) {
-        $table->id(); 
-        $table->string('name');
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
 
-        $table->string('email')->unique();  
-        $table->string('phone')->nullable();
-        $table->string('matric_number')->unique();
-        $table->timestamp('email_verified_at')->nullable();
-        $table->string('password');
-        $table->rememberToken();
-        $table->timestamps(); 
+            $table->string('email')->unique();
+            $table->string('phone')->nullable();
+            $table->string('matric_number')->unique();
+            $table->string('faculty');
 
-        $table->string('matric_number')->unique(); // No duplicates allowed 
-        $table->string('faculty');
-        $table->timestamp('email_verified_at')->nullable();
-
-        $table->string('matric_number')->unique(); // No duplicates allowed 
-        $table->string('faculty');
-        $table->timestamp('email_verified_at')->nullable();
-
-        $table->string('matric_number')->unique(); // No duplicates allowed 
-        $table->string('faculty');
-        $table->timestamp('email_verified_at')->nullable();
-
-        $table->timestamps(); // Creates 'created_at' and 'updated_at' columns automatically
-
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
+            $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');

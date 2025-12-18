@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OcrController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,3 +29,7 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/ocr/process', [OcrController::class, 'process'])->name('ocr.process');
 require __DIR__.'/auth.php';    
+
+Route::post('/register/process-matric-card', [RegisteredUserController::class, 'processMatricCard'])
+    ->name('register.process-matric-card')
+    ->middleware('guest');
