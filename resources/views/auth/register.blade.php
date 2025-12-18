@@ -1,5 +1,3 @@
-
-
 <head>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
@@ -18,244 +16,69 @@
             <form method="POST" action="{{ route('register') }}">
                 @csrf
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
+                <!-- OCR Section -->
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        📸 Quick Fill with Matric Card Scan (Optional)
+                    </label>
+                    <input type="file" id="icImage" accept="image/*" 
+                        class="block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-md file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-blue-600 file:text-white
+                        hover:file:bg-blue-700
+                        file:cursor-pointer">
+                    <p class="mt-2 text-xs text-gray-500">Upload your matric card to auto-fill username</p>
+                    
+                    <!-- Progress indicator -->
+                    <div id="ocrStatus" class="mt-2 text-sm hidden"></div>
+                </div>
+
+                <!-- Name Field -->
                 <div class="mb-4">
-                    <label for="username" class="block text-sm font-medium text-gray-350 mb-1">Username</label>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </div>
-                        <input id="username" type="text" name="username" placeholder="johndoe" :value="old('username')" required autofocus 
+                        <input id="name" type="text" name="name" placeholder="Muhammad Ahmad Bin Abdullah" :value="old('name')" required autofocus 
                             class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
                     </div>
-                    <x-input-error :messages="$errors->get('username')" class="mt-2" />
+                    <x-input-error :messages="$errors->get('name')" class="mt-2" />
                 </div>
 
+                <!-- Matric Number Field -->
                 <div class="mb-4">
-                    <label for="phone" class="block text-sm font-medium text-gray-350 mb-1">Phone Number</label>
+                    <label for="matric_number" class="block text-sm font-medium text-gray-700 mb-1">Matric Number</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                             </svg>
                         </div>
-                        <input id="phone" type="text" name="phone" placeholder="0123456789" :value="old('phone')" required
+                        <input id="matric_number" type="text" name="matric_number" placeholder="A24CS0144" :value="old('matric_number')" required
                             class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
                     </div>
-                    <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                    <x-input-error :messages="$errors->get('matric_number')" class="mt-2" />
                 </div>
 
-                <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium text-gray-350 mb-1">Email</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <input id="email" type="email" name="email" placeholder="you@example.com" :value="old('email')" required
-                            class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
-                    </div>
-                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                </div>
-
-                <div class="mb-4">
-                    <label for="password" class="block text-sm font-medium text-gray-350 mb-1">Password</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                        </div>
-                        <input id="password" type="password" name="password" placeholder="**********" required autocomplete="new-password"
-                            class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
-                    </div>
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                </div>
-
+                <!-- Faculty Field -->
                 <div class="mb-6">
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-350 mb-1">Confirm Password</label>
+                    <label for="faculty" class="block text-sm font-medium text-gray-700 mb-1">Faculty</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
                         </div>
-                        <input id="password_confirmation" type="password" name="password_confirmation" placeholder="**********" required
+                        <input id="faculty" type="text" name="faculty" placeholder="Computing" :value="old('faculty')" required
                             class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
                     </div>
-                    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                    <x-input-error :messages="$errors->get('faculty')" class="mt-2" />
                 </div>
-=======
-                   <!-- ADD THIS OCR SECTION -->
-    <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-    📸 Quick Fill with Matric Card Scan (Optional)
-</label>
-<input type="file" id="icImage" accept="image/*" 
-    class="block w-full text-sm text-gray-500
-    file:mr-4 file:py-2 file:px-4
-    file:rounded-md file:border-0
-    file:text-sm file:font-semibold
-    file:bg-blue-600 file:text-white
-    hover:file:bg-blue-700
-    file:cursor-pointer">
-<p class="mt-2 text-xs text-gray-500">Upload your matric card to auto-fill username</p>
-        
-        <!-- Progress indicator -->
-        <div id="ocrStatus" class="mt-2 text-sm hidden"></div>
-    </div>
-
-<div class="mb-4">
-    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-    <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-        </div>
-        <input id="name" type="text" name="name" placeholder="Muhammad Ahmad Bin Abdullah" :value="old('name')" required autofocus 
-            class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
-    </div>
-    <x-input-error :messages="$errors->get('name')" class="mt-2" />
-</div>
-
-<div class="mb-4">
-    <label for="matric_number" class="block text-sm font-medium text-gray-700 mb-1">Matric Number</label>
-    <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-        </div>
-        <input id="matric_number" type="text" name="matric_number" placeholder="A24CS0144" :value="old('matric_number')" required
-            class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
-    </div>
-    <x-input-error :messages="$errors->get('matric_number')" class="mt-2" />
-</div>
-
-=======
-                   <!-- ADD THIS OCR SECTION -->
-    <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-    📸 Quick Fill with Matric Card Scan (Optional)
-</label>
-<input type="file" id="icImage" accept="image/*" 
-    class="block w-full text-sm text-gray-500
-    file:mr-4 file:py-2 file:px-4
-    file:rounded-md file:border-0
-    file:text-sm file:font-semibold
-    file:bg-blue-600 file:text-white
-    hover:file:bg-blue-700
-    file:cursor-pointer">
-<p class="mt-2 text-xs text-gray-500">Upload your matric card to auto-fill username</p>
-        
-        <!-- Progress indicator -->
-        <div id="ocrStatus" class="mt-2 text-sm hidden"></div>
-    </div>
-
-<div class="mb-4">
-    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-    <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-        </div>
-        <input id="name" type="text" name="name" placeholder="Muhammad Ahmad Bin Abdullah" :value="old('name')" required autofocus 
-            class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
-    </div>
-    <x-input-error :messages="$errors->get('name')" class="mt-2" />
-</div>
-
-<div class="mb-4">
-    <label for="matric_number" class="block text-sm font-medium text-gray-700 mb-1">Matric Number</label>
-    <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-        </div>
-        <input id="matric_number" type="text" name="matric_number" placeholder="A24CS0144" :value="old('matric_number')" required
-            class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
-    </div>
-    <x-input-error :messages="$errors->get('matric_number')" class="mt-2" />
-</div>
-
->>>>>>> Stashed changes
-=======
-                   <!-- ADD THIS OCR SECTION -->
-    <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-    📸 Quick Fill with Matric Card Scan (Optional)
-</label>
-<input type="file" id="icImage" accept="image/*" 
-    class="block w-full text-sm text-gray-500
-    file:mr-4 file:py-2 file:px-4
-    file:rounded-md file:border-0
-    file:text-sm file:font-semibold
-    file:bg-blue-600 file:text-white
-    hover:file:bg-blue-700
-    file:cursor-pointer">
-<p class="mt-2 text-xs text-gray-500">Upload your matric card to auto-fill username</p>
-        
-        <!-- Progress indicator -->
-        <div id="ocrStatus" class="mt-2 text-sm hidden"></div>
-    </div>
-
-<div class="mb-4">
-    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-    <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-        </div>
-        <input id="name" type="text" name="name" placeholder="Muhammad Ahmad Bin Abdullah" :value="old('name')" required autofocus 
-            class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
-    </div>
-    <x-input-error :messages="$errors->get('name')" class="mt-2" />
-</div>
-
-<div class="mb-4">
-    <label for="matric_number" class="block text-sm font-medium text-gray-700 mb-1">Matric Number</label>
-    <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-        </div>
-        <input id="matric_number" type="text" name="matric_number" placeholder="A24CS0144" :value="old('matric_number')" required
-            class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
-    </div>
-    <x-input-error :messages="$errors->get('matric_number')" class="mt-2" />
-</div>
-
->>>>>>> Stashed changes
-<div class="mb-6">
-    <label for="faculty" class="block text-sm font-medium text-gray-700 mb-1">Faculty</label>
-    <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-        </div>
-        <input id="faculty" type="text" name="faculty" placeholder="Computing" :value="old('faculty')" required
-            class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
-    </div>
-    <x-input-error :messages="$errors->get('faculty')" class="mt-2" />
-</div>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
                 <div class="flex items-center justify-center mb-6">
                     <span class="text-sm text-gray-600">Already Have an Account? </span>
@@ -271,165 +94,144 @@
         </div>
     </div>
 
-<script>
-console.log('Script loaded!');
+    <script>
+    console.log('Script loaded!');
 
-const fileInput = document.getElementById('icImage');
+    const fileInput = document.getElementById('icImage');
 
-if (fileInput) {
-    fileInput.addEventListener('change', async function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
+    if (fileInput) {
+        fileInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        if (!file.type.startsWith('image/')) {
-            alert('Please upload an image file');
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file');
+                this.value = '';
+                return;
+            }
+
+            const statusDiv = document.getElementById('ocrStatus');
+            const nameInput = document.getElementById('name');
+            const matricInput = document.getElementById('matric_number');
+            const facultyInput = document.getElementById('faculty');
+
+            statusDiv.classList.remove('hidden');
+            statusDiv.innerHTML = '<span class="text-blue-600">🔄 Processing matric card...</span>';
+
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfToken) {
+                    throw new Error('CSRF token not found');
+                }
+
+                const response = await fetch('/ocr/process', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken.content,
+                        'Accept': 'application/json',
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+                console.log('OCR Result:', result);
+
+                if (result.success) {
+                    // Update Name field
+                    if (result.data.name) {
+                        nameInput.value = result.data.name;
+                    } else {
+                        nameInput.value = '';
+                    }
+                    nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    // Update Matric Number field
+                    if (result.data.matricNum) {
+                        matricInput.value = result.data.matricNum;
+                    } else {
+                        matricInput.value = '';
+                    }
+                    matricInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    // Update Faculty field
+                    if (result.data.faculty) {
+                        facultyInput.value = result.data.faculty;
+                    } else {
+                        facultyInput.value = '';
+                    }
+                    facultyInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    // Build success/warning message
+                    const detected = [];
+                    const missing = [];
+                    
+                    if (result.data.name) detected.push('Name ✓');
+                    else missing.push('Name ✗');
+                    
+                    if (result.data.matricNum) detected.push('Matric ✓');
+                    else missing.push('Matric ✗');
+                    
+                    if (result.data.faculty) detected.push('Faculty ✓');
+                    else missing.push('Faculty ✗');
+
+                    // Show appropriate message
+                    if (detected.length === 3) {
+                        let message = `<span class="text-green-600 font-semibold">✅ All fields detected!</span>`;
+                        message += '<div class="mt-2 text-xs text-gray-700 bg-white p-2 rounded border border-green-200">';
+                        if (result.data.name) message += `<div><strong>Name:</strong> ${result.data.name}</div>`;
+                        if (result.data.matricNum) message += `<div><strong>Matric:</strong> ${result.data.matricNum}</div>`;
+                        if (result.data.faculty) message += `<div><strong>Faculty:</strong> ${result.data.faculty}</div>`;
+                        message += '<div class="mt-1 text-gray-500 italic">Please verify the information is correct</div>';
+                        message += '</div>';
+                        statusDiv.innerHTML = message;
+                    } else if (detected.length > 0) {
+                        let message = `<span class="text-yellow-600 font-semibold">⚠️ Partial detection: ${detected.join(', ')}</span>`;
+                        message += '<div class="mt-2 text-xs text-gray-700 bg-white p-2 rounded border border-yellow-200">';
+                        
+                        if (result.data.name) message += `<div class="text-green-600"><strong>✓ Name:</strong> ${result.data.name}</div>`;
+                        if (result.data.matricNum) message += `<div class="text-green-600"><strong>✓ Matric:</strong> ${result.data.matricNum}</div>`;
+                        if (result.data.faculty) message += `<div class="text-green-600"><strong>✓ Faculty:</strong> ${result.data.faculty}</div>`;
+                        
+                        if (!result.data.name) message += `<div class="text-red-600"><strong>✗ Name:</strong> Not detected</div>`;
+                        if (!result.data.matricNum) message += `<div class="text-red-600"><strong>✗ Matric:</strong> Not detected</div>`;
+                        if (!result.data.faculty) message += `<div class="text-red-600"><strong>✗ Faculty:</strong> Not detected</div>`;
+                        
+                        message += '<div class="mt-1 text-gray-500 italic">Please fill in the missing fields manually</div>';
+                        message += '</div>';
+                        statusDiv.innerHTML = message;
+                    } else {
+                        statusDiv.innerHTML = '<span class="text-red-600 font-semibold">❌ No data detected. Please fill all fields manually.</span>';
+                    }
+                } else {
+                    statusDiv.innerHTML = `<span class="text-red-600">❌ ${result.message || 'Processing failed'}</span>`;
+                }
+
+                setTimeout(() => {
+                    statusDiv.classList.add('hidden');
+                }, 12000);
+
+            } catch (error) {
+                console.error('OCR Error:', error);
+                
+                let errorMessage = error.message;
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Cannot connect to server. Make sure Laravel is running.';
+                }
+                
+                statusDiv.innerHTML = `<span class="text-red-600">❌ ${errorMessage}</span>`;
+                
+                setTimeout(() => {
+                    statusDiv.classList.add('hidden');
+                }, 5000);
+            }
+
             this.value = '';
-            return;
-        }
-
-        const statusDiv = document.getElementById('ocrStatus');
-        const nameInput = document.getElementById('name');
-        const matricInput = document.getElementById('matric_number');
-        const facultyInput = document.getElementById('faculty');
-
-        statusDiv.classList.remove('hidden');
-        statusDiv.innerHTML = '<span class="text-blue-600">🔄 Processing matric card...</span>';
-
-        try {
-            const formData = new FormData();
-            formData.append('image', file);
-
-            const csrfToken = document.querySelector('meta[name="csrf-token"]');
-            if (!csrfToken) {
-                throw new Error('CSRF token not found');
-            }
-
-            const response = await fetch('/ocr/process', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken.content,
-                    'Accept': 'application/json',
-                },
-                body: formData
-            });
-
-            const result = await response.json();
-            console.log('OCR Result:', result);
-
-            if (result.success) {
-                // ALWAYS update all fields - fill with data or empty them
-                
-                // Update Name field
-                if (result.data.name) {
-                    nameInput.value = result.data.name;
-                } else {
-                    nameInput.value = ''; // Clear if not detected
-                }
-                nameInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-                // Update Matric Number field
-                if (result.data.matricNum) {
-                    matricInput.value = result.data.matricNum;
-                } else {
-                    matricInput.value = ''; // Clear if not detected
-                }
-                matricInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-                // Update Faculty field
-                if (result.data.faculty) {
-                    facultyInput.value = result.data.faculty;
-                } else {
-                    facultyInput.value = ''; // Clear if not detected
-                }
-                facultyInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-                // Build success/warning message based on what was detected
-                const detected = [];
-                const missing = [];
-                
-                if (result.data.name) {
-                    detected.push('Name ✓');
-                } else {
-                    missing.push('Name ✗');
-                }
-                
-                if (result.data.matricNum) {
-                    detected.push('Matric ✓');
-                } else {
-                    missing.push('Matric ✗');
-                }
-                
-                if (result.data.faculty) {
-                    detected.push('Faculty ✓');
-                } else {
-                    missing.push('Faculty ✗');
-                }
-
-                // Show appropriate message
-                if (detected.length === 3) {
-                    // All fields detected
-                    let message = `<span class="text-green-600 font-semibold">✅ All fields detected!</span>`;
-                    message += '<div class="mt-2 text-xs text-gray-700 bg-white p-2 rounded border border-green-200">';
-                    if (result.data.name) message += `<div><strong>Name:</strong> ${result.data.name}</div>`;
-                    if (result.data.matricNum) message += `<div><strong>Matric:</strong> ${result.data.matricNum}</div>`;
-                    if (result.data.faculty) message += `<div><strong>Faculty:</strong> ${result.data.faculty}</div>`;
-                    message += '<div class="mt-1 text-gray-500 italic">Please verify the information is correct</div>';
-                    message += '</div>';
-                    statusDiv.innerHTML = message;
-                    
-                } else if (detected.length > 0) {
-                    // Some fields detected
-                    let message = `<span class="text-yellow-600 font-semibold">⚠️ Partial detection: ${detected.join(', ')}</span>`;
-                    message += '<div class="mt-2 text-xs text-gray-700 bg-white p-2 rounded border border-yellow-200">';
-                    
-                    // Show detected fields
-                    if (result.data.name) message += `<div class="text-green-600"><strong>✓ Name:</strong> ${result.data.name}</div>`;
-                    if (result.data.matricNum) message += `<div class="text-green-600"><strong>✓ Matric:</strong> ${result.data.matricNum}</div>`;
-                    if (result.data.faculty) message += `<div class="text-green-600"><strong>✓ Faculty:</strong> ${result.data.faculty}</div>`;
-                    
-                    // Show missing fields
-                    if (!result.data.name) message += `<div class="text-red-600"><strong>✗ Name:</strong> Not detected</div>`;
-                    if (!result.data.matricNum) message += `<div class="text-red-600"><strong>✗ Matric:</strong> Not detected</div>`;
-                    if (!result.data.faculty) message += `<div class="text-red-600"><strong>✗ Faculty:</strong> Not detected</div>`;
-                    
-                    message += '<div class="mt-1 text-gray-500 italic">Please fill in the missing fields manually</div>';
-                    message += '</div>';
-                    statusDiv.innerHTML = message;
-                    
-                } else {
-                    // Nothing detected
-                    statusDiv.innerHTML = '<span class="text-red-600 font-semibold">❌ No data detected. Please fill all fields manually.</span>';
-                }
-            } else {
-                statusDiv.innerHTML = `<span class="text-red-600">❌ ${result.message || 'Processing failed'}</span>`;
-            }
-
-            setTimeout(() => {
-                statusDiv.classList.add('hidden');
-            }, 12000); // 12 seconds since we have more info to show
-
-        } catch (error) {
-            console.error('OCR Error:', error);
-            
-            let errorMessage = error.message;
-            if (error.message.includes('Failed to fetch')) {
-                errorMessage = 'Cannot connect to server. Make sure Laravel is running.';
-            }
-            
-            statusDiv.innerHTML = `<span class="text-red-600">❌ ${errorMessage}</span>`;
-            
-            setTimeout(() => {
-                statusDiv.classList.add('hidden');
-            }, 5000);
-        }
-
-        this.value = '';
-    });
-} else {
-    console.error('File input not found!');
-}
-</script>
-
-
+        });
+    } else {
+        console.error('File input not found!');
+    }
+    </script>
 </x-guest-layout>
-
