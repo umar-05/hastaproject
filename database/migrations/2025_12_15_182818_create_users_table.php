@@ -15,6 +15,7 @@ return new class extends Migration
         $table->id(); 
         $table->string('name');
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         $table->string('email')->unique();  
         $table->string('phone')->nullable();
         $table->string('matric_number')->unique();
@@ -26,6 +27,11 @@ return new class extends Migration
         $table->string('matric_number')->unique(); // No duplicates allowed 
         $table->string('faculty');
         $table->timestamp('email_verified_at')->nullable();
+=======
+        $table->string('matric_number')->unique(); // No duplicates allowed 
+        $table->string('faculty');
+        $table->timestamp('email_verified_at')->nullable();
+>>>>>>> Stashed changes
         $table->timestamps(); // Creates 'created_at' and 'updated_at' columns automatically
 >>>>>>> Stashed changes
         });

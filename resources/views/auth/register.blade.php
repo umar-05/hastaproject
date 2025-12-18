@@ -19,6 +19,7 @@
                 @csrf
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 <div class="mb-4">
                     <label for="username" class="block text-sm font-medium text-gray-350 mb-1">Username</label>
                     <div class="relative">
@@ -136,6 +137,55 @@
     <x-input-error :messages="$errors->get('matric_number')" class="mt-2" />
 </div>
 
+=======
+                   <!-- ADD THIS OCR SECTION -->
+    <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+    📸 Quick Fill with Matric Card Scan (Optional)
+</label>
+<input type="file" id="icImage" accept="image/*" 
+    class="block w-full text-sm text-gray-500
+    file:mr-4 file:py-2 file:px-4
+    file:rounded-md file:border-0
+    file:text-sm file:font-semibold
+    file:bg-blue-600 file:text-white
+    hover:file:bg-blue-700
+    file:cursor-pointer">
+<p class="mt-2 text-xs text-gray-500">Upload your matric card to auto-fill username</p>
+        
+        <!-- Progress indicator -->
+        <div id="ocrStatus" class="mt-2 text-sm hidden"></div>
+    </div>
+
+<div class="mb-4">
+    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+    <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+        </div>
+        <input id="name" type="text" name="name" placeholder="Muhammad Ahmad Bin Abdullah" :value="old('name')" required autofocus 
+            class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
+    </div>
+    <x-input-error :messages="$errors->get('name')" class="mt-2" />
+</div>
+
+<div class="mb-4">
+    <label for="matric_number" class="block text-sm font-medium text-gray-700 mb-1">Matric Number</label>
+    <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+        </div>
+        <input id="matric_number" type="text" name="matric_number" placeholder="A24CS0144" :value="old('matric_number')" required
+            class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
+    </div>
+    <x-input-error :messages="$errors->get('matric_number')" class="mt-2" />
+</div>
+
+>>>>>>> Stashed changes
 <div class="mb-6">
     <label for="faculty" class="block text-sm font-medium text-gray-700 mb-1">Faculty</label>
     <div class="relative">
@@ -149,6 +199,9 @@
     </div>
     <x-input-error :messages="$errors->get('faculty')" class="mt-2" />
 </div>
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
                 <div class="flex items-center justify-center mb-6">
