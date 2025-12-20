@@ -124,14 +124,14 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // Inside RegisteredUserController store method
+        
     $request->validate([
-        'name' => ['required', 'string', 'max:255'],
-        'matric_number' => ['required', 'string', 'max:20'], 
-        'faculty' => ['required', 'string', 'max:255'],
-        'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-        'password' => ['required', 'confirmed', Rules\Password::defaults()],
-    ]);
+    'name' => ['required', 'string', 'max:255'],
+    'matric_number' => ['required', 'string', 'max:20', 'unique:users,matric_number'],
+    'faculty' => ['required', 'string', 'max:255'],
+    'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+    'password' => ['required', 'confirmed', Rules\Password::defaults()],
+]);
 
     $user = User::create([
         'name' => $request->name,
@@ -142,7 +142,7 @@ class RegisteredUserController extends Controller
     ]);
 
         event(new Registered($user));
-        Auth::login($user);
+       // Auth::login($user);
 
         return redirect(route('login'))->with('success', 'You have signed up!');
     }
