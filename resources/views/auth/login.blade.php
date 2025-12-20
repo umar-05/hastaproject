@@ -315,6 +315,8 @@
                 <p>Sign in to your account to continue</p>
             </div>
 
+            
+            
             <!-- Login Form -->
             <form class="login-form" method="POST" action="{{ route('login') }}">
                 @csrf
@@ -381,10 +383,27 @@
             text: "{{ session('success') }}",
             icon: 'success',
             confirmButtonText: 'OK',
-            confirmButtonColor: '#b91c1c' // Matches your HASTA red color
+            confirmButtonColor: '#b91c1c'
         });
     </script>
 @endif
+
+@if (session('status'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: 'Success!',
+                text: 'Password Successfully Resetted! :3', 
+                icon: 'success',
+                confirmButtonText: 'Great!',
+                confirmButtonColor: '#C84B43',
+                background: '#fff',
+                iconColor: '#C84B43'
+            });
+        });
+    </script>
+@endif
+
 
 </body>
 </html>

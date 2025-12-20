@@ -5,9 +5,7 @@
 <x-guest-layout>
     <div class="flex flex-col items-center">
         <div class="mb-6 text-center">
-            <div class="flex justify-center mb-2">
-                <span class="px-4 py-1 text-2xl font-bold text-red-600 border-2 border-red-600 rounded-sm">HASTA</span>
-            </div>
+        
             <h2 class="text-xl font-semibold text-gray-900">Enter Your Personal Details</h2>
             <p class="text-sm text-gray-500">Sign Up to Continue</p>
         </div>

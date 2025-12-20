@@ -19,10 +19,22 @@ class User extends Authenticatable
      */
     protected $fillable = [
     'name',
-    'email',         // Add this
-    'password',      // Add this
-    'matric_number', // Your custom field
-    'faculty',       // Your custom field
+    'email',
+    'password',
+    'matric_number',
+    'faculty',
+    'phoneNum',
+    'icNum',
+    'address',
+    'city',
+    'postcode',
+    'state',
+    'collegeAddress',
+    'eme_name',
+    'emephoneNum',
+    'emerelation',
+    'bankName',
+    'accountNum',
 ];
 
     /**

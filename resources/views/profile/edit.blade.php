@@ -38,8 +38,8 @@
                             <x-text-input id="icNum" name="icNum" type="text" class="mt-1 block w-full" :value="old('icNum', $user->icNum)" />
                         </div>
                         <div>
-                            <x-input-label for="matricNum" :value="__('Matric Number')" />
-                            <x-text-input id="matricNum" name="matricNum" type="text" class="mt-1 block w-full bg-gray-50" :value="old('matricNum', $user->matricNum)" readonly />
+                            <x-input-label for="matric_number" :value="__('Matric Number')" />
+                            <x-text-input id="matric_number" name="matric_number" type="text" class="mt-1 block w-full bg-gray-50" :value="old('matric_number', $user->matric_number)" placeholder="A00XX0000" />
                         </div>
                         <div>
                             <x-input-label for="faculty" :value="__('Faculty')" />
