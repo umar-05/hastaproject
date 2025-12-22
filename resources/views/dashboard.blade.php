@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>HASTA Trvael & Tours</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -18,12 +18,22 @@
         </div>
     </div>
 
-    <nav class="hidden md:flex space-x-8 font-medium text-gray-700">
-        <a href="#" class="text-hasta-red bg-red-100 px-3 py-1 rounded-full">Home</a>
-        <a href="#" class="hover:text-hasta-red transition">Vehicles</a>
-        <a href="#" class="hover:text-hasta-red transition">Details</a>
-        <a href="#" class="hover:text-hasta-red transition">Loyalty</a>
-        <a href="#" class="hover:text-hasta-red transition">Contact Us</a>
+    <nav class="hidden md:flex items-center space-x-8 font-medium">
+        <a href="#" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
+            Book Now
+        </a>
+
+        <a href="#" class="text-gray-700 hover:text-hasta-red transition">
+            Bookings
+        </a>
+
+        <a href="#" class="text-gray-700 hover:text-hasta-red transition">
+            Rewards
+        </a>
+
+        <a href="#" class="text-gray-700 hover:text-hasta-red transition">
+            FAQ
+        </a>
     </nav>
 
     <div class="flex items-center space-x-6">
@@ -37,12 +47,12 @@
 
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="bg-hasta-red hover:bg-hasta-redHover text-white font-bold py-2 px-8 rounded transition">
+                <button type="submit" class="bg-hasta-red hover:bg-red-700 text-white font-bold py-2 px-8 rounded transition">
                     Logout
                 </button>
             </form>
         @else
-            <a href="{{ route('login') }}" class="bg-hasta-red hover:bg-hasta-redHover text-white font-bold py-2 px-8 rounded transition text-center">
+            <a href="{{ route('login') }}" class="bg-hasta-red hover:bg-red-700 text-white font-bold py-2 px-8 rounded transition text-center">
                 Login
             </a>
         @endauth
