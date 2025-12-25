@@ -1,11 +1,10 @@
 <head>
-<meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <x-guest-layout>
     <div class="flex flex-col items-center">
         <div class="mb-6 text-center">
-        
             <h2 class="text-xl font-semibold text-gray-900">Enter Your Personal Details</h2>
             <p class="text-sm text-gray-500">Sign Up to Continue</p>
         </div>
@@ -42,10 +41,12 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </div>
-                        <input id="name" type="text" name="name" placeholder="Muhammad Ahmad Bin Abdullah" :value="old('name')" required autofocus 
+                        <input id="name" type="text" name="name" placeholder="Muhammad Ahmad Bin Abdullah" value="{{ old('name') }}" required autofocus 
                             class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
                     </div>
-                    <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                    @error('name')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Matric Number Field -->
@@ -57,10 +58,12 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                             </svg>
                         </div>
-                        <input id="matric_number" type="text" name="matric_number" placeholder="AXXCSXXXX" :value="old('matric_number')" required
+                        <input id="matric_number" type="text" name="matric_number" placeholder="AXXCSXXXX" value="{{ old('matric_number') }}" required
                             class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
                     </div>
-                    <x-input-error :messages="$errors->get('matric_number')" class="mt-2" />
+                    @error('matric_number')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- Faculty Field -->
@@ -75,7 +78,9 @@
                         <input id="faculty" type="text" name="faculty" placeholder="Computing" value="{{ old('faculty') }}" required
                             class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
                     </div>
-                    <x-input-error :messages="$errors->get('faculty')" class="mt-2" />
+                    @error('faculty')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="mb-4">
@@ -89,7 +94,9 @@
                         <input id="email" type="email" name="email" placeholder="example@gmail.com" value="{{ old('email') }}" required
                             class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
                     </div>
-                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                    @error('email')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="mb-4">
@@ -103,7 +110,9 @@
                         <input id="password" type="password" name="password" placeholder="••••••••" required autocomplete="new-password"
                             class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
                     </div>
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                    @error('password')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="mb-6">
@@ -117,7 +126,9 @@
                         <input id="password_confirmation" type="password" name="password_confirmation" placeholder="••••••••" required
                             class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
                     </div>
-                    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                    @error('password_confirmation')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="flex items-center justify-center mb-6">
