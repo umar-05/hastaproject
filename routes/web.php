@@ -26,6 +26,8 @@ Route::get('/details', function () {
     return view('details');
 })->name('details');
 
+Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
+
 Route::get('/loyalty', function () {
     return view('loyalty');
 })->name('loyalty');
