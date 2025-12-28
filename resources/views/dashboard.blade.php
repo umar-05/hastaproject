@@ -111,7 +111,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6">
-                    <img src=" {{ asset('/images/axia.png') }}" alt="Perodua Axia" class="w-full h-40 object-contain mb-4">
+                    <img src=" {{ asset('/images/axia-2018.png') }}" alt="Perodua Axia" class="w-full h-40 object-contain mb-4">
                     <div class="flex justify-between items-start mb-2">
                         <div>
                             <h4 class="text-xl font-bold">Perodua Axia 2018</h4>
@@ -133,7 +133,7 @@
                 </div>
 
                 <div class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6">
-                    <img src="{{ asset('/images/bezza.png') }}" alt="Perodua Bezza" class="w-full h-40 object-contain mb-4">
+                    <img src="{{ asset('/images/bezza-2018.png') }}" alt="Perodua Bezza" class="w-full h-40 object-contain mb-4">
                     <div class="flex justify-between items-start mb-2">
                         <div>
                             <h4 class="text-xl font-bold">Perodua Bezza 2018</h4>
@@ -155,7 +155,7 @@
                 </div>
 
                  <div class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6">
-                    <img src="{{ asset('/images/myvi.png') }}" alt="Perodua Myvi" class="w-full h-40 object-contain mb-4">
+                    <img src="{{ asset('/images/myvi-2015.png') }}" alt="Perodua Myvi" class="w-full h-40 object-contain mb-4">
                     <div class="flex justify-between items-start mb-2">
                         <div>
                             <h4 class="text-xl font-bold">Perodua Myvi 2015</h4>
