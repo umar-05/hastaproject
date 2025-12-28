@@ -5,9 +5,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OcrController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\VehicleController;
+<<<<<<< Updated upstream
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\BookingController;
+=======
+use App\Http\Controllers\BookingController; 
+
+
+>>>>>>> Stashed changes
 
 Route::get('/', function() {
     return view('dashboard');
@@ -30,6 +36,7 @@ Route::get('/details', function () {
 })->name('details');
 
 Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
+Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
 
 Route::get('/loyalty', function () {
     return view('loyalty');
