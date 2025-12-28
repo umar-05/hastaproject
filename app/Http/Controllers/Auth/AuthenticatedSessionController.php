@@ -28,6 +28,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Redirect staff users to home page, regular users to dashboard
+        if (Auth::user()->role === 'staff') {
+            return redirect()->intended(route('home', absolute: false));
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

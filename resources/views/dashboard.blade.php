@@ -19,19 +19,19 @@
     </div>
 
     <nav class="hidden md:flex items-center space-x-8 font-medium">
-        <a href="#" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
+        <a href="{{ route('book-now') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
             Book Now
         </a>
 
-        <a href="#" class="text-gray-700 hover:text-hasta-red transition">
+        <a href="{{ route('bookings.index') }}" class="text-gray-700 hover:text-hasta-red transition">
             Bookings
         </a>
 
-        <a href="#" class="text-gray-700 hover:text-hasta-red transition">
+        <a href="{{ route('rewards.index') }}" class="text-gray-700 hover:text-hasta-red transition">
             Rewards
         </a>
 
-        <a href="#" class="text-gray-700 hover:text-hasta-red transition">
+        <a href="{{ route('faq') }}" class="text-gray-700 hover:text-hasta-red transition">
             FAQ
         </a>
     </nav>
@@ -62,7 +62,7 @@
     <main class="max-w-7xl mx-auto px-8">
 
         <section class="relative bg-hasta-red rounded-[40px] p-12 md:p-16 overflow-hidden mb-16 text-white">
-            <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none opacity-30 md:opacity-100 mix-blend-overlay" style="background-image: url('{{ asset('images/herocar.png') }}');"> </div>
+            <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none opacity-30 md:opacity-100 mix-blend-overlay" style="background-image: url('{{ asset('images/herocar.png') }}');"></div>
             
             <div class="relative z-10 max-w-xl">
     <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6 drop-shadow-lg">
