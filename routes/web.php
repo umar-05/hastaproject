@@ -7,8 +7,6 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\BookingController; 
 
-
-
 Route::get('/', function() {
     return view('dashboard');
 });
@@ -29,15 +27,9 @@ Route::get('/details', function () {
     return view('details');
 })->name('details');
 
-Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
-Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
-
 Route::get('/book-now', function () {
     return view('customer.book-now');
 })->name('book-now');
-
-Route::resource('bookings', BookingController::class);
-Route::resource('rewards', BookingController::class);
 
 Route::get('/faq', function () {
     return view('customer.faq');
@@ -51,14 +43,34 @@ Route::get('/contact', function () {
     return view('contact');
 })->name('contact');
 
+// BOOKING ROUTES - Fixed!
+// Remove the resource route and use manual routes
+Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
+Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
+
+Route::get('/rewards', function () {
+    return view('rewards.index');
+})->name('rewards.index');
+
+Route::get('/rewards/{reward}', function ($reward) {
+    return view('rewards.show', compact('reward'));
+})->name('rewards.show');
+
+// Profile routes
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// OCR route
 Route::post('/ocr/process', [OcrController::class, 'process'])->name('ocr.process');
 
+// Registration route
 Route::post('/register/process-matric-card', [RegisteredUserController::class, 'processMatricCard'])
     ->name('register.process-matric-card')
     ->middleware('guest');

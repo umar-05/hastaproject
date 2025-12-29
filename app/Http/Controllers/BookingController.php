@@ -177,17 +177,23 @@ class BookingController extends Controller
      * Show user's bookings
      */
     public function index()
-    {
-        try {
-            $bookings = Booking::with('fleet')
-                ->orderBy('created_at', 'desc')
-                ->paginate(10);
-            
-            return view('bookings.index', compact('bookings'));
-        } catch (\Exception $e) {
-            return back()->with('error', 'Error loading bookings');
-        }
+{
+    try {
+        $bookings = Booking::with('fleet')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        
+        // Change from 'bookings.index' to 'customer.bookings'
+        return view('customer.bookings', compact('bookings'));
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile()
+        ], 500);
     }
+}
 
     /**
      * Cancel booking
