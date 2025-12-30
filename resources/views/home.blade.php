@@ -25,7 +25,7 @@
     <p class="text-sm md:text-base opacity-90 mb-8 max-w-md drop-shadow-md">
         We believe your rental car should enhance your trip, not just be a part of it. Our fleet delivers a premium driving experience.
     </p>
-    <a href="{{ route('vehicles.index') }}">
+    <a href="#">
     <button class="bg-hasta-yellow hover:bg-amber-500 text-black font-bold py-3 px-8 rounded-md transition shadow-lg">
         View all cars
     </button>
