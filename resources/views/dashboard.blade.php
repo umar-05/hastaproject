@@ -19,7 +19,7 @@
     </div>
 
     <nav class="hidden md:flex items-center space-x-8 font-medium">
-        <a href="{{ route('book-now') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
+        <a href="{{ route('vehicles.index') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
             Book Now
         </a>
 
@@ -71,9 +71,11 @@
     <p class="text-sm md:text-base opacity-90 mb-8 max-w-md drop-shadow-md">
         We believe your rental car should enhance your trip, not just be a part of it. Our fleet delivers a premium driving experience.
     </p>
+    <a href="{{ route('vehicles.index') }}">
     <button class="bg-hasta-yellow hover:bg-amber-500 text-black font-bold py-3 px-8 rounded-md transition shadow-lg">
         View all cars
     </button>
+    </a>
 </div>
         </section>
 

@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
 
 class StaffController extends Controller
 {
@@ -81,17 +84,58 @@ class StaffController extends Controller
 
     /**
      * Display report page.
+     * Note: Renamed to 'reports' to match web.php route
      */
-    public function report(): View
+    public function reports(): View
     {
-        return view('staff.report');
+        return view('staff.reports'); // Make sure this view file exists as 'reports.blade.php' or 'report.blade.php'
     }
 
     /**
-     * Display add staff page.
+     * Show the form to add a new staff member.
+     * Note: Renamed from 'addStaff' to 'create' to match standard Laravel conventions
      */
-    public function addStaff(): View
+    public function create(): View
     {
         return view('staff.add-staff');
+    }
+
+    /**
+     * Store a newly created staff member in storage.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phoneNum' => ['required', 'string', 'max:20'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+        
+        $lastStaff = User::where('matric_number', 'LIKE', 'STAFF%')
+                         ->where('matric_number', 'NOT LIKE', 'STAFF-%')
+                         ->orderBy('id', 'desc')
+                         ->first();
+
+        $nextNumber = 1;
+
+        if ($lastStaff) {
+            $numberPart = (int) str_replace('STAFF', '', $lastStaff->matric_number);
+            $nextNumber = $numberPart + 1;
+        }
+
+        $newMatricNumber = sprintf("STAFF%03d", $nextNumber);
+
+            User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phoneNum' => $request->phoneNum,
+            'password' => Hash::make($request->password),
+            'role' => 'staff',
+            'matric_number' => $newMatricNumber,
+            'faculty' => 'Administration', 
+        ]);
+
+        return back()->with('status', 'Staff account created successfully!');
     }
 }
