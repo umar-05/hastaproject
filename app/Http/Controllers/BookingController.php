@@ -17,7 +17,13 @@ class BookingController extends Controller
     public function create($fleetId)
     {
         try {
-            $car = Fleet::findOrFail($fleetId);
+            $car = Fleet::where('fleet_id', $fleetId)->firstOrFail();
+            
+            // Get vehicle info for display
+            $vehicleInfo = $this->getVehicleInfoForDisplay($car->model_name, $car->year);
+            $pricePerDay = $car->price_per_day ?? $vehicleInfo['price'];
+            $image = $vehicleInfo['image'];
+            $vehicleName = $car->model_name . ($car->year ? ' ' . $car->year : '');
             
             // Get active rewards or return empty collection if table doesn't exist
             try {
@@ -26,10 +32,59 @@ class BookingController extends Controller
                 $rewards = collect([]);
             }
             
-            return view('bookings.create', compact('car', 'rewards'));
+            return view('bookings.create', compact('car', 'rewards', 'pricePerDay', 'image', 'vehicleName'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Fleet not found: ' . $e->getMessage());
+            return redirect()->route('book-now')
+                ->with('error', 'Vehicle not found: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Get vehicle info for display (similar to VehicleController)
+     */
+    private function getVehicleInfoForDisplay($modelName, $year = null)
+    {
+        $modelName = strtolower($modelName);
+        $year = $year ?? 0;
+        
+        // Determine image filename
+        $image = 'default-car.png';
+        if (strpos($modelName, 'axia') !== false) {
+            $image = $year == 2024 ? 'axia-2024.png' : 'axia-2018.png';
+        } elseif (strpos($modelName, 'bezza') !== false) {
+            $image = 'bezza-2018.png';
+        } elseif (strpos($modelName, 'myvi') !== false) {
+            $image = $year >= 2020 ? 'myvi-2020.png' : 'myvi-2015.png';
+        } elseif (strpos($modelName, 'saga') !== false) {
+            $image = 'saga-2017.png';
+        } elseif (strpos($modelName, 'alza') !== false) {
+            $image = 'alza-2019.png';
+        } elseif (strpos($modelName, 'aruz') !== false) {
+            $image = 'aruz-2020.png';
+        } elseif (strpos($modelName, 'vellfire') !== false) {
+            $image = 'vellfire-2020.png';
+        }
+        
+        // Determine price
+        $price = 120; // default
+        if (strpos($modelName, 'bezza') !== false) {
+            $price = 140;
+        } elseif (strpos($modelName, 'myvi') !== false && $year >= 2020) {
+            $price = 150;
+        } elseif (strpos($modelName, 'axia') !== false && $year == 2024) {
+            $price = 130;
+        } elseif (strpos($modelName, 'alza') !== false) {
+            $price = 200;
+        } elseif (strpos($modelName, 'aruz') !== false) {
+            $price = 180;
+        } elseif (strpos($modelName, 'vellfire') !== false) {
+            $price = 500;
+        }
+        
+        return [
+            'price' => $price,
+            'image' => $image
+        ];
     }
 
     /**
@@ -38,7 +93,7 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'fleet_id' => 'required|exists:fleet,id',
+            'fleet_id' => 'required|exists:fleet,fleet_id',
             'start_date' => 'required|date|after_or_equal:today',
             'start_time' => 'required',
             'end_date' => 'required|date|after:start_date',
@@ -47,12 +102,13 @@ class BookingController extends Controller
             'return_location' => 'required|string|max:255',
             'reward_id' => 'nullable|exists:reward,id',
             'voucher_code' => 'nullable|string',
+            'notes' => 'nullable|string',
         ]);
 
         DB::beginTransaction();
         
         try {
-            $fleet = Fleet::findOrFail($validated['fleet_id']);
+            $fleet = Fleet::where('fleet_id', $validated['fleet_id'])->firstOrFail();
             
             // Calculate rental period
             $startDate = $validated['start_date'];
@@ -66,8 +122,14 @@ class BookingController extends Controller
                 $days = 1;
             }
             
+            // Calculate base price - use price_per_day if available, otherwise calculate from model
+            $pricePerDay = $fleet->price_per_day;
+            if (!$pricePerDay || $pricePerDay == 0) {
+                $pricePerDay = $this->calculatePriceFromModel($fleet->model_name, $fleet->year);
+            }
+            
             // Calculate base price
-            $basePrice = $fleet->price_per_day * $days;
+            $basePrice = $pricePerDay * $days;
             $discount = 0;
             
             // Apply reward discount
@@ -93,9 +155,16 @@ class BookingController extends Controller
             
             $finalPrice = $basePrice - $discount;
             
+            // Get customer_id from authenticated user (using user ID as customer_id for now)
+            $customerId = auth()->id();
+            if (!$customerId) {
+                return redirect()->route('login')
+                    ->with('error', 'Please login to make a booking.');
+            }
+            
             // Create booking with your table structure
             $booking = Booking::create([
-                'customer_id' => auth()->id() ?? 1, // Temporary: Use 1 if not authenticated
+                'customer_id' => $customerId,
                 'fleet_id' => $validated['fleet_id'],
                 'reward_id' => $request->reward_id,
                 'voucher_code' => $request->voucher_code,
@@ -108,16 +177,16 @@ class BookingController extends Controller
                 'base_price' => $basePrice,
                 'discount' => $discount,
                 'total_price' => $finalPrice,
-                'deposit' => $fleet->deposit ?? 0,
+                'deposit' => 200, // Default deposit
                 'booking_stat' => 'pending',
                 'payment_status' => 'pending',
-                'notes' => $request->notes,
+                'notes' => $request->notes ?? null,
             ]);
             
             DB::commit();
             
-            return redirect()->back()
-                ->with('success', 'Booking created successfully! Booking ID: ' . $booking->booking_id);
+            return redirect()->route('bookings.index')
+                ->with('success', 'Booking created successfully! Booking ID: #' . $booking->booking_id);
                 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -163,13 +232,25 @@ class BookingController extends Controller
     public function show($bookingId)
     {
         try {
+            $customerId = auth()->id();
+            
+            if (!$customerId) {
+                return redirect()->route('login')
+                    ->with('error', 'Please login to view booking details.');
+            }
+            
             $booking = Booking::with(['fleet', 'reward'])
                 ->where('booking_id', $bookingId)
+                ->where('customer_id', $customerId)
                 ->firstOrFail();
             
             return view('bookings.show', compact('booking'));
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->route('bookings.index')
+                ->with('error', 'Booking not found or you do not have permission to view it.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Booking not found');
+            return redirect()->route('bookings.index')
+                ->with('error', 'An error occurred while loading the booking.');
         }
     }
 
@@ -177,23 +258,53 @@ class BookingController extends Controller
      * Show user's bookings
      */
     public function index()
-{
-    try {
-        $bookings = Booking::with('fleet')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-        
-        // Change from 'bookings.index' to 'customer.bookings'
-        return view('customer.bookings', compact('bookings'));
-        
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => $e->getMessage(),
-            'line' => $e->getLine(),
-            'file' => $e->getFile()
-        ], 500);
+    {
+        try {
+            // Filter bookings by current authenticated user
+            $customerId = auth()->id();
+            
+            if (!$customerId) {
+                return redirect()->route('login')
+                    ->with('error', 'Please login to view your bookings.');
+            }
+            
+            $bookings = Booking::with('fleet')
+                ->where('customer_id', $customerId)
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+            
+            return view('customer.bookings', compact('bookings'));
+            
+        } catch (\Exception $e) {
+            return redirect()->route('book-now')
+                ->with('error', 'Error loading bookings: ' . $e->getMessage());
+        }
     }
-}
+
+    /**
+     * Calculate price from model name (fallback if price_per_day is not set)
+     */
+    private function calculatePriceFromModel($modelName, $year = null)
+    {
+        $modelName = strtolower($modelName);
+        $year = $year ?? 0;
+        
+        if (strpos($modelName, 'bezza') !== false) {
+            return 140;
+        } elseif (strpos($modelName, 'myvi') !== false && $year >= 2020) {
+            return 150;
+        } elseif (strpos($modelName, 'axia') !== false && $year == 2024) {
+            return 130;
+        } elseif (strpos($modelName, 'alza') !== false) {
+            return 200;
+        } elseif (strpos($modelName, 'aruz') !== false) {
+            return 180;
+        } elseif (strpos($modelName, 'vellfire') !== false) {
+            return 500;
+        }
+        
+        return 120; // default price
+    }
 
     /**
      * Cancel booking

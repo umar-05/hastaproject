@@ -36,9 +36,7 @@ Route::get('/details', function () {
     return view('details');
 })->name('details');
 
-Route::get('/book-now', function () {
-    return view('customer.book-now');
-})->name('book-now');
+Route::get('/book-now', [VehicleController::class, 'bookNow'])->name('book-now');
 
 Route::get('/faq', function () {
     return view('customer.faq');
