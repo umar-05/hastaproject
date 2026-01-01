@@ -56,6 +56,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    // This route shows the payment design you provided
+    Route::post('/bookings/payment', [BookingController::class, 'payment'])->name('bookings.payment');
+    
+    // This route is triggered by the 'Finish' button on the payment page
+    Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
 });
