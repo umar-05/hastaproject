@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OcrController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\RewardController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\BookingController; 
 use App\Http\Controllers\StaffController;
@@ -27,6 +28,29 @@ Route::get('/home', function() {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/reward/staff', function () {
+    return view('reward.staff');
+});
+
+Route::get('/reward/customer', function () {
+    return view('reward.customer');
+});
+
+Route::get('/reward/my-rewards', [RewardController::class, 'showClaimed'])->name('rewards.claimed');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
+    Route::get('/reward/my-rewards', [RewardController::class, 'showClaimed'])->name('rewards.claimed');
+});
+
+Route::middleware(['auth', 'staff'])->prefix('staff')->name('reward.')->group(function () {
+    Route::get('/rewards', fn() => view('reward.index'))->name('index');        
+    Route::get('/rewards/create', fn() => view('reward.reward'))->name('create');
+    Route::post('/rewards', [\App\Http\Controllers\RewardController::class, 'store'])->name('store');
+    Route::get('/rewards/{reward}/edit', [\App\Http\Controllers\RewardController::class, 'edit'])->name('edit');
+    Route::put('/rewards/{reward}', [\App\Http\Controllers\RewardController::class, 'update'])->name('update');
+});
 
 // Vehicle Routes
 Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
