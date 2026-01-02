@@ -11,6 +11,7 @@
 </head>
 <body class="font-sans antialiased text-gray-900 bg-gray-50">
 
+<<<<<<< HEAD
     <!-- Header -->
     <header class="py-6 px-8 flex items-center justify-between max-w-7xl mx-auto bg-white">
         <div class="flex items-center">
@@ -59,21 +60,24 @@
             @endauth
         </div>
     </header>
+=======
+    @include('layouts.navigation')
+>>>>>>> 70121e02d2d3f927f477f3a9e7d072e011e11e51
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-8 py-12">
         <h1 class="text-4xl font-bold mb-8">My Bookings</h1>
 
         <!-- Success/Error Messages -->
-        @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-lg mb-6">
-                {{ session('success') }}
-            </div>
-        @endif
-
         @if(session('error'))
             <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg mb-6">
                 {{ session('error') }}
+            </div>
+        @endif
+
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-lg mb-6">
+                {{ session('success') }}
             </div>
         @endif
 
@@ -88,35 +92,63 @@
                 </a>
             </div>
         @else
-            <div class="space-y-6">
+            <div class="space-y-4">
                 @foreach($bookings as $booking)
-                    <div class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] overflow-hidden">
-                        <div class="md:flex">
-                            <!-- Car Image -->
-                            <div class="md:w-1/3 bg-gray-50 p-8 flex items-center justify-center">
-                                @if($booking->fleet && $booking->fleet->image)
-                                    <img src="{{ asset('storage/' . $booking->fleet->image) }}" 
-                                         alt="{{ $booking->fleet->model ?? 'Car' }}" 
-                                         class="max-w-full h-auto object-contain">
-                                @else
-                                    <div class="text-gray-400">
-                                        <svg class="h-32 w-32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                        </svg>
-                                    </div>
-                                @endif
+                    @php
+                        $vehicleImage = 'default-car.png';
+                        $vehicleName = 'Vehicle';
+                        $vehicleType = 'Car';
+                        
+                        if ($booking->fleet) {
+                            $fleet = $booking->fleet;
+                            $vehicleName = $fleet->model_name . ($fleet->year ? ' ' . $fleet->year : '');
+                            
+                            // Get vehicle info
+                            $modelName = strtolower($fleet->model_name);
+                            $year = $fleet->year ?? 0;
+                            
+                            // Determine image
+                            if (strpos($modelName, 'axia') !== false) {
+                                $vehicleImage = $year == 2024 ? 'axia-2024.png' : 'axia-2018.png';
+                                $vehicleType = 'Hatchback';
+                            } elseif (strpos($modelName, 'bezza') !== false) {
+                                $vehicleImage = 'bezza-2018.png';
+                                $vehicleType = 'Sedan';
+                            } elseif (strpos($modelName, 'myvi') !== false) {
+                                $vehicleImage = $year >= 2020 ? 'myvi-2020.png' : 'myvi-2015.png';
+                                $vehicleType = 'Hatchback';
+                            } elseif (strpos($modelName, 'saga') !== false) {
+                                $vehicleImage = 'saga-2017.png';
+                                $vehicleType = 'Sedan';
+                            } elseif (strpos($modelName, 'alza') !== false) {
+                                $vehicleImage = 'alza-2019.png';
+                                $vehicleType = 'MPV';
+                            } elseif (strpos($modelName, 'aruz') !== false) {
+                                $vehicleImage = 'aruz-2020.png';
+                                $vehicleType = 'SUV';
+                            } elseif (strpos($modelName, 'vellfire') !== false) {
+                                $vehicleImage = 'vellfire-2020.png';
+                                $vehicleType = 'MPV';
+                            }
+                        }
+                    @endphp
+                    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6">
+                        <div class="flex items-center gap-6">
+                            <!-- Car Image (Small) -->
+                            <div class="w-24 h-24 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <img src="{{ asset('images/' . $vehicleImage) }}" 
+                                     alt="{{ $vehicleName }}" 
+                                     class="w-full h-full object-contain p-2">
                             </div>
 
-                            <!-- Booking Details -->
-                            <div class="md:w-2/3 p-8">
-                                <div class="flex justify-between items-start mb-6">
-                                    <div>
-                                        <h2 class="text-2xl font-bold mb-2">
-                                            {{ $booking->fleet->model ?? 'Vehicle' }} {{ $booking->fleet->year ?? '' }}
-                                        </h2>
-                                        <p class="text-gray-600">{{ $booking->fleet->type ?? 'Car' }}</p>
+                            <!-- Essential Details -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between mb-2">
+                                    <div class="flex-1">
+                                        <h3 class="text-lg font-bold text-gray-900 mb-1">{{ $vehicleName }}</h3>
+                                        <p class="text-sm text-gray-500">{{ $vehicleType }}</p>
                                     </div>
-                                    <span class="px-4 py-2 rounded-full text-sm font-semibold
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold ml-4 flex-shrink-0
                                         @if($booking->booking_stat === 'confirmed') bg-green-100 text-green-800
                                         @elseif($booking->booking_stat === 'pending') bg-yellow-100 text-yellow-800
                                         @elseif($booking->booking_stat === 'completed') bg-blue-100 text-blue-800
@@ -125,79 +157,45 @@
                                         {{ ucfirst($booking->booking_stat) }}
                                     </span>
                                 </div>
-
-                                <!-- Booking Information Grid -->
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="text-gray-500 text-sm mb-1">Booking ID</p>
-                                        <p class="font-semibold">#{{ $booking->booking_id }}</p>
-                                    </div>
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="text-gray-500 text-sm mb-1">Pick Up</p>
+                                
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 text-sm">
+                                    <div>
+                                        <p class="text-gray-500 text-xs mb-1">Pick Up</p>
                                         <p class="font-semibold">{{ \Carbon\Carbon::parse($booking->pickup_date)->format('d M Y') }}</p>
-                                        <p class="text-sm text-gray-600">{{ $booking->pickup_time }}</p>
+                                        <p class="text-xs text-gray-600 mt-1">{{ $booking->pickup_loc }}</p>
                                     </div>
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="text-gray-500 text-sm mb-1">Return</p>
+                                    <div>
+                                        <p class="text-gray-500 text-xs mb-1">Return</p>
                                         <p class="font-semibold">{{ \Carbon\Carbon::parse($booking->return_date)->format('d M Y') }}</p>
-                                        <p class="text-sm text-gray-600">{{ $booking->return_time }}</p>
+                                        <p class="text-xs text-gray-600 mt-1">{{ $booking->return_loc }}</p>
                                     </div>
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="text-gray-500 text-sm mb-1">Pick Up Location</p>
-                                        <p class="font-semibold text-sm">{{ $booking->pickup_loc }}</p>
-                                    </div>
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="text-gray-500 text-sm mb-1">Total Amount</p>
-                                        <p class="font-semibold text-hasta-red text-xl">RM{{ number_format($booking->total_price, 2) }}</p>
-                                    </div>
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="text-gray-500 text-sm mb-1">Payment Status</p>
-                                        <p class="font-semibold">{{ ucfirst($booking->payment_status) }}</p>
+                                    <div>
+                                        <p class="text-gray-500 text-xs mb-1">Total Amount</p>
+                                        <p class="font-semibold text-hasta-red">RM{{ number_format($booking->total_price, 2) }}</p>
+                                        <p class="text-xs text-gray-600 mt-1">{{ ucfirst($booking->payment_status) }}</p>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Car Specifications -->
-                                @if($booking->fleet)
-                                <div class="grid grid-cols-4 gap-4 mb-6 text-center text-sm">
-                                    <div class="bg-gray-50 p-3 rounded-lg">
-                                        <div class="text-gray-600 mb-1">Gear Box</div>
-                                        <div class="font-semibold">{{ $booking->fleet->transmission ?? 'Auto' }}</div>
-                                    </div>
-                                    <div class="bg-gray-50 p-3 rounded-lg">
-                                        <div class="text-gray-600 mb-1">Fuel</div>
-                                        <div class="font-semibold">{{ $booking->fleet->fuel_type ?? 'Petrol' }}</div>
-                                    </div>
-                                    <div class="bg-gray-50 p-3 rounded-lg">
-                                        <div class="text-gray-600 mb-1">Seats</div>
-                                        <div class="font-semibold">{{ $booking->fleet->seats ?? '5' }}</div>
-                                    </div>
-                                    <div class="bg-gray-50 p-3 rounded-lg">
-                                        <div class="text-gray-600 mb-1">A/C</div>
-                                        <div class="font-semibold">Yes</div>
-                                    </div>
-                                </div>
+                            <!-- Action Buttons -->
+                            <div class="flex flex-col gap-2 flex-shrink-0">
+                                <a href="{{ route('bookings.show', $booking->booking_id) }}" 
+                                   class="bg-hasta-red hover:bg-red-700 text-white font-bold px-4 py-2 rounded-md transition text-sm text-center whitespace-nowrap">
+                                    View Details
+                                </a>
+                                
+                                @if($booking->booking_stat !== 'completed' && $booking->booking_stat !== 'cancelled')
+                                    <form action="{{ route('bookings.cancel', $booking->booking_id) }}" 
+                                          method="POST" 
+                                          onsubmit="return confirm('Are you sure you want to cancel this booking?');"
+                                          class="inline">
+                                        @csrf
+                                        <button type="submit" 
+                                                class="w-full border-2 border-hasta-red text-hasta-red hover:bg-red-50 font-bold px-4 py-2 rounded-md transition text-sm whitespace-nowrap">
+                                            Cancel
+                                        </button>
+                                    </form>
                                 @endif
-
-                                <!-- Action Buttons -->
-                                <div class="flex flex-wrap gap-3">
-                                    <a href="{{ route('bookings.show', $booking->booking_id) }}" 
-                                       class="bg-hasta-red hover:bg-red-700 text-white font-bold px-6 py-3 rounded-md transition">
-                                        View Details
-                                    </a>
-                                    
-                                    @if($booking->booking_stat !== 'completed' && $booking->booking_stat !== 'cancelled')
-                                        <form action="{{ route('bookings.cancel', $booking->booking_id) }}" 
-                                              method="POST" 
-                                              onsubmit="return confirm('Are you sure you want to cancel this booking?');"
-                                              class="inline">
-                                            @csrf
-                                            <button type="submit" 
-                                                    class="border-2 border-hasta-red text-hasta-red hover:bg-red-50 font-bold px-6 py-3 rounded-md transition">
-                                                Cancel Booking
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
-<header class="py-6 px-8 flex items-center justify-between max-w-7xl mx-auto">
+<header class="w-full bg-white">
+    <div class="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
     <div class="flex items-center">
         <a href="{{ Auth::check() && Auth::user()->role === 'staff' ? route('home') : route('dashboard') }}">
             <div class="border-2 border-hasta-red px-2 py-1 rounded-sm">
@@ -88,5 +89,6 @@
                 Login
             </a>
         @endauth
+    </div>
     </div>
 </header>

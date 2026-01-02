@@ -9,6 +9,11 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+@if(session('error'))
+    <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg mb-6 max-w-7xl mx-auto">
+        <strong>Error:</strong> {{ session('error') }}
+    </div>
+@endif
 <body class="font-sans antialiased text-gray-900 bg-white">
 
     @include('layouts.navigation')
