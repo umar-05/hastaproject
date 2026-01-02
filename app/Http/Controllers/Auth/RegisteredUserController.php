@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -124,26 +125,40 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        
-    $request->validate([
-    'name' => ['required', 'string', 'max:255'],
-    'matric_number' => ['required', 'string', 'max:20', 'unique:users,matric_number'],
-    'faculty' => ['required', 'string', 'max:255'],
-    'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
-    'password' => ['required', 'confirmed', Rules\Password::defaults()],
-]);
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'matric_number' => ['required', 'string', 'max:20', 'unique:users,matric_number'],
+            'faculty' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
 
-    $user = User::create([
-        'name' => $request->name,
-        'matric_number' => $request->matric_number,
-        'faculty' => $request->faculty,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-    ]);
+        // 1. Create the Main User Account (Login Access)
+        $user = User::create([
+            'name' => $request->name,
+            'matric_number' => $request->matric_number,
+            'faculty' => $request->faculty,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'customer', // Ensure role is set
+        ]);
+
+        // 2. Create the Customer Profile Record
+        // We map the User fields to the Customers table columns
+        Customer::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password), // Storing password here too as per your migration
+            'matric_no' => $request->matric_number,       // Note: migration uses 'matric_no', User uses 'matric_number'
+            'faculty' => $request->faculty,
+        ]);
 
         event(new Registered($user));
-       // Auth::login($user);
+        
+        // Auth::login($user); // Uncomment if you want auto-login
 
         return redirect(route('login'))->with('success', 'You have signed up!');
     }
+
+    
 }

@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Booking;
+use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Carbon\Carbon;
 
 class StaffController extends Controller
 {
@@ -67,11 +70,29 @@ class StaffController extends Controller
     }
 
     /**
-     * Display pickup/return page.
+     * Display pickup/return page with dynamic data.
+     * (I removed the old static version and kept this new dynamic one)
      */
-    public function pickupReturn(): View
+    public function pickupReturn(): View 
     {
-        return view('staff.pickup-return');
+        $today = Carbon::today();
+
+        // 1. Fetch Pickups: Scheduled for TODAY and status is 'confirmed' or 'pending'
+        $todayPickups = Booking::with(['fleet', 'customer'])
+            ->whereDate('pickup_date', $today)
+            ->whereIn('booking_stat', ['confirmed', 'pending']) 
+            ->orderBy('pickup_time', 'asc')
+            ->get();
+
+        // 2. Fetch Returns: Scheduled for TODAY (or overdue) and status is 'active'
+        $pendingReturns = Booking::with(['fleet', 'customer'])
+            ->whereDate('return_date', '<=', $today) 
+            ->where('booking_stat', 'active') 
+            ->orderBy('return_date', 'asc')
+            ->orderBy('return_time', 'asc')
+            ->get();
+
+        return view('staff.pickup-return', compact('todayPickups', 'pendingReturns')); 
     }
 
     /**
@@ -84,16 +105,14 @@ class StaffController extends Controller
 
     /**
      * Display report page.
-     * Note: Renamed to 'reports' to match web.php route
      */
     public function reports(): View
     {
-        return view('staff.reports'); // Make sure this view file exists as 'reports.blade.php' or 'report.blade.php'
+        return view('staff.reports');
     }
 
     /**
      * Show the form to add a new staff member.
-     * Note: Renamed from 'addStaff' to 'create' to match standard Laravel conventions
      */
     public function create(): View
     {
@@ -112,21 +131,21 @@ class StaffController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
         
+        // Auto-generate Matric/Staff ID for Users table
         $lastStaff = User::where('matric_number', 'LIKE', 'STAFF%')
                          ->where('matric_number', 'NOT LIKE', 'STAFF-%')
                          ->orderBy('id', 'desc')
                          ->first();
 
         $nextNumber = 1;
-
         if ($lastStaff) {
             $numberPart = (int) str_replace('STAFF', '', $lastStaff->matric_number);
             $nextNumber = $numberPart + 1;
         }
-
         $newMatricNumber = sprintf("STAFF%03d", $nextNumber);
 
-            User::create([
+        // 1. Create User Record
+        User::create([
             'name' => $request->name,
             'email' => $request->email,
             'phoneNum' => $request->phoneNum,
@@ -134,6 +153,14 @@ class StaffController extends Controller
             'role' => 'staff',
             'matric_number' => $newMatricNumber,
             'faculty' => 'Administration', 
+        ]);
+
+        // 2. Create Staff Record
+        Staff::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone_no' => $request->phoneNum, // Map phoneNum to phone_no
+            'position' => 'Staff',            // Default position
         ]);
 
         return back()->with('status', 'Staff account created successfully!');

@@ -32,7 +32,7 @@
                 </a>
             @else
                 <!-- Customer Navigation Links -->
-                <a href="{{ route('book-now') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
+                <a href="{{ route('vehicles.index') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
                     Book Now
                 </a>
 
@@ -50,7 +50,7 @@
             @endif
         @else
             <!-- Guest Navigation Links -->
-            <a href="{{ route('book-now') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
+            <a href="{{ route('vehicles.index') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
                 Book Now
             </a>
 
