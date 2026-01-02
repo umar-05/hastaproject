@@ -5,12 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OcrController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\RewardController;
-<<<<<<< Updated upstream
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\BookingController; 
 use App\Http\Controllers\StaffController;
-=======
->>>>>>> Stashed changes
 
 /*
 |--------------------------------------------------------------------------
@@ -55,7 +52,6 @@ Route::middleware(['auth', 'staff'])->prefix('staff')->name('reward.')->group(fu
     Route::put('/rewards/{reward}', [\App\Http\Controllers\RewardController::class, 'update'])->name('update');
 });
 
-<<<<<<< Updated upstream
 // Vehicle Routes
 Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
 Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
@@ -102,8 +98,6 @@ Route::get('/rewards/{reward}', function ($reward) {
 })->name('rewards.show');
 
 // Profile routes
-=======
->>>>>>> Stashed changes
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

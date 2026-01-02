@@ -11,7 +11,6 @@
 </head>
 <body class="font-sans antialiased text-gray-900 bg-gray-50">
 
-<<<<<<< HEAD
     <!-- Header -->
     <header class="py-6 px-8 flex items-center justify-between max-w-7xl mx-auto bg-white">
         <div class="flex items-center">
@@ -60,9 +59,6 @@
             @endauth
         </div>
     </header>
-=======
-    @include('layouts.navigation')
->>>>>>> 70121e02d2d3f927f477f3a9e7d072e011e11e51
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-8 py-12">
