@@ -176,8 +176,8 @@ class BookingController extends Controller
                 'return_loc' => $validated['return_location'],
                 'base_price' => $basePrice,
                 'discount' => $discount,
-                'total_price' => $finalPrice + ($request->input('deposit_amount') ? (float)$request->input('deposit_amount') : 50),
-                'deposit' => $request->input('deposit_amount', 50),
+                'total_price' => $finalPrice,
+                'deposit' => 200, // Default deposit
                 'booking_stat' => 'pending',
                 'payment_status' => 'pending',
                 'notes' => $request->notes ?? null,
@@ -325,63 +325,4 @@ class BookingController extends Controller
             return back()->with('error', 'Error cancelling booking');
         }
     }
-
-    public function payment(Request $request)
-    {
-        // 1. Validate the booking details
-        $request->validate([
-            'fleet_id' => 'required',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'pickup_location' => 'required',
-            'return_location' => 'required',
-        ]);
-
-        // 2. Fetch car details
-        $car = \App\Models\Fleet::findOrFail($request->fleet_id);
-        
-        // 3. Calculate rental days
-        $start = new \DateTime($request->start_date);
-        $end = new \DateTime($request->end_date);
-        $diff = $start->diff($end);
-        $days = $diff->days ?: 1; // If same day, count as 1 day
-
-        // 4. Calculate both payment options
-        // Prefer values passed from the previous form (hidden inputs) if present,
-        // otherwise fall back to server-side calculation.
-        $requestedTotal = $request->input('total_amount');
-        $requestedPricePerDay = $request->input('price_per_day');
-        $requestedDeposit = $request->input('deposit_amount');
-
-        if (!is_null($requestedTotal) && $requestedTotal !== '') {
-            $full_amount = (float) $requestedTotal;
-        } else {
-            $pricePerDay = null;
-            if (!is_null($requestedPricePerDay) && $requestedPricePerDay !== '') {
-                $pricePerDay = (float) $requestedPricePerDay;
-            } elseif (!empty($car->price_per_day)) {
-                $pricePerDay = $car->price_per_day;
-            } else {
-                $pricePerDay = $this->calculatePriceFromModel($car->model_name, $car->year);
-            }
-
-            $full_amount = $days * $pricePerDay;
-        }
-
-        $deposit_amount = !is_null($requestedDeposit) && $requestedDeposit !== ''
-            ? (float) $requestedDeposit
-            : ($car->deposit ?? 200.00); // Use car deposit or default to 200
-
-        // 5. Compute total with deposit and send variables to the view
-        $total_with_deposit = $full_amount + $deposit_amount;
-
-        return view('bookings.payment', [
-            'booking_data' => $request->all(),
-            'full_amount' => $full_amount,
-            'deposit_amount' => $deposit_amount,
-            'total_with_deposit' => $total_with_deposit,
-            'car' => $car
-        ]);
-    }
-
 }

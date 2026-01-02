@@ -43,8 +43,7 @@
                 </a>
             </div>
 
-            {{-- ADJUSTED: Action points to the payment route instead of store --}}
-            <form action="{{ route('bookings.payment') }}" method="POST" id="bookingForm">
+            <form action="{{ route('bookings.store') }}" method="POST" id="bookingForm">
                 @csrf
 
                 {{-- Car Details --}}
@@ -55,15 +54,12 @@
                         <p class="text-gray-600">{{ $car->plate_number }}</p>
                         <div class="flex gap-4 mt-2">
                             <span class="text-red-600 font-semibold">RM{{ $pricePerDay }}/day</span>
-                            <span class="text-gray-600">Deposit: RM{{ $car->deposit ?? 50 }}</span>
+                            <span class="text-gray-600">Deposit: RM{{ $car->deposit ?? 200 }}</span>
                         </div>
                     </div>
                 </div>
 
                 <input type="hidden" name="fleet_id" value="{{ $car->fleet_id }}">
-                <input type="hidden" name="price_per_day" id="price_per_day_input" value="{{ $pricePerDay }}">
-                <input type="hidden" name="total_amount" id="total_amount_input" value="{{ $pricePerDay }}">
-                <input type="hidden" name="deposit_amount" id="deposit_amount_input" value="{{ $car->deposit ?? 50 }}">
 
                 {{-- Date Selection --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -120,7 +116,7 @@
                     </div>
                 </div>
 
-                {{-- Total Amount Section --}}
+                {{-- Reward, Voucher, Total & Buttons sections stay the same --}}
                 <div class="bg-red-50 rounded-lg p-6 mb-6">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-gray-700 font-medium">Total Amount:</span>
@@ -130,7 +126,7 @@
 
                 <div class="flex gap-4">
                     <a href="{{ route('home') }}" class="flex-1 bg-white border-2 border-gray-300 hover:bg-gray-50 text-gray-700 py-3 rounded-lg text-center font-semibold">Cancel</a>
-                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold">Book this car</button>
+                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold">Next</button>
                 </div>
             </form>
         </div>
@@ -152,6 +148,7 @@ function openMap(type) {
     if (mapDiv.classList.contains('hidden')) {
         mapDiv.classList.remove('hidden');
 
+        // Delay ensures the div is visible so Leaflet can calculate its 350px height
         setTimeout(() => {
             if (type === 'pickup') {
                 if (!pickupMap) {
@@ -162,7 +159,7 @@ function openMap(type) {
                     pickupMap.on('click', e => placeMarkerAndGetAddress(e.latlng, pickupMarker, pickupMap, input));
                     pickupMarker.on('dragend', e => placeMarkerAndGetAddress(e.target.getLatLng(), pickupMarker, pickupMap, input));
                 }
-                pickupMap.invalidateSize();
+                pickupMap.invalidateSize(); // Fixes "thin" rendering
             } else {
                 if (!returnMap) {
                     returnMap = L.map('return_map').setView(studentMallCoords, 15);
@@ -206,6 +203,7 @@ function geocodeAddress(address, map, marker, input) {
         });
 }
 
+// Event Listeners for shortcut buttons and enter key
 document.querySelectorAll('.location-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const input = document.getElementById(this.dataset.target);
@@ -228,52 +226,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function calculateTotal() {
-    const startDateInput = document.getElementById('start_date');
-    const endDateInput = document.getElementById('end_date');
-    const totalDisplay = document.getElementById('total_amount');
-    const pricePerDay = {{ $pricePerDay }};
-    const depositInput = document.getElementById('deposit_amount_input');
-    const deposit = depositInput ? parseFloat(depositInput.value) || 50 : 50;
-
-    if (startDateInput.value) {
-        endDateInput.min = startDateInput.value;
-    }
-
-    const start = new Date(startDateInput.value);
-    const end = new Date(endDateInput.value);
-
-    if (startDateInput.value && endDateInput.value && end < start) {
-        alert("Return date cannot be before the start date.");
-        endDateInput.value = startDateInput.value;
-        return;
-    }
-
-    if (startDateInput.value && endDateInput.value) {
-        const diffTime = Math.abs(end - start);
-        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        if (diffDays === 0) diffDays = 1;
-        const totalBase = diffDays * pricePerDay;
-        const totalWithDeposit = (totalBase + deposit).toFixed(2);
-        totalDisplay.textContent = totalWithDeposit;
-        const totalInput = document.getElementById('total_amount_input');
-        if (totalInput) totalInput.value = totalWithDeposit;
+    const start = new Date(document.getElementById('start_date').value);
+    const end = new Date(document.getElementById('end_date').value);
+    if (start && end && end > start) {
+        const days = Math.ceil((end - start) / (86400000));
+        document.getElementById('total_amount').textContent = (days * {{ $pricePerDay }}).toFixed(2);
     }
 }
 document.getElementById('start_date').addEventListener('change', calculateTotal);
 document.getElementById('end_date').addEventListener('change', calculateTotal);
-
-document.addEventListener('DOMContentLoaded', () => {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('start_date').min = today;
-    calculateTotal();
-    const depositInput = document.getElementById('deposit_amount_input');
-    if (depositInput && !depositInput.value) {
-        depositInput.value = {{ $car->deposit ?? 200 }};
-    }
-    const priceInput = document.getElementById('price_per_day_input');
-    if (priceInput && !priceInput.value) {
-        priceInput.value = {{ $pricePerDay }};
-    }
-});
 </script>
 @endsection
