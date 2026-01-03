@@ -1,55 +1,147 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('password.store') }}">
-        @csrf
+{{-- resources/views/auth/reset-password.blade.php --}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Reset Password - HASTA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- RESET & BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #fff0f0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
 
-        <div class="mb-4">
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                    </svg>
-                </div>
-                <input id="email" type="email" name="email" :value="old('email', $request->email)" required autofocus
-                    class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
+        /* --- CARD DESIGN --- */
+        .auth-wrapper {
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .auth-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 6px;
+            background: #bb1419;
+        }
+
+        /* --- LOGO & HEADER --- */
+        .logo-container { text-align: center; margin-bottom: 25px; }
+        .logo-container img { height: 60px; width: auto; }
+
+        .header-text { text-align: center; margin-bottom: 30px; }
+        .header-text h1 { font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 5px; }
+        .header-text p { font-size: 14px; color: #666; }
+
+        /* --- FORM STYLING --- */
+        .form-group { margin-bottom: 20px; }
+
+        .form-group label {
+            display: block; font-size: 13px; font-weight: 600;
+            color: #555; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%; padding: 14px 16px; font-size: 15px; color: #333;
+            background-color: #f3f4f6; border: 2px solid #e5e7eb;
+            border-radius: 10px; transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-input:focus {
+            outline: none; background-color: #fff;
+            border-color: #bb1419; box-shadow: 0 0 0 4px rgba(187, 20, 25, 0.1);
+        }
+
+        .error-message { color: #dc2626; font-size: 12px; margin-top: 6px; font-weight: 500; }
+
+        /* --- BUTTONS --- */
+        .submit-btn {
+            width: 100%; padding: 16px;
+            background: linear-gradient(to right, #bb1419, #d84545);
+            color: white; border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 600; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(187, 20, 25, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(187, 20, 25, 0.4); }
+        .submit-btn:active { transform: translateY(0); }
+
+    </style>
+</head>
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            
+            <div class="logo-container">
+                <img src="{{ asset('images/HASTALOGO.svg') }}" alt="HASTA Logo">
             </div>
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
 
-        <div class="mb-4">
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                </div>
-                <input id="password" type="password" name="password" required autocomplete="new-password"
-                    class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
+            <div class="header-text">
+                <h1>Set New Password</h1>
+                <p>Enter your new password below.</p>
             </div>
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
 
-        <div class="mb-6">
-            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
+            <form method="POST" action="{{ route('password.store') }}">
+                @csrf
+
+                <input type="hidden" name="token" value="{{ $request->route('token') }}">
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-input" 
+                           value="{{ old('email', $request->email) }}" required autofocus>
+                    @error('email') <div class="error-message">{{ $message }}</div> @enderror
                 </div>
-                <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
-                    class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5">
-            </div>
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <button type="submit" class="w-full bg-[#C84B43] hover:bg-red-700 text-white font-bold py-3 px-4 rounded-md shadow-lg transition duration-150 ease-in-out uppercase tracking-widest text-xs">
-                {{ __('Reset Password') }}
-            </button>
+                <div class="form-group">
+                    <label for="password">New Password</label>
+                    <input type="password" id="password" name="password" class="form-input" 
+                           placeholder="••••••••" required autocomplete="new-password">
+                    @error('password') <div class="error-message">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="password_confirmation">Confirm Password</label>
+                    <input type="password" id="password_confirmation" name="password_confirmation" 
+                           class="form-input" placeholder="••••••••" required autocomplete="new-password">
+                    @error('password_confirmation') <div class="error-message">{{ $message }}</div> @enderror
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    Reset Password
+                </button>
+            </form>
         </div>
-    </form>
-</x-guest-layout>
+    </div>
+
+</body>
+</html>

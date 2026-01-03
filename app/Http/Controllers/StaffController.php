@@ -7,6 +7,9 @@ use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Carbon\Carbon;
 
@@ -14,8 +17,9 @@ class StaffController extends Controller
 {
     /**
      * Display the staff dashboard.
+     * FIX: Renamed from 'dashboard' to 'index' to match your route definition.
      */
-    public function dashboard(): View
+    public function index(): View
     {
         return view('staff.dashboard');
     }
@@ -74,14 +78,12 @@ class StaffController extends Controller
     public function pickupReturn(): View 
     {
         $today = Carbon::today();
-
-        // FIX: Updated to use camelCase column names (pickupDate, bookingStat)
         
         // 1. Fetch Pickups: Scheduled for TODAY
         $todayPickups = Booking::with(['fleet', 'customer'])
             ->whereDate('pickupDate', $today)
             ->whereIn('bookingStat', ['confirmed', 'pending']) 
-            ->orderBy('pickupDate', 'asc') // Assuming pickupTime isn't in your migration, strictly sort by Date
+            ->orderBy('pickupDate', 'asc') 
             ->get();
 
         // 2. Fetch Returns: Scheduled for TODAY (or overdue)
@@ -126,38 +128,75 @@ class StaffController extends Controller
         $request->validate([
             'name'     => ['required', 'string', 'max:255'],
             'phoneNum' => ['required', 'numeric'],
-            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:staff,email'], // Check 'staff' table
+            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:staff,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
         
-        // FIX: Generate Staff ID logic using the 'staff' table
+        // Generate Staff ID logic
         $lastStaff = Staff::where('staffID', 'LIKE', 'STAFF%')
                           ->orderBy('staffID', 'desc')
                           ->first();
 
         $nextNumber = 1;
         if ($lastStaff) {
-            // Extract number from STAFF001 -> 1
             $numberPart = (int) str_replace('STAFF', '', $lastStaff->staffID);
             $nextNumber = $numberPart + 1;
         }
         
-        // Format: STAFF002
         $newStaffID = sprintf("STAFF%03d", $nextNumber);
 
-        // FIX: Create directly in Staff table (removed User table logic)
         Staff::create([
             'staffID'  => $newStaffID,
             'name'     => $request->name,
             'email'    => $request->email,
-            'password' => Hash::make($request->password), // Required for login
-            'phoneNum' => $request->phoneNum, // Match model: phoneNum
-            'position' => 'Staff',            // Default position
-            
-            // Add other required fields with defaults if necessary, or ensure they are nullable in DB
-            // 'icNum' => '', 
+            'password' => Hash::make($request->password),
+            'phoneNum' => $request->phoneNum, 
+            'position' => 'Staff',            
         ]);
 
         return back()->with('status', 'Staff account created successfully! ID: ' . $newStaffID);
+    }
+
+    /**
+     * Display the user's profile form.
+     */
+    public function editProfile(Request $request)
+    {
+        return view('staff.profile.edit', [
+            'user' => Auth::guard('staff')->user(),
+        ]);
+    }
+
+    /**
+     * Update the user's profile information.
+     */
+    public function updateProfile(Request $request)
+    {
+        // Get the currently logged in staff first so we can use their ID in validation
+        $user = Auth::guard('staff')->user();
+
+        $attributes = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required', 
+                'string', 
+                'email', 
+                'max:255', 
+                // FIX: Explicitly ignore the current user's 'staffID' so they can save without "email taken" error
+                Rule::unique('staff', 'email')->ignore($user->staffID, 'staffID'),
+            ],
+            // FIX: Changed 'phone_no' to 'phoneNum' to match your database and 'store' method
+            'phoneNum' => ['nullable', 'numeric'], 
+        ]);
+
+        $user->fill($attributes);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        return Redirect::route('staff.profile.edit')->with('status', 'profile-updated');
     }
 }

@@ -6,9 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - HASTA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
-
+        /* --- RESET & BASE --- */
         * {
             margin: 0;
             padding: 0;
@@ -16,337 +19,250 @@
         }
 
         body {
-            font-family: Poppins, sans-serif;
-            background: #bb1419ff;
+            font-family: 'Poppins', sans-serif;
+            /* CHANGED: Clean white background with a very subtle red tint for theme harmony */
+            background: linear-gradient(135deg, #ffffff 0%, #fff0f0 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 50px 20px;
-        }
-
-        /* Logo Section */
-        .logo-section {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .logo {
-            display: inline-block;
-            padding: 10px 20px;
-            border: 3px solid #d84545;
-            border-radius: 5px;
-        }
-
-        .logo-text {
-            font-size: 48px;
-            font-weight: bold;
-            color: #d84545;
-            letter-spacing: 2px;
-        }
-
-        /* Login Card */
-        .login-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            padding: 20px 50px;
-            width: 30%;
-            max-width: 600px;
-        }
-
-        .welcome-text {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .welcome-text h1 {
-            font-size: 32px;
             color: #333;
-            margin-bottom: 10px;
         }
 
-        .welcome-text p {
-            color: #999;
-            font-size: 14px;
+        /* --- CARD DESIGN --- */
+        .login-wrapper {
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
         }
 
-        /* Form */
-        .login-form {
-            margin-top: 40px;
+        .login-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 20px;
+            /* Slightly stronger shadow for better contrast on white background */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.02);
         }
 
-        .form-group {
+        /* Accent bar remains to keep branding strong */
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: #bb1419;
+        }
+
+        /* --- LOGO & HEADER --- */
+        .logo-container {
+            text-align: center;
             margin-bottom: 25px;
+        }
+
+        .logo-container img {
+            height: 60px; 
+            width: auto;
+        }
+
+        .header-text {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header-text h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+
+        .header-text p {
+            font-size: 14px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        /* --- FORM STYLING --- */
+        .form-group {
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 10px;
-            font-weight: 500;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .input-wrapper {
             position: relative;
         }
 
-        .input-icon {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
-            font-size: 20px;
-        }
-
         .form-input {
             width: 100%;
-            padding: 18px 20px 18px 30px;
-            border: 2px solid #e0e0e0;
+            padding: 14px 16px;
+            font-size: 15px;
+            color: #333;
+            /* Slightly darker input background for contrast */
+            background-color: #f3f4f6;
+            border: 2px solid #e5e7eb;
             border-radius: 10px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: #d84545;
+            background-color: #fff;
+            border-color: #bb1419;
+            box-shadow: 0 0 0 4px rgba(187, 20, 25, 0.1);
         }
 
         .form-input::placeholder {
-            color: #ccc;
+            color: #aaa;
         }
 
-        /* Form Options */
-        .form-options {
+        /* --- ALERTS --- */
+        .error-message {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        .global-error {
+            background: #fef2f2;
+            border-left: 4px solid #dc2626;
+            color: #b91c1c;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            font-size: 13px;
+        }
+
+        /* --- ACTIONS --- */
+        .form-actions {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
+            justify-content: flex-end;
+            margin-bottom: 25px;
         }
 
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .remember-me input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .remember-me label {
-            color: #333;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .forgot-password {
-            color: #4a90e2;
+        .forgot-link {
+            font-size: 13px;
+            color: #666;
             text-decoration: none;
-            font-size: 14px;
+            transition: color 0.2s;
         }
 
-        .forgot-password:hover {
+        .forgot-link:hover {
+            color: #bb1419;
             text-decoration: underline;
         }
 
-        /* Sign In Button */
-        .signin-btn {
+        .submit-btn {
             width: 100%;
-            padding: 18px;
-            background: #d84545;
+            padding: 16px;
+            background: linear-gradient(to right, #bb1419, #d84545);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            box-shadow: 0 4px 15px rgba(187, 20, 25, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .signin-btn:hover {
-            background: #c73939;
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(187, 20, 25, 0.4);
         }
 
-        /* Sign Up Link */
-        .signup-link {
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* --- FOOTER LINKS --- */
+        .signup-text {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 25px;
+            font-size: 14px;
             color: #666;
-            font-size: 15px;
         }
 
-        .signup-link a {
-            color: #4a90e2;
+        .signup-text a {
+            color: #bb1419;
+            font-weight: 600;
             text-decoration: none;
-            font-weight: bold;
         }
 
-        .signup-link a:hover {
+        .signup-text a:hover {
             text-decoration: underline;
         }
 
-        /* Footer */
-        footer {
-            background: #d84545;
-            color: white;
-            padding: 40px 100px;
-            margin-top: auto;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 50px;
-            margin-bottom: 20px;
-        }
-
-        .footer-section h3 {
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .footer-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 8px;
-        }
-
-        .footer-links a {
-            color: white;
-            text-decoration: none;
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
-        .footer-links a:hover {
-            opacity: 1;
-        }
-
-        .social-icons {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .social-icon {
-            width: 35px;
-            height: 35px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .social-icon:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        .footer-logo {
-            font-size: 32px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
-        }
-
-        @media (max-width: 768px) {
+        /* Mobile Adjustments */
+        @media (max-width: 480px) {
             .login-card {
-                padding: 30px;
-            }
-
-            footer {
                 padding: 30px 20px;
             }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
         }
-
-            .logo-container img {
-                display:block;
-                height: auto;
-                width: 60%;
-                margin-left: auto;
-                margin-right: auto;
-                margin-bottom: 30px;
-            }
     </style>
 </head>
 <body>
-    <!-- Main Content -->
-    <div class="main-content">
+
+    <div class="login-wrapper">
         <div class="login-card">
-            <!-- Logo -->
+            
             <div class="logo-container">
                 <img src="{{ asset('images/HASTALOGO.svg') }}" alt="HASTA Logo">
             </div>
 
             @if ($errors->any())
-    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 14px;">
-        @foreach ($errors->all() as $error)
-            <p>{{ $error }}</p>
-        @endforeach
-    </div>
-@endif
+                <div class="global-error">
+                    @foreach ($errors->all() as $error)
+                        <p>{{ $error }}</p>
+                    @endforeach
+                </div>
+            @endif
 
-            <!-- Welcome Text -->
-            <div class="welcome-text">
-                <h1>Welcome</h1>
-                <p>Sign in to your account to continue</p>
+            <div class="header-text">
+                <h1>Welcome Back</h1>
+                <p>Please enter your details to sign in</p>
             </div>
-            
-            <!-- Login Form -->
-            <form class="login-form" method="POST" action="{{ route('login') }}">
+
+            <form method="POST" action="{{ route('login') }}">
                 @csrf
 
-                <!-- Email Field -->
                 <div class="form-group">
-                    <label for="email">Email Address</label>
+                    <label for="email">Email</label>
                     <div class="input-wrapper">
                         <input 
                             type="email" 
                             id="email" 
                             name="email" 
                             class="form-input" 
-                            placeholder="you@example.com"
+                            placeholder="Enter your email"
                             value="{{ old('email') }}"
-                            required
+                            required 
+                            autofocus
                         >
                     </div>
                     @error('email')
-                        <span style="color: #d84545; font-size: 12px; margin-top: 5px; display: block;">{{ $message }}</span>
+                        <div class="error-message">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <!-- Password Field -->
                 <div class="form-group">
                     <label for="password">Password</label>
                     <div class="input-wrapper">
@@ -355,64 +271,71 @@
                             id="password" 
                             name="password" 
                             class="form-input" 
-                            placeholder="**********"
+                            placeholder="••••••••"
                             required
                         >
                     </div>
                     @error('password')
-                        <span style="color: #d84545; font-size: 12px; margin-top: 5px; display: block;">{{ $message }}</span>
+                        <div class="error-message">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <!-- Forgot Password -->
-                <div class="form-options">
-                    <a href="{{ route('password.request') }}" class="forgot-password">Forgot Password?</a>
+                <div class="form-actions">
+                    @if (Route::has('password.request'))
+                        <a href="{{ route('password.request') }}" class="forgot-link">
+                            Forgot password?
+                        </a>
+                    @endif
                 </div>
-                <!-- Sign In Button -->
-                <button type="submit" class="signin-btn">Sign In</button> 
-                </form>
-                <!-- Sign Up Link -->
-                <div class="signup-link">
-                    Don't have an account? <a href="{{ route('register') }}">Sign Up</a>
+
+                <button type="submit" class="submit-btn">
+                    Sign In
+                </button>
+
+                <div class="signup-text">
+                    Don't have an account? 
+                    <a href="{{ route('register') }}">Create account</a>
                 </div>
+            </form>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
-
-@if (session('status'))
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-                title: 'Success!',
-                text: 'Password Successfully Resetted! :3', 
-                icon: 'success',
-                confirmButtonText: 'Great!',
-                confirmButtonColor: '#C84B43',
-                background: '#fff',
-                iconColor: '#C84B43'
+    @if (session('status'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+                
+                Toast.fire({
+                    icon: 'success',
+                    title: "{{ session('status') }}"
+                });
             });
-        });
-    </script>
-@endif
+        </script>
+    @endif
 
-
-@if (session('success'))
+    @if (session('success'))
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
-                    title: 'Registration Successful!',
+                    title: 'Welcome!',
                     text: "{{ session('success') }}", 
                     icon: 'success',
-                    confirmButtonText: 'Login Now',
-                    confirmButtonColor: '#C84B43',
+                    confirmButtonText: 'Let\'s Go',
+                    confirmButtonColor: '#bb1419',
                     background: '#fff',
-                    iconColor: '#C84B43'
+                    iconColor: '#bb1419'
                 });
-        });
-    </script>
-@endif
+            });
+        </script>
+    @endif
+
 </body>
 </html>

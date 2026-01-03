@@ -73,10 +73,10 @@
                 </div>
 
                 <div>
-                    <x-input-label for="icNum" :value="__('IC Number')" class="text-xs uppercase tracking-wider text-gray-500 font-bold mb-2 ml-1" />
-                    <x-text-input id="icNum" name="icNum" type="text" 
+                    <x-input-label for="icNum_passport" :value="__('IC Number / Passport')" class="text-xs uppercase tracking-wider text-gray-500 font-bold mb-2 ml-1" />
+                    <x-text-input id="icNum_passport" name="icNum_passport" type="text" 
                         class="block w-full bg-[#f3f4f6] border-none rounded-xl py-4 px-5 text-gray-700 shadow-[inset_4px_4px_8px_#d1d5db,inset_-4px_-4px_8px_#ffffff] focus:ring-2 focus:ring-[#bb1419]/20 transition-all duration-300" 
-                        :value="old('icNum', $user->icNum)" required />
+                        :value="old('icNum_passport', $user->icNum_passport)" required />
                 </div>
             </div>
         </div>

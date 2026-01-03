@@ -33,8 +33,6 @@
             </div>
         </section>
 
-        {{-- FIX 2: Active Booking Dashboard Section --}}
-        {{-- This only shows if the Controller passed $activeBooking and it is not null --}}
         @if(isset($activeBooking) && $activeBooking)
         <section class="mb-16 bg-gray-50 p-8 rounded-3xl border border-gray-100 shadow-sm">
             <div class="flex justify-between items-center mb-6">

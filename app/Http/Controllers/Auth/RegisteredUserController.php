@@ -139,7 +139,8 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
         
-        Auth::login($user);
+        // Removed auto-login to prevent redirect loop
+        // Auth::login($user);
 
         return redirect(route('home'))->with('success', 'You have signed up!');
     }

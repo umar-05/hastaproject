@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->bigInteger('phoneNum')->nullable();
-            $table->string('icNum')->unique()->nullable();
+            $table->string('icNum_passport')->unique()->nullable();
             $table->text('address')->nullable();
             $table->text('city')->nullable();
             $table->integer('postcode')->nullable();
@@ -32,7 +32,8 @@ return new class extends Migration
             $table->tinyText('emerelation')->nullable();
             $table->tinyText('bankName')->nullable();
             $table->bigInteger('accountNum')->nullable();
-
+            
+            $table->rememberToken();
             $table->timestamps();
         });
     }
@@ -42,6 +43,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customer');
+        Schema::table('customer', function (Blueprint $table) {
+        $table->dropRememberToken();
+    });
     }
 };

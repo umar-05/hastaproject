@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->bigInteger('phoneNum')->nullable();
-            $table->string('icNum')->unique()->nullable();
+            $table->string('icNum_passport')->unique()->nullable();
             $table->text('address')->nullable();
             $table->text('city')->nullable();
             $table->integer('postcode')->nullable();
