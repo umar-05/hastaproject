@@ -148,9 +148,8 @@ class RegisteredUserController extends Controller
         Customer::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'matric_no' => $request->matric_number,
-            'password' => Hash::make(trim($request->password)),
+            'password' => Hash::make($request->password), // Storing password here too as per your migration
+            'matric_no' => $request->matric_number,       // Note: migration uses 'matric_no', User uses 'matric_number'
             'faculty' => $request->faculty,
         ]);
 
