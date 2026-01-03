@@ -24,14 +24,14 @@ return new class extends Migration
             $table->longint('phoneNum')->nullable();
             $table->string('icNum')->unique();
             $table->text('address')->nullable();
+            $table->text('city')->nullable();
             $table->int('postcode')->nullable();
             $table->tinyText('state')->nullable();
             $table->string('eme_name')->nullable();
-            $table->int('emephoneNum')->unique();
+            $table->longint('emephoneNum')->unique();
             $table->tinyText('emerelation')->nullable();
             $table->tinyText('bankName')->nullable();
             $table->longint('accountNum')->nullable();
-
 
             $table->timestamps();
         });

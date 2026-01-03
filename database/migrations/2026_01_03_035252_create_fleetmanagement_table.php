@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('fleetmanagement', function (Blueprint $table) {
-            $table->id();
+            $table->foreignId('vehicleID')->constrained(table: 'fleet', column: 'vehicleID');
+            $table->foreignId('staffID')->constrained(table: 'staff', column: 'staffID');
+
+            $table->primary(['vehicleID', 'staffID']);
             $table->timestamps();
         });
     }
