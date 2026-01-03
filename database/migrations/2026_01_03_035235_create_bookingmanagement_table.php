@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('bookingmanagement', function (Blueprint $table) {
-            $table->id();
+            $table->foreignID('bookingID')->constrained(table: 'booking', column: 'bookingID');
+            $table->foreignID('staffID')->constrained(table: 'staff', column: 'staffID');
+
+            $table->primary(['bookingID', 'staffID']);
             $table->timestamps();
         });
     }

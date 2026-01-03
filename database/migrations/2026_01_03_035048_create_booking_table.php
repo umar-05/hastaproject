@@ -12,7 +12,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('booking', function (Blueprint $table) {
-            $table->id();
+            $table->id('bookingID');
+            
+            $table->dateTime('pickupDate');
+            $table->dateTime('returnDate');
+            $table->string('pickupLoc');
+            $table->string('returnLoc');
+            $table->double('deposit');
+            $table->double('totalPrice');
+            $table->string('bookingStat');
+            $table->string('feedback');
+            
+            
+            // FK
+            $table->foreignId('matricNum')->constrained(table: 'customer', column: 'matricNum');
+            $table->foreignId('rewardID')->constrained(table: 'reward', column: 'rewardID');
+            $table->foreignId('vehicleID')->constrained(table: 'fleet', column: 'vehicleID');
+
+
+
             $table->timestamps();
         });
     }
