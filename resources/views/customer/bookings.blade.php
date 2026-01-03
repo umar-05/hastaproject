@@ -97,10 +97,10 @@
                         
                         if ($booking->fleet) {
                             $fleet = $booking->fleet;
-                            $vehicleName = $fleet->model_name . ($fleet->year ? ' ' . $fleet->year : '');
+                            $vehicleName = $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : '');
                             
                             // Get vehicle info
-                            $modelName = strtolower($fleet->model_name);
+                            $modelName = strtolower($fleet->modelName);
                             $year = $fleet->year ?? 0;
                             
                             // Determine image
@@ -145,43 +145,43 @@
                                         <p class="text-sm text-gray-500">{{ $vehicleType }}</p>
                                     </div>
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold ml-4 flex-shrink-0
-                                        @if($booking->booking_stat === 'confirmed') bg-green-100 text-green-800
-                                        @elseif($booking->booking_stat === 'pending') bg-yellow-100 text-yellow-800
-                                        @elseif($booking->booking_stat === 'completed') bg-blue-100 text-blue-800
+                                        @if(($booking->bookingStat ?? '') === 'confirmed') bg-green-100 text-green-800
+                                        @elseif(($booking->bookingStat ?? '') === 'pending') bg-yellow-100 text-yellow-800
+                                        @elseif(($booking->bookingStat ?? '') === 'completed') bg-blue-100 text-blue-800
                                         @else bg-red-100 text-red-800
                                         @endif">
-                                        {{ ucfirst($booking->booking_stat) }}
+                                        {{ ucfirst($booking->bookingStat ?? 'unknown') }}
                                     </span>
                                 </div>
                                 
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 text-sm">
                                     <div>
                                         <p class="text-gray-500 text-xs mb-1">Pick Up</p>
-                                        <p class="font-semibold">{{ \Carbon\Carbon::parse($booking->pickup_date)->format('d M Y') }}</p>
-                                        <p class="text-xs text-gray-600 mt-1">{{ $booking->pickup_loc }}</p>
+                                        <p class="font-semibold">{{ optional($booking->pickupDate)->format('d M Y') ?? (\Carbon\Carbon::parse($booking->pickupDate ?? $booking->pickup_date)->format('d M Y')) }}</p>
+                                        <p class="text-xs text-gray-600 mt-1">{{ $booking->pickupLoc ?? $booking->pickup_loc }}</p>
                                     </div>
                                     <div>
                                         <p class="text-gray-500 text-xs mb-1">Return</p>
-                                        <p class="font-semibold">{{ \Carbon\Carbon::parse($booking->return_date)->format('d M Y') }}</p>
-                                        <p class="text-xs text-gray-600 mt-1">{{ $booking->return_loc }}</p>
+                                        <p class="font-semibold">{{ optional($booking->returnDate)->format('d M Y') ?? (\Carbon\Carbon::parse($booking->returnDate ?? $booking->return_date)->format('d M Y')) }}</p>
+                                        <p class="text-xs text-gray-600 mt-1">{{ $booking->returnLoc ?? $booking->return_loc }}</p>
                                     </div>
                                     <div>
                                         <p class="text-gray-500 text-xs mb-1">Total Amount</p>
-                                        <p class="font-semibold text-hasta-red">RM{{ number_format($booking->total_price, 2) }}</p>
-                                        <p class="text-xs text-gray-600 mt-1">{{ ucfirst($booking->payment_status) }}</p>
+                                        <p class="font-semibold text-hasta-red">RM{{ number_format($booking->totalPrice ?? $booking->total_price ?? 0, 2) }}</p>
+                                        <p class="text-xs text-gray-600 mt-1">{{ ucfirst($booking->payment_status ?? 'pending') }}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Action Buttons -->
                             <div class="flex flex-col gap-2 flex-shrink-0">
-                                <a href="{{ route('bookings.show', $booking->booking_id) }}" 
+                                <a href="{{ route('bookings.show', $booking->bookingID ?? $booking->booking_id) }}" 
                                    class="bg-hasta-red hover:bg-red-700 text-white font-bold px-4 py-2 rounded-md transition text-sm text-center whitespace-nowrap">
                                     View Details
                                 </a>
                                 
-                                @if($booking->booking_stat !== 'completed' && $booking->booking_stat !== 'cancelled')
-                                    <form action="{{ route('bookings.cancel', $booking->booking_id) }}" 
+                                @if(($booking->bookingStat ?? $booking->booking_stat) !== 'completed' && ($booking->bookingStat ?? $booking->booking_stat) !== 'cancelled')
+                                    <form action="{{ route('bookings.cancel', $booking->bookingID ?? $booking->booking_id) }}" 
                                           method="POST" 
                                           onsubmit="return confirm('Are you sure you want to cancel this booking?');"
                                           class="inline">

@@ -17,13 +17,14 @@ class BookingController extends Controller
     public function create($fleetId)
     {
         try {
-            $car = Fleet::where('fleet_id', $fleetId)->firstOrFail();
-            
+            // fleet primary key is plateNumber
+            $car = Fleet::where('plateNumber', $fleetId)->firstOrFail();
+
             // Get vehicle info for display
-            $vehicleInfo = $this->getVehicleInfoForDisplay($car->model_name, $car->year);
+            $vehicleInfo = $this->getVehicleInfoForDisplay($car->modelName, $car->year);
             $pricePerDay = $car->price_per_day ?? $vehicleInfo['price'];
             $image = $vehicleInfo['image'];
-            $vehicleName = $car->model_name . ($car->year ? ' ' . $car->year : '');
+            $vehicleName = $car->modelName . ($car->year ? ' ' . $car->year : '');
             
             // Get active rewards or return empty collection if table doesn't exist
             try {
@@ -93,7 +94,7 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'fleet_id' => 'required|exists:fleet,fleet_id',
+            'plateNumber' => 'required|exists:fleet,plateNumber',
             'start_date' => 'required|date|after_or_equal:today',
             'start_time' => 'required',
             'end_date' => 'required|date|after:start_date',
@@ -108,24 +109,24 @@ class BookingController extends Controller
         DB::beginTransaction();
         
         try {
-            $fleet = Fleet::where('fleet_id', $validated['fleet_id'])->firstOrFail();
+            $fleet = Fleet::where('plateNumber', $validated['plateNumber'])->firstOrFail();
             
-            // Calculate rental period
-            $startDate = $validated['start_date'];
-            $endDate = $validated['end_date'];
-            
-            $start = new \DateTime($startDate);
-            $end = new \DateTime($endDate);
+            // Combine date and time into datetimes for DB (pickupDate / returnDate)
+            $pickupDateTime = $validated['start_date'] . ' ' . $validated['start_time'];
+            $returnDateTime = $validated['end_date'] . ' ' . $validated['end_time'];
+
+            // Calculate rental days based on dates only
+            $start = new \DateTime($validated['start_date']);
+            $end = new \DateTime($validated['end_date']);
             $days = $end->diff($start)->days;
-            
             if ($days < 1) {
                 $days = 1;
             }
             
             // Calculate base price - use price_per_day if available, otherwise calculate from model
-            $pricePerDay = $fleet->price_per_day;
+            $pricePerDay = $fleet->price_per_day ?? 0;
             if (!$pricePerDay || $pricePerDay == 0) {
-                $pricePerDay = $this->calculatePriceFromModel($fleet->model_name, $fleet->year);
+                $pricePerDay = $this->calculatePriceFromModel($fleet->modelName, $fleet->year);
             }
             
             // Calculate base price
@@ -155,38 +156,36 @@ class BookingController extends Controller
             
             $finalPrice = $basePrice - $discount;
             
-            // Get customer_id from authenticated user (using user ID as customer_id for now)
+            // Get customer primary key (Customer uses matricNum as primary key)
             $customerId = auth()->id();
             if (!$customerId) {
                 return redirect()->route('login')
                     ->with('error', 'Please login to make a booking.');
             }
-            
-            // Create booking with your table structure
+
+            // Determine deposit (from request or fleet default)
+            $depositAmount = $request->input('deposit_amount', $fleet->deposit ?? 50);
+            $totalPrice = $finalPrice + (float)$depositAmount;
+
+            // Create booking using the DB column names (camelCase)
             $booking = Booking::create([
-                'customer_id' => $customerId,
-                'fleet_id' => $validated['fleet_id'],
-                'reward_id' => $request->reward_id,
-                'voucher_code' => $request->voucher_code,
-                'pickup_date' => $startDate,
-                'pickup_time' => $validated['start_time'],
-                'return_date' => $endDate,
-                'return_time' => $validated['end_time'],
-                'pickup_loc' => $validated['pickup_location'],
-                'return_loc' => $validated['return_location'],
-                'base_price' => $basePrice,
-                'discount' => $discount,
-                'total_price' => $finalPrice + ($request->input('deposit_amount') ? (float)$request->input('deposit_amount') : 50),
-                'deposit' => $request->input('deposit_amount', 50),
-                'booking_stat' => 'pending',
-                'payment_status' => 'pending',
-                'notes' => $request->notes ?? null,
+                'matricNum' => $customerId,
+                'plateNumber' => $validated['plateNumber'],
+                'rewardID' => $request->input('reward_id') ?? null,
+                'pickupDate' => $pickupDateTime,
+                'returnDate' => $returnDateTime,
+                'pickupLoc' => $validated['pickup_location'],
+                'returnLoc' => $validated['return_location'],
+                'deposit' => (float)$depositAmount,
+                'totalPrice' => (float)$totalPrice,
+                'bookingStat' => 'pending',
+                'feedback' => null,
             ]);
             
             DB::commit();
             
             return redirect()->route('bookings.index')
-                ->with('success', 'Booking created successfully! Booking ID: #' . $booking->booking_id);
+                ->with('success', 'Booking created successfully! Booking ID: #' . $booking->bookingID);
                 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -240,8 +239,8 @@ class BookingController extends Controller
             }
             
             $booking = Booking::with(['fleet', 'reward'])
-                ->where('booking_id', $bookingId)
-                ->where('customer_id', $customerId)
+                ->where('bookingID', $bookingId)
+                ->where('matricNum', $customerId)
                 ->firstOrFail();
             
             return view('bookings.show', compact('booking'));
@@ -269,7 +268,7 @@ class BookingController extends Controller
             }
             
             $bookings = Booking::with('fleet')
-                ->where('customer_id', $customerId)
+                ->where('matricNum', $customerId)
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
             
@@ -312,13 +311,13 @@ class BookingController extends Controller
     public function cancel($bookingId)
     {
         try {
-            $booking = Booking::where('booking_id', $bookingId)->firstOrFail();
-            
-            if ($booking->booking_stat === 'completed' || $booking->booking_stat === 'cancelled') {
+            $booking = Booking::where('bookingID', $bookingId)->firstOrFail();
+
+            if ($booking->bookingStat === 'completed' || $booking->bookingStat === 'cancelled') {
                 return back()->with('error', 'This booking cannot be cancelled.');
             }
-            
-            $booking->update(['booking_stat' => 'cancelled']);
+
+            $booking->update(['bookingStat' => 'cancelled']);
             
             return back()->with('success', 'Booking cancelled successfully.');
         } catch (\Exception $e) {
@@ -330,7 +329,7 @@ class BookingController extends Controller
     {
         // 1. Validate the booking details
         $request->validate([
-            'fleet_id' => 'required',
+            'plateNumber' => 'required',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'pickup_location' => 'required',
@@ -338,7 +337,7 @@ class BookingController extends Controller
         ]);
 
         // 2. Fetch car details
-        $car = \App\Models\Fleet::findOrFail($request->fleet_id);
+        $car = \App\Models\Fleet::where('plateNumber', $request->plateNumber)->firstOrFail();
         
         // 3. Calculate rental days
         $start = new \DateTime($request->start_date);
@@ -362,7 +361,7 @@ class BookingController extends Controller
             } elseif (!empty($car->price_per_day)) {
                 $pricePerDay = $car->price_per_day;
             } else {
-                $pricePerDay = $this->calculatePriceFromModel($car->model_name, $car->year);
+                $pricePerDay = $this->calculatePriceFromModel($car->modelName, $car->year);
             }
 
             $full_amount = $days * $pricePerDay;

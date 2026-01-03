@@ -60,16 +60,18 @@ return [
     */
 
     'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
-        ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+    // Change the default 'users' provider to point to your Customer model
+    'users' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Customer::class, 
     ],
+
+    // Add a new provider for your Staff model
+    'staff' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Staff::class,
+    ],
+],
 
     /*
     |--------------------------------------------------------------------------
