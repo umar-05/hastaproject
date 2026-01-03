@@ -12,7 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reward', function (Blueprint $table) {
-            $table->id();
+            $table->id('rewardID');
+
+            $table->tinyInteger('rewardPoints');
+            $table->string('voucherCode');
+            $table->mediumText('rewardType');
+            $table->int('rewardAmount');
+            $table->tinyInteger('totalClaimable');
+            $table->date('expiryDate');
+            $table->mediumText('rewardStatus');
+
             $table->timestamps();
         });
     }
