@@ -10,7 +10,7 @@ class Reward extends Model
     use HasFactory;
 
     protected $table = 'reward';
-
+    
     protected $fillable = [
         'company',
         'discount',
