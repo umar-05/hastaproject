@@ -57,19 +57,19 @@
             </a>
 
         @else
-            <a href="{{ route('vehicles.index') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
+            <a href="{{ route('login') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
                 Book Now
             </a>
 
-            <a href="{{ route('bookings.index') }}" class="text-gray-700 hover:text-hasta-red transition">
+            <a href="{{ route('login') }}" class="text-gray-700 hover:text-hasta-red transition">
                 Bookings
             </a>
 
-            <a href="{{ route('rewards.index') }}" class="text-gray-700 hover:text-hasta-red transition">
+            <a href="{{ route('login') }}" class="text-gray-700 hover:text-hasta-red transition">
                 Rewards
             </a>
 
-            <a href="{{ route('faq') }}" class="text-gray-700 hover:text-hasta-red transition">
+            <a href="{{ route('login') }}" class="text-gray-700 hover:text-hasta-red transition">
                 FAQ
             </a>
         @endauth
