@@ -27,7 +27,8 @@ return new class extends Migration
             // FK
             $table->foreignId('matricNum')->constrained(table: 'customer', column: 'matricNum');
             $table->foreignId('rewardID')->constrained(table: 'reward', column: 'rewardID');
-            $table->foreignId('vehicleID')->constrained(table: 'fleet', column: 'vehicleID');
+            $table->string('plateNumber');
+            $table->foreign('plateNumber')->references('plateNumber')->on('fleet');
 
 
 

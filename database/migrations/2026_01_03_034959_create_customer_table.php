@@ -21,17 +21,17 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->longint('phoneNum')->nullable();
+            $table->bigInteger('phoneNum')->nullable();
             $table->string('icNum')->unique();
             $table->text('address')->nullable();
             $table->text('city')->nullable();
-            $table->int('postcode')->nullable();
+            $table->integer('postcode')->nullable();
             $table->tinyText('state')->nullable();
             $table->string('eme_name')->nullable();
-            $table->longint('emephoneNum')->unique();
+            $table->bigInteger('emephoneNum')->unique();
             $table->tinyText('emerelation')->nullable();
             $table->tinyText('bankName')->nullable();
-            $table->longint('accountNum')->nullable();
+            $table->bigInteger('accountNum')->nullable();
 
             $table->timestamps();
         });

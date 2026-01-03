@@ -3,39 +3,46 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable; // Changed to support login
+use Illuminate\Notifications\Notifiable;
 
-class Staff extends Model
+class Staff extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $table = 'staff';
-    protected $primaryKey = 'staff_id';
+    
+    // Match the exact casing from your phpMyAdmin screenshot
+    protected $primaryKey = 'staffID'; 
+
+    // Tell Laravel the PK is a string (STAFF001) and not a number
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
-        // Standard Identity
+        'staffID',    // Added so you can seed it manually
+        'position',
         'name', 
         'email', 
-        'matric_number', // Added
-        'faculty',       // Added
-        'position',      // Kept (Specific to Staff)
-        
-        // Profile Fields (Now matching User table names)
-        'phoneNum',      // Renamed from phone_no
-        'icNum',         // Renamed from ic_no
-        
-        // Address
+        'password',   // Added because it exists in your screenshot
+        'phoneNum', 
+        'icNum', 
         'address', 
         'city', 
         'postcode', 
         'state',
-        'collegeAddress', // Added
         'eme_name',
         'emephoneNum',
         'emerelation',
         'bankName',
         'accountNum',
-        'reward_points',
     ];
-];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 }

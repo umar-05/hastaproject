@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('rewardmanagement', function (Blueprint $table) {
-            $table->foreignId('staffID')->constrained(table: 'staff', column: 'staffID');
+            $table->string('staffID');
+            $table->foreign('staffID')->references('staffID')->on('staff');
             $table->foreignId('rewardID')->constrained(table: 'reward', column: 'rewardID');
 
             $table->primary(['staffID', 'rewardID']);

@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('bookingmanagement', function (Blueprint $table) {
             $table->foreignID('bookingID')->constrained(table: 'booking', column: 'bookingID');
-            $table->foreignID('staffID')->constrained(table: 'staff', column: 'staffID');
+            $table->string('staffID');
+            $table->foreign('staffID')->references('staffID')->on('staff');
 
             $table->primary(['bookingID', 'staffID']);
             $table->timestamps();

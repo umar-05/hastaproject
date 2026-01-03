@@ -17,7 +17,7 @@ return new class extends Migration
             $table->tinyInteger('rewardPoints');
             $table->string('voucherCode');
             $table->mediumText('rewardType');
-            $table->int('rewardAmount');
+            $table->integer('rewardAmount');
             $table->tinyInteger('totalClaimable');
             $table->date('expiryDate');
             $table->mediumText('rewardStatus');

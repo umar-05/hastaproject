@@ -12,23 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('staff', function (Blueprint $table) {
-            $table->id('staffID');
+            $table->string('staffID')->primary();
+            //$table->foreign('staffID')->references('staffID')->on('staffID');
 
             $table->string('position');
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->longint('phoneNum')->nullable();
-            $table->string('icNum')->unique();
+            $table->bigInteger('phoneNum')->nullable();
+            $table->string('icNum')->unique()->nullable();
             $table->text('address')->nullable();
             $table->text('city')->nullable();
-            $table->int('postcode')->nullable();
+            $table->integer('postcode')->nullable();
             $table->tinyText('state')->nullable();
             $table->string('eme_name')->nullable();
-            $table->int('emephoneNum')->unique();
+            $table->integer('emephoneNum')->unique()->nullable();
             $table->tinyText('emerelation')->nullable();
             $table->tinyText('bankName')->nullable();
-            $table->longint('accountNum')->nullable();
+            $table->bigInteger('accountNum')->nullable();
 
             $table->timestamps();
         });
