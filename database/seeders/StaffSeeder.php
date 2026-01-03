@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\Staff;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -15,16 +15,14 @@ class StaffSeeder extends Seeder
     public function run(): void
     {
         // Create or update staff user
-        User::updateOrCreate(
-            ['email' => 'staff@hasta.com'],
+        Staff::updateOrCreate(
             [
                 'name' => 'Staff User',
                 'email' => 'staff@hasta.com',
                 'password' => Hash::make('password'),
-                'role' => 'staff',
-                'matric_number' => 'STAFF001',
-                'faculty' => 'Administration',
-                'email_verified_at' => now(),
+                'position' => 'staff',
+                'staffID' => 'STAFF001',
+                //'email_verified_at' => now(),
             ]
         );
     }
