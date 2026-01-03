@@ -109,9 +109,12 @@
             <div class="font-mono font-bold text-lg bg-gray-100 p-3 rounded-lg border border-dashed border-gray-400 mb-6" id="modalCode"></div>
             
             <div class="space-y-3">
-                <button onclick="window.location.href='{{ route('reward.customer') }}'" class="w-full py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700">
-                    Done
-                </button>
+            <button 
+                onclick="window.location.href='/rewards/claimed'" 
+                class="w-full py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700"
+            >
+                Done
+            </button>
                 <button onclick="document.getElementById('rewardModal').classList.add('hidden')" class="w-full py-2 text-gray-500 text-sm">
                     Close
                 </button>

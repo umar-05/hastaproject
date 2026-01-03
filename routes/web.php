@@ -49,6 +49,10 @@ Route::middleware(['auth:customer', 'verified'])->group(function () {
     return view('reward.customer');
 })->name('reward.customer');
 
+    Route::get('/rewards/my-claimed', function () {
+        return view('rewards.claimed'); // This looks for resources/views/rewards/claimed.blade.php
+    })->name('rewards.claimed')->middleware(['auth:customer', 'verified']);
+
     // The route the "Claim" button is looking for
     Route::get('/rewards/claimed', [RewardController::class, 'claimed'])->name('rewards.claimed');
     

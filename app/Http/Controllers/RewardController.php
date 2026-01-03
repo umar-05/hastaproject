@@ -22,9 +22,9 @@ class RewardController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function showClaimed()
+    public function claimed()
     {
-        return view('reward.my-rewards');
+        return view('reward.claimed');
     }
 
     /**
