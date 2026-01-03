@@ -17,20 +17,20 @@ return new class extends Migration
             $table->id('matricNum');
 
             $table->string('faculty');
-            $table->text('collegeAddress');
+            $table->text('collegeAddress')->nullable();
             $table->string('name');
-            $table->string('email');
+            $table->string('email')->unique();
             $table->string('password');
-            $table->longint('phoneNum');
-            $table->string('icNum');
-            $table->text('address');
-            $table->int('postcode');
-            $table->tinyText('state');
-            $table->string('eme_name');
-            $table->int('emephoneNum');
-            $table->tinyText('emerelation');
-            $table->tinyText('bankName');
-            $table->longint('accountNum');
+            $table->longint('phoneNum')->nullable();
+            $table->string('icNum')->unique();
+            $table->text('address')->nullable();
+            $table->int('postcode')->nullable();
+            $table->tinyText('state')->nullable();
+            $table->string('eme_name')->nullable();
+            $table->int('emephoneNum')->unique();
+            $table->tinyText('emerelation')->nullable();
+            $table->tinyText('bankName')->nullable();
+            $table->longint('accountNum')->nullable();
 
 
             $table->timestamps();
