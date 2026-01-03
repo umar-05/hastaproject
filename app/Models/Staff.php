@@ -37,5 +37,27 @@ class Staff extends Model
         'accountNum',
         'reward_points',
     ];
-];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    public function getAuthIdentifierName()
+    {
+        return 'email';
+    }
+
+    /**
+     * The attributes that should be cast.
+     */
+    protected $casts = [
+        'phoneNum'   => 'integer',
+        'postcode'   => 'integer',
+        'emephoneNum'=> 'integer',
+        'accountNum' => 'integer',
+    ];
 }

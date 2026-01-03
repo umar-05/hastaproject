@@ -155,9 +155,7 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
         
-        // Auth::login($user); // Uncomment if you want auto-login
-
-        return redirect(route('login'))->with('success', 'You have signed up!');
+        return redirect()->route('login')->with('success', 'Registration successful! Please log in with your credentials.');
     }
 
     

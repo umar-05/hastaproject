@@ -3,46 +3,54 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable; // Import this to allow login
+use Illuminate\Notifications\Notifiable;
 
-class Customer extends Model
+// FIX: Extend Authenticatable instead of Model so Auth::guard('customer') works
+class Customer extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
-<<<<<<< HEAD
-    // Fix: Match the table name from your migration ('customers')
-    protected $table = 'customers';
+    // FIX: Use the plural table name to match standard migrations
+    protected $table = 'customers'; 
+    
+    // FIX: Define the custom primary key
     protected $primaryKey = 'customer_id';
 
+    // FIX: Consolidate the fillable array (I kept the detailed list)
     protected $fillable = [
-    'name', 'email', 'password', 'phone_no', 'matric_no', 'faculty', 'ic_no',
-    'address', 'city', 'postcode', 'state',
-    'college_address',
-    'emergency_contact_name',
-    'emergency_no',
-    'emergency_relation',
-    'bank_name',
-    'account_no',
-];
-=======
-    protected $table = 'customer';
-    protected $primaryKey = 'customer_id';
-
-    protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        // Add other customer fields as needed
+        'name', 
+        'email', 
+        'password', 
+        'phone_no',    // Make sure your DB column is 'phone_no' (not 'phone')
+        'matric_no', 
+        'faculty', 
+        'ic_no',
+        'address', 
+        'city', 
+        'postcode', 
+        'state',
+        'college_address',
+        'emergency_contact_name',
+        'emergency_no',
+        'emergency_relation',
+        'bank_name', 
+        'account_no',
     ];
->>>>>>> 70121e02d2d3f927f477f3a9e7d072e011e11e51
+
+    // Added to hide sensitive data when converting to array/JSON
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    // Added to ensure password hashing works correctly in newer Laravel versions
+    protected $casts = [
+        'password' => 'hashed',
+    ];
 
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'customer_id', 'customer_id');
     }
-<<<<<<< HEAD
 }
-=======
-}
-
->>>>>>> 70121e02d2d3f927f477f3a9e7d072e011e11e51
