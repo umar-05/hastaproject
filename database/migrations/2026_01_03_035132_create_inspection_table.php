@@ -12,7 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inspection', function (Blueprint $table) {
-            $table->id();
+            $table->id('inspectionID');
+
+            $table->string('vehiclePhotos');
+            $table->double('mileage');
+            $table->string('fuelImage');
+            $table->double('fuelBar');
+            $table->dateTime('dateOut');
+            $table->dateTime('time');
+            $table->string('pic');
+            $table->string('remark');
+
             $table->timestamps();
         });
     }
