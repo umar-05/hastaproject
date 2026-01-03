@@ -19,7 +19,7 @@
     </div>
 
     <nav class="hidden md:flex items-center space-x-8 font-medium">
-        <a href="{{ route('book-now') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
+        <a href="{{ route('vehicles.index') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
             Book Now
         </a>
 
@@ -71,7 +71,7 @@
     <p class="text-sm md:text-base opacity-90 mb-8 max-w-md drop-shadow-md">
         We believe your rental car should enhance your trip, not just be a part of it. Our fleet delivers a premium driving experience.
     </p>
-    <a href="{{ route('book-now') }}">
+    <a href="{{ route('vehicles.index') }}">
     <button class="bg-hasta-yellow hover:bg-amber-500 text-black font-bold py-3 px-8 rounded-md transition shadow-lg">
         View all cars
     </button>
@@ -106,7 +106,7 @@
         <section class="mb-20">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-extrabold max-w-xs">Choose the car that suits you</h2>
-                <a href="{{ route('book-now') }}" class="text-gray-900 font-bold flex items-center hover:text-hasta-red transition">
+                <a href="{{ route('vehicles.index') }}" class="text-gray-900 font-bold flex items-center hover:text-hasta-red transition">
                     View All <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                 </a>
             </div>
