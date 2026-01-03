@@ -3,7 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+<<<<<<< Updated upstream
 use Illuminate\Foundation\Auth\User as Authenticatable; // Import this to allow login
+=======
+use Illuminate\Foundation\Auth\User as Authenticatable;
+>>>>>>> Stashed changes
 use Illuminate\Notifications\Notifiable;
 
 // FIX: Extend Authenticatable instead of Model so Auth::guard('customer') works
@@ -40,7 +44,6 @@ class Customer extends Authenticatable
 
     // Added to hide sensitive data when converting to array/JSON
     protected $hidden = [
-        'password',
         'remember_token',
     ];
 
