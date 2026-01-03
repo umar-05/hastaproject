@@ -16,6 +16,7 @@ class Booking extends Model
         'matricNum',
         'plateNumber',
         'rewardID',
+        'destination',
         'pickupDate',
         'returnDate',
         'pickupLoc',

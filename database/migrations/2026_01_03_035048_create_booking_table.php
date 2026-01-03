@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('booking', function (Blueprint $table) {
             $table->string('bookingID')->primary();
             
+            $table->string('destination')->nullable();
             $table->dateTime('pickupDate')->nullable();
             $table->dateTime('returnDate')->nullable();
             $table->string('pickupLoc')->nullable();

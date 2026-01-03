@@ -22,7 +22,7 @@ class Staff extends Authenticatable
         'email',
         'password',
         'phoneNum',
-        'icNum',
+        'icNum_passport',
         'address',
         'city',
         'postcode',

@@ -62,11 +62,12 @@ Route::middleware(['auth:customer', 'verified'])->group(function () {
 Route::middleware(['auth:staff'])->prefix('staff')->name('staff.')->group(function () {
     
     // Staff Dashboard (This was causing the loop!)
-    Route::get('/dashboard', function () {
-        return view('dashboard'); 
-    })->name('dashboard');
+    Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
     Route::get('/staff/rewards', [StaffController::class, 'rewards'])->name('staff.rewards');
+
+    Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
+    Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
 
     // Staff Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
