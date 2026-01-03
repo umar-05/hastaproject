@@ -14,9 +14,7 @@ class RewardController extends Controller
      */
     public function index()
     {
-        // In real app: fetch user's stamps from DB
-        // For demo, we'll pass dummy data or let frontend handle it
-        return view('rewards.customer');
+        return view('reward.customer');
     }
 
     /**
@@ -26,13 +24,7 @@ class RewardController extends Controller
      */
     public function showClaimed()
     {
-        // In a real app, you'd fetch from the database:
-        // $claimedRewards = Auth::user()->claimedRewards;
-
-        // For now, we'll pass an empty array — the frontend will load from localStorage
-        // (or later you can replace this with real DB data)
-
-        return view('rewards.my-rewards');
+        return view('reward.my-rewards');
     }
 
     /**
@@ -49,9 +41,6 @@ class RewardController extends Controller
             'title' => 'required|string',
             'description' => 'required|string',
         ]);
-
-        // Example: Save to claimed_rewards table
-        // Auth::user()->claimedRewards()->create($request->only('code', 'title', 'description'));
 
         return response()->json(['success' => true, 'message' => 'Reward claimed!']);
     }
