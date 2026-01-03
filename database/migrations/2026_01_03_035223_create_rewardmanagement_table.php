@@ -12,12 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('rewardmanagement', function (Blueprint $table) {
-            $table->id('staffID');
-            $table->id('rewardID');
-
             $table->foreignId('staffID')->constrained(table: 'staff', column: 'staffID');
             $table->foreignId('rewardID')->constrained(table: 'reward', column: 'rewardID');
 
+            $table->primary(['staffID', 'rewardID']);
             $table->timestamps();
         });
     }
