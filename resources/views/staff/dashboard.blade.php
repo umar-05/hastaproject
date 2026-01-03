@@ -1,86 +1,303 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Staff Dashboard') }}
-        </h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+<x-staff-layout>
+    {{-- Main Content Wrapper --}}
+    <div class="py-6 bg-gray-50 min-h-screen font-poppins">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- Welcome Message --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6 text-gray-900">
-                    {{ __("Welcome back, ") }} <span class="font-bold text-hasta-red">{{ Auth::guard('staff')->user()->name }}</span>!
-                    <br>
-                    <span class="text-sm text-gray-500">Staff ID: {{ Auth::guard('staff')->user()->staffID }}</span>
+            {{-- PAGE HEADER --}}
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="font-bold text-2xl text-gray-800 tracking-tight">
+                    DASHBOARD
+                </h2>
+                {{-- Date/Time Display (Optional Touch) --}}
+                <div class="text-sm text-gray-500 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
+                    {{ now()->format('l, d M Y') }}
                 </div>
             </div>
 
-            {{-- Quick Actions Grid --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {{-- 1. TOP METRICS CARDS --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                
+                {{-- Card 1: Manage Booking --}}
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center hover:shadow-md transition">
+                    <div class="p-4 rounded-xl bg-red-50 text-hasta-red">
+                        {{-- Calendar Icon --}}
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5">
+                        <h4 class="text-3xl font-bold text-gray-800">5</h4>
+                        <p class="text-sm text-gray-500 font-medium">Manage Booking</p>
+                    </div>
+                </div>
 
-                {{-- Card 1: Manage Profile --}}
-                <a href="{{ route('staff.profile.edit') }}" class="block group">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition duration-200 border-l-4 border-transparent hover:border-hasta-red h-full">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-red-100 text-hasta-red group-hover:bg-red-200 transition">
-                                    {{-- User Icon --}}
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                </div>
-                                <div class="ml-4">
-                                    <h3 class="text-lg font-semibold text-gray-800">My Profile</h3>
-                                    <p class="text-sm text-gray-500 mt-1">Update email, name & password</p>
-                                </div>
+                {{-- Card 2: Pickup Today --}}
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center hover:shadow-md transition">
+                    <div class="p-4 rounded-xl bg-gray-50 text-gray-600">
+                        {{-- Car Icon --}}
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" /> {{-- Simple Arrow Up Icon for pickup --}}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5">
+                        <h4 class="text-3xl font-bold text-gray-800">2</h4>
+                        <p class="text-sm text-gray-500 font-medium">Pickup Today</p>
+                    </div>
+                </div>
+
+                {{-- Card 3: Return Today --}}
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center hover:shadow-md transition">
+                    <div class="p-4 rounded-xl bg-gray-50 text-gray-600">
+                        {{-- Refresh/Return Icon --}}
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </div>
+                    <div class="ml-5">
+                        <h4 class="text-3xl font-bold text-gray-800">10</h4>
+                        <p class="text-sm text-gray-500 font-medium">Return Today</p>
+                    </div>
+                </div>
+
+            </div>
+
+            {{-- 2. MIDDLE SECTION: Charts & Availability --}}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                
+                {{-- LEFT: Recent Bookings Chart --}}
+                <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-semibold text-lg text-gray-800">Recent Bookings</h3>
+                        <select class="text-sm border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 text-gray-500">
+                            <option>Weekly</option>
+                            <option>Monthly</option>
+                        </select>
+                    </div>
+
+                    {{-- Chart Container --}}
+                    <div class="relative h-64 w-full">
+                        
+                        {{-- Y-Axis Grid Lines (Optional background lines) --}}
+                        <div class="absolute inset-0 flex flex-col justify-between text-xs text-gray-300 pointer-events-none">
+                            <div class="border-b border-gray-100 h-0 w-full"></div>
+                            <div class="border-b border-gray-100 h-0 w-full"></div>
+                            <div class="border-b border-gray-100 h-0 w-full"></div>
+                            <div class="border-b border-gray-100 h-0 w-full"></div>
+                            <div class="border-b border-gray-100 h-0 w-full"></div>
+                        </div>
+
+                        {{-- Chart Bars & Axes --}}
+                        <div class="relative h-full flex items-end justify-between pl-6 pb-6">
+                            
+                            {{-- Y-Axis Labels --}}
+                            <div class="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 pb-6">
+                                <span>12</span>
+                                <span>9</span>
+                                <span>6</span>
+                                <span>3</span>
+                                <span>0</span>
+                            </div>
+
+                            {{-- Bar 1 --}}
+                            <div class="w-full flex flex-col items-center group">
+                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 10%;"></div>
+                                <span class="text-xs text-gray-400 mt-3">1 Jan</span>
+                            </div>
+
+                            {{-- Bar 2 (High) --}}
+                            <div class="w-full flex flex-col items-center group">
+                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 80%;"></div>
+                                <span class="text-xs text-gray-400 mt-3">2 Jan</span>
+                            </div>
+
+                            {{-- Bar 3 --}}
+                            <div class="w-full flex flex-col items-center group">
+                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 0%;"></div>
+                                <span class="text-xs text-gray-400 mt-3">3 Jan</span>
+                            </div>
+
+                            {{-- Bar 4 --}}
+                            <div class="w-full flex flex-col items-center group">
+                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 60%;"></div>
+                                <span class="text-xs text-gray-400 mt-3">4 Jan</span>
+                            </div>
+
+                            {{-- Bar 5 --}}
+                            <div class="w-full flex flex-col items-center group">
+                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 45%;"></div>
+                                <span class="text-xs text-gray-400 mt-3">5 Jan</span>
+                            </div>
+
+                            {{-- Bar 6 --}}
+                            <div class="w-full flex flex-col items-center group">
+                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 0%;"></div>
+                                <span class="text-xs text-gray-400 mt-3">6 Jan</span>
+                            </div>
+
+                            {{-- Bar 7 --}}
+                            <div class="w-full flex flex-col items-center group">
+                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 20%;"></div>
+                                <span class="text-xs text-gray-400 mt-3">7 Jan</span>
+                            </div>
+
+                            {{-- Bar 8 (Highest) --}}
+                            <div class="w-full flex flex-col items-center group">
+                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 95%;"></div>
+                                <span class="text-xs text-gray-400 mt-3">8 Jan</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                    {{-- CSS Only Bar Chart Representation --}}
+                    <div class="relative h-64 flex items-end justify-between px-4 pb-6 border-b border-gray-100 space-x-4">
+                        {{-- Y-Axis Labels --}}
+                        <div class="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 -ml-6">
+                            <span>12</span><span>9</span><span>6</span><span>3</span><span>0</span>
+                        </div>
+
+                        {{-- Bar 1 --}}
+                        <div class="w-full flex flex-col items-center group">
+                            <div class="w-full max-w-[40px] bg-red-100 rounded-t-sm h-[0%] group-hover:h-[20%] transition-all duration-500 relative"></div>
+                            <span class="text-xs text-gray-400 mt-2">1 Jan</span>
+                        </div>
+                        {{-- Bar 2 (High) --}}
+                        <div class="w-full flex flex-col items-center group">
+                            <div class="w-full max-w-[40px] bg-hasta-red rounded-t-sm h-[70%] relative group-hover:opacity-80 transition"></div>
+                            <span class="text-xs text-gray-400 mt-2">2 Jan</span>
+                        </div>
+                        {{-- Bar 3 --}}
+                        <div class="w-full flex flex-col items-center group">
+                            <div class="w-full max-w-[40px] bg-red-100 rounded-t-sm h-[0%] transition-all"></div>
+                            <span class="text-xs text-gray-400 mt-2">3 Jan</span>
+                        </div>
+                        {{-- Bar 4 (Med) --}}
+                        <div class="w-full flex flex-col items-center group">
+                            <div class="w-full max-w-[40px] bg-hasta-red rounded-t-sm h-[60%] relative group-hover:opacity-80 transition"></div>
+                            <span class="text-xs text-gray-400 mt-2">4 Jan</span>
+                        </div>
+                         {{-- Bar 5 --}}
+                        <div class="w-full flex flex-col items-center group">
+                            <div class="w-full max-w-[40px] bg-red-100 rounded-t-sm h-[0%] transition-all"></div>
+                            <span class="text-xs text-gray-400 mt-2">5 Jan</span>
+                        </div>
+                        {{-- Bar 6 (Low) --}}
+                        <div class="w-full flex flex-col items-center group">
+                            <div class="w-full max-w-[40px] bg-hasta-red rounded-t-sm h-[40%] relative group-hover:opacity-80 transition"></div>
+                            <span class="text-xs text-gray-400 mt-2">6 Jan</span>
+                        </div>
+                        {{-- Bar 7 --}}
+                        <div class="w-full flex flex-col items-center group">
+                            <div class="w-full max-w-[40px] bg-red-100 rounded-t-sm h-[0%] transition-all"></div>
+                            <span class="text-xs text-gray-400 mt-2">7 Jan</span>
+                        </div>
+                         {{-- Bar 8 (Highest) --}}
+                        <div class="w-full flex flex-col items-center group">
+                            <div class="w-full max-w-[40px] bg-hasta-red rounded-t-sm h-[90%] relative group-hover:opacity-80 transition"></div>
+                            <span class="text-xs text-gray-400 mt-2">8 Jan</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- RIGHT: Car Availability Check --}}
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-semibold text-lg text-gray-800 mb-6">Car Availability</h3>
+                    
+                    <form action="#" class="space-y-4">
+                        {{-- Car ID Select --}}
+                        <div>
+                            <select class="w-full border-gray-200 rounded-lg text-gray-600 focus:border-red-500 focus:ring-red-200 py-3">
+                                <option>Select Car ID</option>
+                                <option>P001 - Proton Saga</option>
+                                <option>H002 - Honda City</option>
+                            </select>
+                        </div>
+
+                        {{-- Date 1 --}}
+                        <div>
+                            <input type="date" class="w-full border-gray-200 rounded-lg text-gray-600 focus:border-red-500 focus:ring-red-200 py-3">
+                        </div>
+
+                        {{-- Date 2 --}}
+                        <div>
+                            <input type="date" class="w-full border-gray-200 rounded-lg text-gray-600 focus:border-red-500 focus:ring-red-200 py-3">
+                        </div>
+
+                        <button class="w-full bg-hasta-red hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow-md transition duration-200 mt-4">
+                            CHECK
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- 3. BOTTOM SECTION: Car Types & Status --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {{-- Car Type Progress Bars --}}
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-semibold text-lg text-gray-800 mb-6">Car Type</h3>
+                    
+                    <div class="space-y-6">
+                        {{-- Item 1 --}}
+                        <div>
+                            <div class="flex justify-between text-sm font-medium text-gray-600 mb-1">
+                                <span>Proton Alza</span>
+                                <span>75%</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5">
+                                <div class="bg-black h-2.5 rounded-full" style="width: 75%"></div>
+                            </div>
+                        </div>
+
+                        {{-- Item 2 --}}
+                        <div>
+                            <div class="flex justify-between text-sm font-medium text-gray-600 mb-1">
+                                <span>Sedan</span>
+                                <span>60%</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5">
+                                <div class="bg-black h-2.5 rounded-full" style="width: 60%"></div>
+                            </div>
+                        </div>
+
+                        {{-- Item 3 --}}
+                        <div>
+                            <div class="flex justify-between text-sm font-medium text-gray-600 mb-1">
+                                <span>SUV</span>
+                                <span>30%</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5">
+                                <div class="bg-black h-2.5 rounded-full" style="width: 30%"></div>
                             </div>
                         </div>
                     </div>
-                </a>
+                </div>
 
-                {{-- Card 2: Pickup & Return --}}
-                <a href="{{ route('staff.pickup-return') }}" class="block group">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition duration-200 border-l-4 border-transparent hover:border-hasta-red h-full">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-200 transition">
-                                    {{-- Car Icon --}}
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                                    </svg>
-                                </div>
-                                <div class="ml-4">
-                                    <h3 class="text-lg font-semibold text-gray-800">Pickup & Return</h3>
-                                    <p class="text-sm text-gray-500 mt-1">Manage vehicle handovers</p>
-                                </div>
-                            </div>
+                {{-- Booking Status Legend --}}
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-semibold text-lg text-gray-800 mb-6">Booking Status</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-gray-300 mr-3"></span>
+                            <span class="text-gray-600 font-medium">Cancelled (25%)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-hasta-red mr-3"></span>
+                            <span class="text-gray-600 font-medium">Booked (60%)</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-yellow-400 mr-3"></span>
+                            <span class="text-gray-600 font-medium">Pending (15%)</span>
                         </div>
                     </div>
-                </a>
 
-                {{-- Card 3: Add New Staff --}}
-                <a href="{{ route('staff.add-staff') }}" class="block group">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition duration-200 border-l-4 border-transparent hover:border-hasta-red h-full">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-green-100 text-green-600 group-hover:bg-green-200 transition">
-                                    {{-- Plus Icon --}}
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                                    </svg>
-                                </div>
-                                <div class="ml-4">
-                                    <h3 class="text-lg font-semibold text-gray-800">Add Staff</h3>
-                                    <p class="text-sm text-gray-500 mt-1">Register new team members</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
+                    {{-- Optional: Small decorative pie chart circle could go here --}}
+                </div>
 
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-staff-layout>

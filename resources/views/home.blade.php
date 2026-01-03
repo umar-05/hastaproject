@@ -20,7 +20,7 @@
             
             <div class="relative z-10 max-w-xl">
                 <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6 drop-shadow-lg">
-                        Experience the road like never before
+                    Experience the road like never before
                 </h1>
                 <p class="text-sm md:text-base opacity-90 mb-8 max-w-md drop-shadow-md">
                     We believe your rental car should enhance your trip, not just be a part of it. Our fleet delivers a premium driving experience.

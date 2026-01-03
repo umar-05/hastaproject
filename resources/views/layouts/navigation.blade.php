@@ -10,9 +10,7 @@
         @else
             <a href="{{ route('home') }}">
         @endif
-            <div class="border-2 border-hasta-red px-2 py-1 rounded-sm">
-                <span class="text-2xl font-bold text-hasta-red">HASTA</span>
-            </div>
+            <img src="{{ asset('images/HASTALOGO.svg') }}" alt="HASTA Logo" class="h-10 w-auto">
         </a>
     </div>
 
