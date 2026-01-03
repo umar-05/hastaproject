@@ -12,9 +12,7 @@
         @else
             <a href="{{ route('home') }}">
         @endif
-            <div class="border-2 border-hasta-red px-2 py-1 rounded-sm">
-                <span class="text-2xl font-bold text-hasta-red">HASTA</span>
-            </div>
+            <img src="{{ asset('images/HASTALOGO.svg') }}" alt="HASTA Logo" class="h-10 w-auto">
         </a>
     </div>
 
@@ -59,19 +57,19 @@
             </a>
 
         @else
-            <a href="{{ route('vehicles.index') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
+            <a href="{{ route('login') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
                 Book Now
             </a>
 
-            <a href="{{ route('bookings.index') }}" class="text-gray-700 hover:text-hasta-red transition">
+            <a href="{{ route('login') }}" class="text-gray-700 hover:text-hasta-red transition">
                 Bookings
             </a>
 
-            <a href="{{ route('rewards.index') }}" class="text-gray-700 hover:text-hasta-red transition">
+            <a href="{{ route('login') }}" class="text-gray-700 hover:text-hasta-red transition">
                 Rewards
             </a>
 
-            <a href="{{ route('faq') }}" class="text-gray-700 hover:text-hasta-red transition">
+            <a href="{{ route('login') }}" class="text-gray-700 hover:text-hasta-red transition">
                 FAQ
             </a>
         @endauth
