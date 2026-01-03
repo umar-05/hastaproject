@@ -26,7 +26,7 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <h1 class="text-3xl font-bold mb-2">Booking Details</h1>
-                        <p class="text-red-100">Booking ID: #{{ $booking->booking_id }}</p>
+                        <p class="text-red-100">Booking ID: #{{ $booking->bookingID }}</p>
                     </div>
                     <span class="px-4 py-2 rounded-full text-sm font-semibold bg-white
                         @if($booking->booking_stat === 'confirmed') text-green-800
@@ -34,7 +34,7 @@
                         @elseif($booking->booking_stat === 'completed') text-blue-800
                         @else text-red-800
                         @endif">
-                        {{ ucfirst($booking->booking_stat) }}
+                        {{ ucfirst($booking->bookingStat) }}
                     </span>
                 </div>
             </div>
@@ -47,9 +47,9 @@
                     
                     if ($booking->fleet) {
                         $fleet = $booking->fleet;
-                        $vehicleName = $fleet->model_name . ($fleet->year ? ' ' . $fleet->year : '');
+                        $vehicleName = $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : '');
                         
-                        $modelName = strtolower($fleet->model_name);
+                        $modelName = strtolower($fleet->modelName);
                         $year = $fleet->year ?? 0;
                         
                         if (strpos($modelName, 'axia') !== false) {
@@ -125,11 +125,11 @@
                         </div>
                         <div class="bg-gray-50 p-6 rounded-lg">
                             <p class="text-gray-500 text-sm mb-2">Pick Up Location</p>
-                            <p class="font-semibold">{{ $booking->pickup_loc }}</p>
+                            <p class="font-semibold">{{ $booking->pickupLoc }}</p>
                         </div>
                         <div class="bg-gray-50 p-6 rounded-lg">
                             <p class="text-gray-500 text-sm mb-2">Return Location</p>
-                            <p class="font-semibold">{{ $booking->return_loc }}</p>
+                            <p class="font-semibold">{{ $booking->returnLoc }}</p>
                         </div>
                     </div>
                 </div>
@@ -140,7 +140,7 @@
                     <div class="bg-gray-50 rounded-lg p-6 space-y-4">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Base Price</span>
-                            <span class="font-semibold">RM{{ number_format($booking->base_price, 2) }}</span>
+                            <span class="font-semibold">RM{{ number_format($booking->totalPrice, 2) }}</span>
                         </div>
                         @if($booking->discount > 0)
                         <div class="flex justify-between text-green-600">
@@ -156,7 +156,7 @@
                         @endif
                         <div class="border-t pt-4 flex justify-between items-center">
                             <span class="text-lg font-bold">Total Amount</span>
-                            <span class="text-2xl font-bold text-hasta-red">RM{{ number_format($booking->total_price, 2) }}</span>
+                            <span class="text-2xl font-bold text-hasta-red">RM{{ number_format($booking->totalPrice, 2) + 50 }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Payment Status</span>
@@ -184,7 +184,7 @@
                         Back to Bookings
                     </a>
                     @if($booking->booking_stat !== 'completed' && $booking->booking_stat !== 'cancelled')
-                        <form action="{{ route('bookings.cancel', $booking->booking_id) }}" 
+                        <form action="{{ route('bookings.cancel', $booking->bookingID) }}" 
                               method="POST" 
                               onsubmit="return confirm('Are you sure you want to cancel this booking?');"
                               class="inline">

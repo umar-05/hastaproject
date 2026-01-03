@@ -181,7 +181,7 @@
                                 </a>
                                 
                                 @if(($booking->bookingStat ?? $booking->booking_stat) !== 'completed' && ($booking->bookingStat ?? $booking->booking_stat) !== 'cancelled')
-                                    <form action="{{ route('bookings.cancel', $booking->bookingID ?? $booking->booking_id) }}" 
+                                    <form action="{{ route('bookings.cancel', $booking->bookingID) }}" 
                                           method="POST" 
                                           onsubmit="return confirm('Are you sure you want to cancel this booking?');"
                                           class="inline">
