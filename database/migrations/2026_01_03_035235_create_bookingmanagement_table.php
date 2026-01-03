@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('bookingmanagement', function (Blueprint $table) {
-            $table->foreignID('bookingID')->constrained(table: 'booking', column: 'bookingID');
+
+            $table->string('bookingID');
+            $table->foreign('bookingID')->references('bookingID')->on('booking');
+
             $table->string('staffID');
             $table->foreign('staffID')->references('staffID')->on('staff');
 

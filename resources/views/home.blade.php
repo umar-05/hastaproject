@@ -19,19 +19,83 @@
             <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none opacity-30 md:opacity-100 mix-blend-overlay" style="background-image: url('{{ asset('images/herocar.png') }}');"></div>
             
             <div class="relative z-10 max-w-xl">
-    <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6 drop-shadow-lg">
-        Experience the road like never before
-    </h1>
-    <p class="text-sm md:text-base opacity-90 mb-8 max-w-md drop-shadow-md">
-        We believe your rental car should enhance your trip, not just be a part of it. Our fleet delivers a premium driving experience.
-    </p>
-    <a href="{{ route('vehicles.index') }}">
-    <button class="bg-hasta-yellow hover:bg-amber-500 text-black font-bold py-3 px-8 rounded-md transition shadow-lg">
-        View all cars
-    </button>
-    </a>
-</div>
+                <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6 drop-shadow-lg">
+                        Experience the road like never before
+                </h1>
+                <p class="text-sm md:text-base opacity-90 mb-8 max-w-md drop-shadow-md">
+                    We believe your rental car should enhance your trip, not just be a part of it. Our fleet delivers a premium driving experience.
+                </p>
+                <a href="{{ route('vehicles.index') }}">
+                    <button class="bg-hasta-yellow hover:bg-amber-500 text-black font-bold py-3 px-8 rounded-md transition shadow-lg">
+                        View all cars
+                    </button>
+                </a>
+            </div>
         </section>
+
+        {{-- FIX 2: Active Booking Dashboard Section --}}
+        {{-- This only shows if the Controller passed $activeBooking and it is not null --}}
+        @if(isset($activeBooking) && $activeBooking)
+        <section class="mb-16 bg-gray-50 p-8 rounded-3xl border border-gray-100 shadow-sm">
+            <div class="flex justify-between items-center mb-6">
+                 <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-hasta-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Your Active Trip
+                 </h2>
+                 <span class="bg-green-100 text-green-800 px-4 py-1 rounded-full text-sm font-bold uppercase tracking-wide">
+                    {{ $activeBooking->bookingStat }}
+                 </span>
+            </div>
+            
+            <div class="flex flex-col md:flex-row items-center gap-8 bg-white p-6 rounded-2xl shadow-sm">
+                <div class="w-full md:w-1/3">
+                     {{-- Generic car image or dynamic if available --}}
+                    <img src="{{ asset('images/herocar.png') }}" alt="Current Car" class="w-full h-auto object-contain transform scale-x-[-1]">
+                </div>
+                
+                <div class="w-full md:w-2/3">
+                    <div class="mb-4">
+                        <h3 class="text-3xl font-extrabold text-gray-900">
+                            {{ $activeBooking->fleet->brand ?? 'Car' }} {{ $activeBooking->fleet->model ?? 'Model' }}
+                        </h3>
+                        <p class="text-gray-500 font-mono text-sm tracking-wider uppercase">
+                            {{ $activeBooking->fleet->plateNumber ?? 'Unknown Plate' }}
+                        </p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-8 border-t border-b border-gray-100 py-4">
+                        <div>
+                            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Pickup</p>
+                            <p class="font-bold text-lg text-gray-800">
+                                {{ \Carbon\Carbon::parse($activeBooking->pickupDate)->format('d M Y') }}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                {{ \Carbon\Carbon::parse($activeBooking->pickupTime)->format('h:i A') }}
+                            </p>
+                        </div>
+                         <div>
+                            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Return</p>
+                            <p class="font-bold text-lg text-gray-800">
+                                {{ \Carbon\Carbon::parse($activeBooking->returnDate)->format('d M Y') }}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                {{ \Carbon\Carbon::parse($activeBooking->returnTime)->format('h:i A') }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <a href="{{ route('bookings.show', $activeBooking->bookingID) }}" class="inline-flex justify-center items-center w-full md:w-auto bg-black text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-800 transition">
+                        Manage Booking
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+        @endif
 
         <section class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center mb-20">
             <div class="flex flex-col items-center">
@@ -79,13 +143,15 @@
                         </div>
                     </div>
                     <div class="flex space-x-4 text-gray-500 text-sm mb-6">
-                        <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg> Automatic</span>
+                        <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg> Auto</span>
                         <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> RON 95</span>
-                         <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg> Air Conditioner</span>
+                         <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg> A/C</span>
                     </div>
+                    <a href="{{ route('vehicles.index') }}">
                     <button class="w-full bg-hasta-red hover:bg-hasta-redHover text-white font-bold py-3 rounded transition">
                         View Details
                     </button>
+                    </a>
                 </div>
 
                 <div class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6">
@@ -101,13 +167,15 @@
                         </div>
                     </div>
                      <div class="flex space-x-4 text-gray-500 text-sm mb-6">
-                        <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg> Automatic</span>
+                        <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg> Auto</span>
                         <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> RON 95</span>
-                         <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg> Air Conditioner</span>
+                         <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg> A/C</span>
                     </div>
+                    <a href="{{ route('vehicles.index') }}">
                     <button class="w-full bg-hasta-red hover:bg-hasta-redHover text-white font-bold py-3 rounded transition">
                         View Details
                     </button>
+                    </a>
                 </div>
 
                  <div class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6">
@@ -123,13 +191,15 @@
                         </div>
                     </div>
                      <div class="flex space-x-4 text-gray-500 text-sm mb-6">
-                        <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg> Automatic</span>
+                        <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg> Auto</span>
                         <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> RON 95</span>
-                         <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg> Air Conditioner</span>
+                         <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg> A/C</span>
                     </div>
+                    <a href="{{ route('vehicles.index') }}">
                     <button class="w-full bg-hasta-red hover:bg-hasta-redHover text-white font-bold py-3 rounded transition">
                         View Details
                     </button>
+                    </a>
                 </div>
             </div>
         </section>
@@ -163,7 +233,7 @@
                     <li><a href="#" class="hover:opacity-100">Contact us</a></li>
                     <li><a href="#" class="hover:opacity-100">Gallery</a></li>
                     <li><a href="#" class="hover:opacity-100">Blog</a></li>
-                    <li><a href="#" class="hover:opacity-100">F.A.Q</a></li>
+                    <li><a href="{{ route('faq') }}" class="hover:opacity-100">F.A.Q</a></li>
                 </ul>
             </div>
 

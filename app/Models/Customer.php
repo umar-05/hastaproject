@@ -3,46 +3,45 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable; // Changed to Authenticatable
+use Illuminate\Notifications\Notifiable;
 
-class Customer extends Model
+class Customer extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
-<<<<<<< HEAD
-    // Fix: Match the table name from your migration ('customers')
-    protected $table = 'customers';
-    protected $primaryKey = 'customer_id';
-
-    protected $fillable = [
-    'name', 'email', 'password', 'phone_no', 'matric_no', 'faculty', 'ic_no',
-    'address', 'city', 'postcode', 'state',
-    'college_address',
-    'emergency_contact_name',
-    'emergency_no',
-    'emergency_relation',
-    'bank_name',
-    'account_no',
-];
-=======
     protected $table = 'customer';
-    protected $primaryKey = 'customer_id';
+    protected $primaryKey = 'matricNum';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        // Add other customer fields as needed
+        'matricNum',
+        'name', 
+        'email', 
+        'password', 
+        'phoneNum',
+        'icNum',
+        'address', 
+        'city', 
+        'postcode', 
+        'state',
+        'collegeAddress',
+        'faculty',
+        'eme_name',
+        'emephoneNum',
+        'emerelation',
+        'bankName',
+        'accountNum',
     ];
->>>>>>> 70121e02d2d3f927f477f3a9e7d072e011e11e51
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
     public function bookings()
     {
-        return $this->hasMany(Booking::class, 'customer_id', 'customer_id');
+        return $this->hasMany(Booking::class, 'matricNum', 'matricNum');
     }
-<<<<<<< HEAD
 }
-=======
-}
-
->>>>>>> 70121e02d2d3f927f477f3a9e7d072e011e11e51

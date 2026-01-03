@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('customer', function (Blueprint $table) {
             
             // Primary Key
-            $table->id('matricNum');
+            $table->string('matricNum')->primary();
 
             $table->string('faculty');
             $table->text('collegeAddress')->nullable();
@@ -22,13 +22,13 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->bigInteger('phoneNum')->nullable();
-            $table->string('icNum')->unique();
+            $table->string('icNum')->unique()->nullable();
             $table->text('address')->nullable();
             $table->text('city')->nullable();
             $table->integer('postcode')->nullable();
             $table->tinyText('state')->nullable();
             $table->string('eme_name')->nullable();
-            $table->bigInteger('emephoneNum')->unique();
+            $table->bigInteger('emephoneNum')->unique()->nullable();
             $table->tinyText('emerelation')->nullable();
             $table->tinyText('bankName')->nullable();
             $table->bigInteger('accountNum')->nullable();
