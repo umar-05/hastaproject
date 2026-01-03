@@ -12,7 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('payment', function (Blueprint $table) {
-            $table->id();
+            $table->id('paymentID');
+            
+            $table->varchar('paymentStatus');
+            $table->varchar('method', 50);
+            $table->dateTime('paymentDate');
+            $table->decimal('discountedPrice', 10, 2);
+            $table->decimal('amount', 10, 2);
+            $table->decimal('grandTotal', 10, 2);
+            
+            $table->foreignId('bookingID')->constrained(table: 'booking', column: 'bookingID');
+
             $table->timestamps();
         });
     }
