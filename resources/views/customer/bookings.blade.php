@@ -20,11 +20,11 @@
         </div>
 
         <nav class="hidden md:flex items-center space-x-8 font-medium">
-            <a href="{{ route('vehicles.index') }}" class="text-gray-700 hover:text-hasta-red transition">
+            <a href="{{ route('vehicles.index') }}" class="bg-hasta-red text-white px-5 py-2 rounded-md font-bold transition shadow-md">
                 Book Now
             </a>
 
-            <a href="{{ route('bookings.index') }}" class="bg-hasta-red text-white px-5 py-2 rounded-md font-bold transition shadow-md">
+            <a href="{{ route('bookings.index') }}" class="text-gray-700 hover:text-hasta-red transition">
                 Bookings
             </a>
 

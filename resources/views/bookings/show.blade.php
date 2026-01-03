@@ -47,7 +47,7 @@
                     
                     if ($booking->fleet) {
                         $fleet = $booking->fleet;
-                        $vehicleName = $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : '');
+                        $vehicleName = $fleet->modelName;
                         
                         $modelName = strtolower($fleet->modelName);
                         $year = $fleet->year ?? 0;
