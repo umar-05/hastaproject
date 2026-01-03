@@ -139,7 +139,6 @@ class RegisteredUserController extends Controller
             'matric_number' => $request->matric_number,
             'faculty' => $request->faculty,
             'email' => $request->email,
-<<<<<<< Updated upstream
             'password' => Hash::make($request->password),
             'role' => 'customer', // Ensure role is set
         ]);
@@ -149,11 +148,9 @@ class RegisteredUserController extends Controller
         Customer::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password), // Storing password here too as per your migration
-            'matric_no' => $request->matric_number,       // Note: migration uses 'matric_no', User uses 'matric_number'
-=======
+            'password' => Hash::make($request->password),
+            'matric_no' => $request->matric_number,
             'password' => Hash::make(trim($request->password)),
->>>>>>> Stashed changes
             'faculty' => $request->faculty,
         ]);
 
