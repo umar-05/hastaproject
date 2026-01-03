@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('matricNum');
             $table->id('rewarID');
 
-            $table->dateTime(redemptionDate)
+            $table->dateTime(redemptionDate);
 
             $table->foreignId('matricNum')->constrained(table: 'customer', column: 'matricNum');
             $table->foreignId('rewardID')->constrained(table: 'reward', column: 'rewardID');
