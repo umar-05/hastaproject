@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/reward/my-rewards', [RewardController::class, 'showClaimed'])->name('rewards.claimed');
 });
 
+
 Route::middleware(['auth', 'staff'])->prefix('staff')->name('reward.')->group(function () {
     Route::get('/rewards', fn() => view('reward.index'))->name('index');        
     Route::get('/rewards/create', fn() => view('reward.reward'))->name('create');
@@ -106,6 +107,12 @@ Route::middleware('auth')->group(function () {
 
 // OCR route
 Route::post('/ocr/process', [OcrController::class, 'process'])->name('ocr.process');
+
+// Staff routes
+Route::middleware(['auth'])->prefix('staff')->group(function () {
+    Route::get('/fleet/{id}', [App\Http\Controllers\Staff\FleetController::class, 'show'])
+         ->name('staff.fleet.show');
+});
 
 // Registration route
 Route::post('/register/process-matric-card', [RegisteredUserController::class, 'processMatricCard'])
