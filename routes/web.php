@@ -66,6 +66,10 @@ Route::middleware(['auth:staff'])->prefix('staff')->name('staff.')->group(functi
     // Staff Dashboard
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
+    Route::get('/booking-management', function () {
+        return view('staff.bookingmanagement');
+    })->name('bookingsmanage'); 
+
     // Staff-Specific Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');

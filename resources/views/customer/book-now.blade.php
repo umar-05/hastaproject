@@ -78,7 +78,7 @@
                     </span>
                     @endif
                 </div>
-                <a href="{{ route('vehicles.show', $vehicle['id']) }}">
+                <a href="{{ route('vehicles.show', $vehicle ['id']) }}">
                     <button class="w-full bg-hasta-red hover:bg-hasta-redHover text-white font-bold py-3 rounded transition">
                         View Details
                     </button>
