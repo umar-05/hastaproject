@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('staff', function (Blueprint $table) {
             $table->string('staffID')->primary();
-            //$table->foreign('staffID')->references('staffID')->on('staffID');
 
             $table->string('position');
             $table->string('name');

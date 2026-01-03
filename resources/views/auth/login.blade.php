@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - HASTA</title>
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
@@ -301,7 +302,6 @@
 </head>
 <body>
     <!-- Main Content -->
-
     <div class="main-content">
         <div class="login-card">
             <!-- Logo -->
@@ -309,13 +309,19 @@
                 <img src="{{ asset('images/HASTALOGO.svg') }}" alt="HASTA Logo">
             </div>
 
+            @if ($errors->any())
+    <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 14px;">
+        @foreach ($errors->all() as $error)
+            <p>{{ $error }}</p>
+        @endforeach
+    </div>
+@endif
+
             <!-- Welcome Text -->
             <div class="welcome-text">
                 <h1>Welcome</h1>
                 <p>Sign in to your account to continue</p>
             </div>
-
-            
             
             <!-- Login Form -->
             <form class="login-form" method="POST" action="{{ route('login') }}">
@@ -362,31 +368,19 @@
                 <div class="form-options">
                     <a href="{{ route('password.request') }}" class="forgot-password">Forgot Password?</a>
                 </div>
-
                 <!-- Sign In Button -->
-                <button type="submit" class="signin-btn">Sign In</button>
-
+                <button type="submit" class="signin-btn">Sign In</button> 
+                </form>
                 <!-- Sign Up Link -->
                 <div class="signup-link">
                     Don't have an account? <a href="{{ route('register') }}">Sign Up</a>
                 </div>
-            </form>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@if (session('success'))
-    <script>
-        Swal.fire({
-            title: 'Success!',
-            text: "{{ session('success') }}",
-            icon: 'success',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#b91c1c'
-        });
-    </script>
-@endif
+
 
 @if (session('status'))
     <script>
@@ -405,5 +399,20 @@
 @endif
 
 
+@if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: 'Registration Successful!',
+                    text: "{{ session('success') }}", 
+                    icon: 'success',
+                    confirmButtonText: 'Login Now',
+                    confirmButtonColor: '#C84B43',
+                    background: '#fff',
+                    iconColor: '#C84B43'
+                });
+        });
+    </script>
+@endif
 </body>
 </html>

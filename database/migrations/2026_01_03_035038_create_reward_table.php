@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reward', function (Blueprint $table) {
-            $table->id('rewardID');
+            $table->string('rewardID')->primary();
 
             $table->tinyInteger('rewardPoints');
             $table->string('voucherCode');

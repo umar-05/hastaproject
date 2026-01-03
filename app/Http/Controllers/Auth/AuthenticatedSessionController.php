@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,18 +21,29 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $request->authenticate();
+        $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
 
-        $request->session()->regenerate();
-
-        // Redirect staff users to home page, regular users to dashboard
-        if (Auth::user()->role === 'staff') {
-            return redirect()->intended(route('home', absolute: false));
+        // 1. Try logging in as CUSTOMER
+        if (Auth::guard('customer')->attempt(['email' => $request->email, 'password' => $request->password], $request->boolean('remember'))) {
+            $request->session()->regenerate();
+            return redirect()->intended(route('home'));
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // 2. Try logging in as STAFF
+        if (Auth::guard('staff')->attempt(['email' => $request->email, 'password' => $request->password], $request->boolean('remember'))) {
+            $request->session()->regenerate();
+            return redirect()->intended(route('staff.dashboard'));
+        }
+
+        // 3. If both fail
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
     }
 
     /**
@@ -41,10 +51,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::guard('web')->logout();
+        // Log out whichever guard was active
+        if (Auth::guard('customer')->check()) {
+            Auth::guard('customer')->logout();
+        } elseif (Auth::guard('staff')->check()) {
+            Auth::guard('staff')->logout();
+        }
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');

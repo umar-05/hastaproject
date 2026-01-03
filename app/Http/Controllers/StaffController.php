@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Booking;
 use App\Models\Staff;
 use Illuminate\Http\Request;
@@ -71,25 +70,25 @@ class StaffController extends Controller
 
     /**
      * Display pickup/return page with dynamic data.
-     * (I removed the old static version and kept this new dynamic one)
      */
     public function pickupReturn(): View 
     {
         $today = Carbon::today();
 
-        // 1. Fetch Pickups: Scheduled for TODAY and status is 'confirmed' or 'pending'
+        // FIX: Updated to use camelCase column names (pickupDate, bookingStat)
+        
+        // 1. Fetch Pickups: Scheduled for TODAY
         $todayPickups = Booking::with(['fleet', 'customer'])
-            ->whereDate('pickup_date', $today)
-            ->whereIn('booking_stat', ['confirmed', 'pending']) 
-            ->orderBy('pickup_time', 'asc')
+            ->whereDate('pickupDate', $today)
+            ->whereIn('bookingStat', ['confirmed', 'pending']) 
+            ->orderBy('pickupDate', 'asc') // Assuming pickupTime isn't in your migration, strictly sort by Date
             ->get();
 
-        // 2. Fetch Returns: Scheduled for TODAY (or overdue) and status is 'active'
+        // 2. Fetch Returns: Scheduled for TODAY (or overdue)
         $pendingReturns = Booking::with(['fleet', 'customer'])
-            ->whereDate('return_date', '<=', $today) 
-            ->where('booking_stat', 'active') 
-            ->orderBy('return_date', 'asc')
-            ->orderBy('return_time', 'asc')
+            ->whereDate('returnDate', '<=', $today) 
+            ->where('bookingStat', 'active') 
+            ->orderBy('returnDate', 'asc')
             ->get();
 
         return view('staff.pickup-return', compact('todayPickups', 'pendingReturns')); 
@@ -125,44 +124,40 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'phoneNum' => ['required', 'string', 'max:20'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'name'     => ['required', 'string', 'max:255'],
+            'phoneNum' => ['required', 'numeric'],
+            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:staff,email'], // Check 'staff' table
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
         
-        // Auto-generate Matric/Staff ID for Users table
-        $lastStaff = User::where('matric_number', 'LIKE', 'STAFF%')
-                         ->where('matric_number', 'NOT LIKE', 'STAFF-%')
-                         ->orderBy('id', 'desc')
-                         ->first();
+        // FIX: Generate Staff ID logic using the 'staff' table
+        $lastStaff = Staff::where('staffID', 'LIKE', 'STAFF%')
+                          ->orderBy('staffID', 'desc')
+                          ->first();
 
         $nextNumber = 1;
         if ($lastStaff) {
-            $numberPart = (int) str_replace('STAFF', '', $lastStaff->matric_number);
+            // Extract number from STAFF001 -> 1
+            $numberPart = (int) str_replace('STAFF', '', $lastStaff->staffID);
             $nextNumber = $numberPart + 1;
         }
-        $newMatricNumber = sprintf("STAFF%03d", $nextNumber);
+        
+        // Format: STAFF002
+        $newStaffID = sprintf("STAFF%03d", $nextNumber);
 
-        // 1. Create User Record
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phoneNum' => $request->phoneNum,
-            'password' => Hash::make($request->password),
-            'role' => 'staff',
-            'matric_number' => $newMatricNumber,
-            'faculty' => 'Administration', 
-        ]);
-
-        // 2. Create Staff Record
+        // FIX: Create directly in Staff table (removed User table logic)
         Staff::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone_no' => $request->phoneNum, // Map phoneNum to phone_no
+            'staffID'  => $newStaffID,
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password), // Required for login
+            'phoneNum' => $request->phoneNum, // Match model: phoneNum
             'position' => 'Staff',            // Default position
+            
+            // Add other required fields with defaults if necessary, or ensure they are nullable in DB
+            // 'icNum' => '', 
         ]);
 
-        return back()->with('status', 'Staff account created successfully!');
+        return back()->with('status', 'Staff account created successfully! ID: ' . $newStaffID);
     }
 }

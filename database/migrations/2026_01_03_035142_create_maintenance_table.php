@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('maintenance', function (Blueprint $table) {
-            $table->id('maintenanceID');
+            $table->string('maintenanceID')->primary();
 
-            $table->text('description');
-            $table->date('mDate');
-            $table->time('mTime');
-            $table->decimal('cost');
+            $table->text('description')->nullable();
+            $table->date('mDate')->nullable();
+            $table->time('mTime')->nullable();
+            $table->decimal('cost', 10, 2)->nullable();
 
             $table->timestamps();
         });

@@ -12,16 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inspection', function (Blueprint $table) {
-            $table->id('inspectionID');
+            $table->string('inspectionID')->primary();
 
-            $table->string('vehiclePhotos');
-            $table->double('mileage');
-            $table->string('fuelImage');
-            $table->double('fuelBar');
-            $table->dateTime('dateOut');
-            $table->dateTime('time');
-            $table->string('pic');
-            $table->string('remark');
+            $table->string('vehiclePhotos')->nullable();
+            $table->double('mileage')->nullable();
+            $table->string('fuelImage')->nullable();
+            $table->double('fuelBar')->nullable();
+            $table->dateTime('dateOut')->nullable();
+            $table->dateTime('time')->nullable();
+            $table->string('pic')->nullable();
+            $table->string('remark')->nullable();
 
             $table->timestamps();
         });

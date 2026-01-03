@@ -12,25 +12,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('booking', function (Blueprint $table) {
-            $table->id('bookingID');
+            $table->string('bookingID')->primary();
             
-            $table->dateTime('pickupDate');
-            $table->dateTime('returnDate');
-            $table->string('pickupLoc');
-            $table->string('returnLoc');
-            $table->double('deposit');
-            $table->double('totalPrice');
-            $table->string('bookingStat');
-            $table->string('feedback');
+            $table->dateTime('pickupDate')->nullable();
+            $table->dateTime('returnDate')->nullable();
+            $table->string('pickupLoc')->nullable();
+            $table->string('returnLoc')->nullable();
+            $table->double('deposit')->nullable();
+            $table->double('totalPrice')->nullable();
+            $table->string('bookingStat')->nullable();
+            $table->string('feedback')->nullable();
             
             
             // FK
-            $table->foreignId('matricNum')->constrained(table: 'customer', column: 'matricNum');
-            $table->foreignId('rewardID')->constrained(table: 'reward', column: 'rewardID');
-            $table->string('plateNumber');
+            $table->string('plateNumber')->nullable();
             $table->foreign('plateNumber')->references('plateNumber')->on('fleet');
 
-
+            $table->string('matricNum')->nullable();
+            $table->foreign('matricNum')->references('matricNum')->on('customer');
+            
+            $table->string('rewardID')->nullable();
+            $table->foreign('rewardID')->references('rewardID')->on('reward');
 
             $table->timestamps();
         });

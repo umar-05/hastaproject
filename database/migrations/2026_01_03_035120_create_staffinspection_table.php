@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('staffinspection', function (Blueprint $table) {
-            $table->id('staffID');
-            $table->string('pic');
+            $table->string('staffID')->primary();
+            $table->string('pic')->nullable();
             $table->timestamps();
         });
     }
