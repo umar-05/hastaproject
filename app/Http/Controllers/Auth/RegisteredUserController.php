@@ -141,7 +141,7 @@ class RegisteredUserController extends Controller
         
         Auth::login($user);
 
-        return redirect(route('dashboard'))->with('success', 'You have signed up!');
+        return redirect(route('home'))->with('success', 'You have signed up!');
     }
 
     
