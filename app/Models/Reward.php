@@ -10,28 +10,39 @@ class Reward extends Model
     use HasFactory;
 
     protected $table = 'reward';
+    protected $primaryKey = 'rewardID';
 
     protected $fillable = [
-        'company',
-        'discount',
-        'valid_until',
-        'active',
+        'rewardPoints',
+        'voucherCode',
+        'rewardType',
+        'rewardAmount',
+        'totalClaimable',
+        'expiryDate',
+        'rewardStatus',
     ];
 
     protected $casts = [
-        'valid_until' => 'date',
-        'active' => 'boolean',
+        'rewardPoints'   => 'integer',
+        'rewardAmount'   => 'integer',
+        'totalClaimable' => 'integer',
+        'expiryDate'     => 'date',
     ];
 
+    /**
+     * Relationships
+     */
     public function bookings()
     {
-        return $this->hasMany(Booking::class, 'reward_id');
+        return $this->hasMany(Booking::class, 'rewardID', 'rewardID');
     }
 
+    /**
+     * Scopes
+     */
     public function scopeActive($query)
     {
-        return $query->where('active', true)
-            ->where('valid_until', '>=', now());
+        return $query->where('rewardStatus', 'Active')
+                     ->where('expiryDate', '>=', now());
     }
 }
-
