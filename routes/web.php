@@ -45,8 +45,12 @@ Route::middleware(['auth:customer', 'verified'])->group(function () {
     Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
 
     // Customer Rewards
-    Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
-    Route::get('/my-rewards', [RewardController::class, 'showClaimed'])->name('rewards.claimed');
+    Route::get('/rewards', function () {
+    return view('reward.customer');
+})->name('reward.customer');
+
+    // The route the "Claim" button is looking for
+    Route::get('/rewards/claimed', [RewardController::class, 'claimed'])->name('rewards.claimed');
     
     // Booking Management
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
