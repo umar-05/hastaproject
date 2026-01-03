@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Customer;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -120,44 +119,29 @@ class RegisteredUserController extends Controller
         return $data;
     }
 
-    /**
-     * Handle registration submission
-     */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'matric_number' => ['required', 'string', 'max:20', 'unique:users,matric_number'],
+            'matric_number' => ['required', 'string', 'max:20', 'unique:customer,matricNum'],
             'faculty' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:customer,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // 1. Create the Main User Account (Login Access)
-        $user = User::create([
+        $user = Customer::create([
+            'matricNum' => $request->matric_number,
             'name' => $request->name,
-            'matric_number' => $request->matric_number,
-            'faculty' => $request->faculty,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'customer', // Ensure role is set
-        ]);
-
-        // 2. Create the Customer Profile Record
-        // We map the User fields to the Customers table columns
-        Customer::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password), // Storing password here too as per your migration
-            'matric_no' => $request->matric_number,       // Note: migration uses 'matric_no', User uses 'matric_number'
             'faculty' => $request->faculty,
         ]);
 
         event(new Registered($user));
         
-        // Auth::login($user); // Uncomment if you want auto-login
+        Auth::login($user);
 
-        return redirect(route('login'))->with('success', 'You have signed up!');
+        return redirect(route('dashboard'))->with('success', 'You have signed up!');
     }
 
     

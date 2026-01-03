@@ -12,16 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('payment', function (Blueprint $table) {
-            $table->id('paymentID');
+            $table->string('paymentID')->primary();
             
-            $table->string('paymentStatus');
-            $table->string('method', 50);
-            $table->dateTime('paymentDate');
-            $table->decimal('discountedPrice', 10, 2);
-            $table->decimal('amount', 10, 2);
-            $table->decimal('grandTotal', 10, 2);
+            $table->string('paymentStatus')->nullable();
+            $table->string('method', 50)->nullable();
+            $table->dateTime('paymentDate')->nullable();
+            $table->decimal('discountedPrice', 10, 2)->nullable();
+            $table->decimal('amount', 10, 2)->nullable();
+            $table->decimal('grandTotal', 10, 2)->nullable();
             
-            $table->foreignId('bookingID')->constrained(table: 'booking', column: 'bookingID');
+            $table->string('bookingID')->nullable();
+            $table->foreign('bookingID')->references('bookingID')->on('booking');
 
             $table->timestamps();
         });

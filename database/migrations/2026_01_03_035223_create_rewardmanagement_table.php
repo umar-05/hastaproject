@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('rewardmanagement', function (Blueprint $table) {
             $table->string('staffID');
             $table->foreign('staffID')->references('staffID')->on('staff');
-            $table->foreignId('rewardID')->constrained(table: 'reward', column: 'rewardID');
+
+            $table->string('rewardID');
+            $table->foreign('rewardID')->references('rewardID')->on('reward');
 
             $table->primary(['staffID', 'rewardID']);
             $table->timestamps();

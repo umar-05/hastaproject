@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('rewardredemption', function (Blueprint $table) {
 
-            $table->dateTime('redemptionDate');
+            $table->dateTime('redemptionDate')->nullable();
 
-            $table->foreignId('matricNum')->constrained(table: 'customer', column: 'matricNum');
-            $table->foreignId('rewardID')->constrained(table: 'reward', column: 'rewardID');
+            $table->string('matricNum')->nullable();
+            $table->foreign('matricNum')->references('matricNum')->on('customer');
+
+            $table->string('rewardID')->nullable();
+            $table->foreign('rewardID')->references('rewardID')->on('reward');
 
             $table->primary(['matricNum', 'rewardID']);
 

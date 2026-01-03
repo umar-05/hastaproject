@@ -27,6 +27,7 @@ class Customer extends Authenticatable
         'postcode', 
         'state',
         'collegeAddress',
+        'faculty',
         'eme_name',
         'emephoneNum',
         'emerelation',

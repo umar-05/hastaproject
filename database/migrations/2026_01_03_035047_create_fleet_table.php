@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('photos')->nullable();
             
             $table->string('ownerName')->nullable();
-            $table->bigInteger('ownerIc')->nullable(); // Changed to bigInt for long IC numbers
+            $table->bigInteger('ownerIc')->nullable();
             $table->bigInteger('ownerPhone')->nullable();
             $table->string('ownerEmail')->nullable();
             
@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('status')->default('available');
             $table->text('note')->nullable();
         
-            $table->unsignedBigInteger('matricNum')->nullable();
+            $table->string('matricNum')->nullable();
             $table->foreign('matricNum')->references('matricNum')->on('customer');
             
             $table->string('staffID')->nullable();
