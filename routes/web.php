@@ -112,21 +112,20 @@ Route::post('/register/process-matric-card', [RegisteredUserController::class, '
     ->name('register.process-matric-card')
     ->middleware('guest');
 
-Route::middleware(['auth'])->group(function () {
-    
-    // 1. Add Staff
+// Staff-only routes: use the staff guard directly so guests or customers
+// authenticated with the default guard don't trigger redirects.
+Route::middleware(['auth:staff'])->group(function () {
     Route::get('/staff/add', [StaffController::class, 'create'])->name('staff.add-staff');
     Route::post('/staff/add', [StaffController::class, 'store'])->name('staff.store');
 
-    // 2. Pickup & Return
+    // Pickup & Return
     Route::get('/staff/pickup-return', [StaffController::class, 'pickupReturn'])->name('staff.pickup-return');
 
-    // 3. Rewards (Fixes your current error)
+    // Rewards
     Route::get('/staff/rewards', [StaffController::class, 'rewards'])->name('staff.rewards');
 
-    // 4. Reports (Fixes the next error)
+    // Reports
     Route::get('/staff/reports', [StaffController::class, 'reports'])->name('staff.report');
-    
 });
 
 require __DIR__.'/auth.php';

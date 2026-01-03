@@ -79,17 +79,16 @@ class StaffController extends Controller
 
         // 1. Fetch Pickups: Scheduled for TODAY and status is 'confirmed' or 'pending'
         $todayPickups = Booking::with(['fleet', 'customer'])
-            ->whereDate('pickup_date', $today)
-            ->whereIn('booking_stat', ['confirmed', 'pending']) 
-            ->orderBy('pickup_time', 'asc')
+            ->whereDate('pickupDate', $today)
+            ->whereIn('bookingStat', ['confirmed', 'pending']) 
+            ->orderBy('pickupDate', 'asc')
             ->get();
 
         // 2. Fetch Returns: Scheduled for TODAY (or overdue) and status is 'active'
         $pendingReturns = Booking::with(['fleet', 'customer'])
-            ->whereDate('return_date', '<=', $today) 
-            ->where('booking_stat', 'active') 
-            ->orderBy('return_date', 'asc')
-            ->orderBy('return_time', 'asc')
+            ->whereDate('returnDate', '<=', $today)
+            ->whereNotIn('bookingStat', ['cancelled', 'completed'])
+            ->orderBy('returnDate', 'asc')
             ->get();
 
         return view('staff.pickup-return', compact('todayPickups', 'pendingReturns')); 

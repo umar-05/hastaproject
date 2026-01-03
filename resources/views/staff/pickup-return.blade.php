@@ -38,26 +38,26 @@
                             <h3 class="text-xl font-bold text-gray-800">Today's Pickups ({{ $todayPickups->count() }})</h3>
                             <span class="text-sm text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-200 shadow-sm">Current Date: {{ date('d M Y') }}</span>
                         </div>
-                        
+
                         @forelse($todayPickups as $booking)
                             <div class="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden mb-6">
                                 
                                 <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
                                     <div class="flex items-center space-x-2">
                                         <span class="text-gray-400 font-bold text-sm uppercase">Booking ID</span>
-                                        <span class="font-mono font-bold text-gray-800 text-lg">#B-{{ str_pad($booking->booking_id, 4, '0', STR_PAD_LEFT) }}</span>
+                                        <span class="font-mono font-bold text-gray-800 text-lg">{{ $booking->bookingID }}</span>
                                     </div>
                                     <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide border border-yellow-200">
-                                        {{ $booking->booking_stat }}
+                                        {{ $booking->bookingStat }}
                                     </span>
                                 </div>
 
                                 <div class="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
                                     
                                     <div class="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-gray-100 pb-6 lg:pb-0 lg:pr-6">
-                                        <h4 class="text-2xl font-extrabold text-gray-900 leading-tight">{{ $booking->fleet->model_name ?? 'Vehicle Unavailable' }}</h4>
+                                        <h4 class="text-2xl font-extrabold text-gray-900 leading-tight">{{ $booking->fleet->modelName ?? 'Vehicle Unavailable' }}</h4>
                                         <div class="mt-2 flex items-center">
-                                            <span class="bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded mr-2">{{ $booking->fleet->plate_number ?? 'N/A' }}</span>
+                                            <span class="bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded mr-2">{{ $booking->fleet->plateNumber ?? 'N/A' }}</span>
                                             <span class="text-sm text-gray-500">{{ $booking->fleet->year ?? '' }} Model</span>
                                         </div>
 
@@ -81,12 +81,12 @@
                                             <div>
                                                 <p class="text-xs text-green-600 font-bold uppercase mb-1">Pickup</p>
                                                 <p class="font-bold text-gray-900 text-lg">
-                                                    {{ \Carbon\Carbon::parse($booking->pickup_date)->format('d M Y') }}, 
-                                                    {{ \Carbon\Carbon::parse($booking->pickup_time)->format('h:i A') }}
+                                                    {{ optional($booking->pickupDate)->format('d M Y') }}, 
+                                                        {{ optional($booking->pickupDate)->format('h:i A') }}
                                                 </p>
                                                 <div class="flex items-center text-sm text-gray-500 mt-1">
                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                                    {{ $booking->pickup_loc }}
+                                                    {{ $booking->pickupLoc }}
                                                 </div>
                                             </div>
                                         </div>
@@ -98,12 +98,12 @@
                                             <div>
                                                 <p class="text-xs text-red-600 font-bold uppercase mb-1">Return</p>
                                                 <p class="font-bold text-gray-900 text-lg">
-                                                    {{ \Carbon\Carbon::parse($booking->return_date)->format('d M Y') }},
-                                                    {{ \Carbon\Carbon::parse($booking->return_time)->format('h:i A') }}
+                                                    {{ optional($booking->returnDate)->format('d M Y') }},
+                                                    {{ optional($booking->returnDate)->format('h:i A') }}
                                                 </p>
                                                 <div class="flex items-center text-sm text-gray-500 mt-1">
                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                                    {{ $booking->return_loc }}
+                                                    {{ $booking->returnLoc }}
                                                 </div>
                                             </div>
                                         </div>
@@ -114,7 +114,7 @@
                                         
                                         <div class="flex justify-between mb-2 text-sm">
                                             <span class="text-gray-600">Rental Price</span>
-                                            <span class="font-bold text-gray-900">RM {{ $booking->total_price }}</span>
+                                            <span class="font-bold text-gray-900">RM {{ $booking->totalPrice }}</span>
                                         </div>
                                         
                                         <div class="flex justify-between mb-4 text-sm pb-4 border-b border-gray-200">
@@ -124,13 +124,13 @@
                                         
                                         <div class="flex justify-between items-end">
                                             <span class="text-sm font-bold text-hasta-red">Total</span>
-                                            <span class="text-2xl font-extrabold text-hasta-red">RM {{ number_format($booking->total_price + $booking->deposit, 2) }}</span>
+                                            <span class="text-2xl font-extrabold text-hasta-red">RM {{ number_format(($booking->totalPrice ?? 0) + ($booking->deposit ?? 0), 2) }}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end">
-                                    <button class="bg-hasta-red hover:bg-red-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transform active:scale-95 transition flex items-center">
+                                        <button class="bg-hasta-red hover:bg-red-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transform active:scale-95 transition flex items-center">
                                         Process Pickup
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -164,7 +164,7 @@
                                 <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
                                     <div class="flex items-center space-x-2">
                                         <span class="text-gray-400 font-bold text-sm uppercase">Booking ID</span>
-                                        <span class="font-mono font-bold text-gray-800 text-lg">#B-{{ str_pad($booking->booking_id, 4, '0', STR_PAD_LEFT) }}</span>
+                                        <span class="font-mono font-bold text-gray-800 text-lg">{{ $booking->bookingID }}</span>
                                     </div>
                                     <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide border border-blue-200">
                                         Active / Return Due
@@ -172,9 +172,9 @@
                                 </div>
                                 <div class="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
                                     <div class="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-gray-100 pb-6 lg:pb-0 lg:pr-6">
-                                        <h4 class="text-2xl font-extrabold text-gray-900 leading-tight">{{ $booking->fleet->model_name ?? 'Vehicle Unavailable' }}</h4>
+                                        <h4 class="text-2xl font-extrabold text-gray-900 leading-tight">{{ $booking->fleet->modelName ?? 'Vehicle Unavailable' }}</h4>
                                         <div class="mt-2 flex items-center">
-                                            <span class="bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded mr-2">{{ $booking->fleet->plate_number ?? 'N/A' }}</span>
+                                            <span class="bg-gray-800 text-white text-xs font-bold px-2 py-1 rounded mr-2">{{ $booking->fleet->plateNumber ?? 'N/A' }}</span>
                                         </div>
                                         <div class="mt-8 flex items-center bg-blue-50 p-4 rounded-xl border border-blue-100">
                                             <div class="h-12 w-12 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold text-lg mr-4">
@@ -190,9 +190,9 @@
                                          <div>
                                             <p class="text-xs text-gray-500 font-bold uppercase mb-1">Return Due</p>
                                             <p class="font-bold text-gray-900 text-2xl">
-                                                {{ \Carbon\Carbon::parse($booking->return_date)->format('d M Y') }}
+                                                {{ optional($booking->returnDate)->format('d M Y') }}
                                             </p>
-                                            <p class="text-gray-500">{{ \Carbon\Carbon::parse($booking->return_time)->format('h:i A') }} at {{ $booking->return_loc }}</p>
+                                            <p class="text-gray-500">{{ optional($booking->returnDate)->format('h:i A') }} at {{ $booking->returnLoc }}</p>
                                          </div>
                                          <button class="bg-hasta-red hover:bg-red-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition">
                                             Process Return
