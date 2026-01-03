@@ -63,4 +63,14 @@ class AuthenticatedSessionController extends Controller
 
         return redirect('/');
     }
+
+    public function logout(Request $request)
+{
+    Auth::guard('web')->logout();
+
+    $request->session()->invalidate(); // Invalidates the session
+    $request->session()->regenerateToken(); // Regenerates the CSRF token
+
+    return redirect('/login'); // Or wherever you want them to go
+}
 }

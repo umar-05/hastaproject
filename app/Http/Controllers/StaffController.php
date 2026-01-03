@@ -2,201 +2,144 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Booking;
+use App\Http\Controllers\Controller;
 use App\Models\Staff;
+use App\Models\Booking; // Assumed Booking model exists for dashboard stats
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\RedirectResponse; // FIX: Added this import
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules;
-use Carbon\Carbon;
+use Illuminate\View\View;
 
 class StaffController extends Controller
 {
     /**
-     * Display the staff dashboard.
-     * FIX: Renamed from 'dashboard' to 'index' to match your route definition.
+     * Display the Staff Dashboard.
      */
     public function index(): View
     {
-        return view('staff.dashboard');
+        // Example stats logic - adjust status strings based on your actual database values
+        $bookingsToManage = Booking::where('bookingStat', 'Pending')->count();
+        $pickupsToday = Booking::whereDate('pickupDate', now())->where('bookingStat', 'Confirmed')->count();
+        $returnsToday = Booking::whereDate('returnDate', now())->where('bookingStat', 'Active')->count();
+
+        return view('staff.dashboard', [
+            'bookingsToManage' => $bookingsToManage,
+            'pickupsToday' => $pickupsToday,
+            'returnsToday' => $returnsToday,
+        ]);
     }
 
     /**
-     * Display a listing of bookings.
+     * Display the Pickup & Return Inspection page.
      */
-    public function bookingsIndex(): View
+    public function pickupReturn(): View
     {
-        return view('staff.bookings.index');
-    }
-
-    /**
-     * Display a listing of fleet vehicles.
-     */
-    public function fleetIndex(): View
-    {
-        return view('staff.fleet.index');
-    }
-
-    /**
-     * Display a listing of maintenance records.
-     */
-    public function maintenanceIndex(): View
-    {
-        return view('staff.maintenance.index');
-    }
-
-    /**
-     * Display a listing of inspections.
-     */
-    public function inspectionsIndex(): View
-    {
-        return view('staff.inspections.index');
-    }
-
-    /**
-     * Display a listing of payments.
-     */
-    public function paymentsIndex(): View
-    {
-        return view('staff.payments.index');
-    }
-
-    /**
-     * Display a listing of customers.
-     */
-    public function customersIndex(): View
-    {
-        return view('staff.customers.index');
-    }
-
-    /**
-     * Display pickup/return page with dynamic data.
-     */
-    public function pickupReturn(): View 
-    {
-        $today = Carbon::today();
-        
-        // 1. Fetch Pickups: Scheduled for TODAY
-        $todayPickups = Booking::with(['fleet', 'customer'])
-            ->whereDate('pickupDate', $today)
-            ->whereIn('bookingStat', ['confirmed', 'pending']) 
-            ->orderBy('pickupDate', 'asc') 
+        // Get pickups scheduled for today
+        $todayPickups = Booking::with(['customer', 'fleet'])
+            ->whereDate('pickup_date', now())
+            ->where('bookingStat', 'Confirmed') // Adjust status as needed
+            ->orderBy('pickupDate')
             ->get();
 
-        // 2. Fetch Returns: Scheduled for TODAY (or overdue)
-        $pendingReturns = Booking::with(['fleet', 'customer'])
-            ->whereDate('returnDate', '<=', $today) 
-            ->where('bookingStat', 'active') 
-            ->orderBy('returnDate', 'asc')
+        // Get active rentals that need returning
+        $pendingReturns = Booking::with(['customer', 'fleet'])
+            ->where('bookingStat', 'Active') // Adjust status as needed
+            ->orderBy('returnDate')
             ->get();
 
-        return view('staff.pickup-return', compact('todayPickups', 'pendingReturns')); 
-    }
-
-    /**
-     * Display rewards page.
-     */
-    public function rewards(): View
-    {
-        return view('staff.rewards');
-    }
-
-    /**
-     * Display report page.
-     */
-    public function reports(): View
-    {
-        return view('staff.reports');
-    }
-
-    /**
-     * Show the form to add a new staff member.
-     */
-    public function create(): View
-    {
-        return view('staff.add-staff');
-    }
-
-    /**
-     * Store a newly created staff member in storage.
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'phoneNum' => ['required', 'numeric'],
-            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:staff,email'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        return view('staff.pickup-return', [
+            'todayPickups' => $todayPickups,
+            'pendingReturns' => $pendingReturns,
         ]);
-        
-        // Generate Staff ID logic
-        $lastStaff = Staff::where('staffID', 'LIKE', 'STAFF%')
-                          ->orderBy('staffID', 'desc')
-                          ->first();
-
-        $nextNumber = 1;
-        if ($lastStaff) {
-            $numberPart = (int) str_replace('STAFF', '', $lastStaff->staffID);
-            $nextNumber = $numberPart + 1;
-        }
-        
-        $newStaffID = sprintf("STAFF%03d", $nextNumber);
-
-        Staff::create([
-            'staffID'  => $newStaffID,
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'phoneNum' => $request->phoneNum, 
-            'position' => 'Staff',            
-        ]);
-
-        return back()->with('status', 'Staff account created successfully! ID: ' . $newStaffID);
     }
 
     /**
-     * Display the user's profile form.
+     * Show the profile edit form.
      */
-    public function editProfile(Request $request)
+    public function editProfile(Request $request): View
     {
         return view('staff.profile.edit', [
-            'user' => Auth::guard('staff')->user(),
+            'user' => $request->user('staff'),
         ]);
     }
 
     /**
-     * Update the user's profile information.
+     * Update the staff's profile information.
      */
-    public function updateProfile(Request $request)
+    public function updateProfile(Request $request): RedirectResponse
     {
-        // Get the currently logged in staff first so we can use their ID in validation
-        $user = Auth::guard('staff')->user();
-
-        $attributes = $request->validate([
+        // 1. Validate the input
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required', 
-                'string', 
-                'email', 
-                'max:255', 
-                // FIX: Explicitly ignore the current user's 'staffID' so they can save without "email taken" error
-                Rule::unique('staff', 'email')->ignore($user->staffID, 'staffID'),
-            ],
-            // FIX: Changed 'phone_no' to 'phoneNum' to match your database and 'store' method
-            'phoneNum' => ['nullable', 'numeric'], 
+            // Use 'staffID' as the unique key to ignore
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('staff')->ignore($request->user('staff')->staffID, 'staffID')],
+            'position' => ['nullable', 'string', 'max:255'],
+            'phoneNum' => ['nullable', 'string', 'max:20'],
+            'icNum_passport' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'postcode' => ['nullable', 'string', 'max:10'],
+            'state' => ['nullable', 'string', 'max:100'],
+            'eme_name' => ['nullable', 'string', 'max:255'],
+            'emerelation' => ['nullable', 'string', 'max:100'],
+            'emephoneNum' => ['nullable', 'string', 'max:20'],
+            'bankName' => ['nullable', 'string', 'max:100'],
+            'accountNum' => ['nullable', 'string', 'max:50'],
         ]);
 
-        $user->fill($attributes);
+        // 2. Fill the user model with validated data
+        $user = $request->user('staff');
+        $user->fill($validated);
 
+        // 3. Reset email verification if email changed
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
 
+        // 4. Save to Database
         $user->save();
 
         return Redirect::route('staff.profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Show form to add new staff.
+     */
+    public function create(): View
+    {
+        return view('staff.add'); // Ensure this view exists
+    }
+
+    /**
+     * Store a new staff member.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'staffID' => ['required', 'string', 'max:10', 'unique:staff'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:staff'],
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+        ]);
+
+        Staff::create([
+            'name' => $request->name,
+            'staffID' => $request->staffID,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->route('staff.dashboard')->with('status', 'Staff member added successfully!');
+    }
+
+    /**
+     * Show reports page.
+     */
+    public function reports(): View
+    {
+        return view('staff.reports'); // Ensure this view exists
     }
 }

@@ -16,7 +16,7 @@ return new class extends Migration
 
             $table->string('ownerName')->nullable();
             $table->string('ownerEmail')->unique()->nullable();
-            $table->bigInteger('ownerPhoneNum')->unique()->nullable();
+            $table->string('ownerPhoneNum')->unique()->nullable();
             $table->tinyText('roadtaxStat')->nullable();
             $table->date('taxActivedate')->nullable();
             $table->date('taxExpirydate')->nullable();
