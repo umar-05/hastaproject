@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('rewardredemption', function (Blueprint $table) {
             $table->id('matricNum');
-            $table->id('rewarID');
+            $table->id('rewardID');
 
             $table->dateTime(redemptionDate);
 
