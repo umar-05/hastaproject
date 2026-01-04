@@ -1,4 +1,5 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -137,6 +138,8 @@
                 <div class="mt-3">
                     <button class="btn btn-warning w-100">Manage Info</button>
 =======
+=======
+>>>>>>> Stashed changes
 @extends('layouts.app') 
 
 @section('content')
@@ -395,11 +398,15 @@
                 @endif
                 <div class="text-right mt-3">
                     <button class="btn btn-sm btn-outline-danger">View All Bookings</button>
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                 </div>
             </div>
         </div>
     </div>
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 
     <!-- Technical Specification -->
@@ -487,6 +494,8 @@ function switchImage(thumb, url) {
 </body>
 </html>
 =======
+=======
+>>>>>>> Stashed changes
 </div>
 
 {{-- Essential Styling (Place this in a style tag or your main CSS file) --}}
@@ -529,5 +538,9 @@ function switchImage(thumb, url) {
     }
 </style>
 
+<<<<<<< Updated upstream
+@endsection
+>>>>>>> Stashed changes
+=======
 @endsection
 >>>>>>> Stashed changes

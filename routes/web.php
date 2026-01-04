@@ -63,6 +63,7 @@ Route::middleware(['auth:customer', 'verified'])->group(function () {
 Route::middleware(['auth:staff'])->prefix('staff')->name('staff.')->group(function () {
     
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     // Staff Dashboard (This was causing the loop!)
     Route::get('/dashboard', function () {
         return view('dashboard'); 
@@ -70,6 +71,8 @@ Route::middleware(['auth:staff'])->prefix('staff')->name('staff.')->group(functi
 
     Route::get('/staff/rewards', [StaffController::class, 'rewards'])->name('staff.rewards');
 =======
+=======
+>>>>>>> Stashed changes
     // --- 3.1 Staff Dashboard & Profile ---
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
@@ -96,7 +99,11 @@ Route::middleware(['auth:staff'])->prefix('staff')->name('staff.')->group(functi
     // --- 3.5 Reward Management ---
     Route::prefix('rewards')->name('reward.')->group(function() {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         Route::get('/', [RewardController::class, 'index'])->name('index');
+=======
+        Route::get('/', [RewardController::class, 'index'])->name('index'); 
+>>>>>>> Stashed changes
 =======
         Route::get('/', [RewardController::class, 'index'])->name('index'); 
 >>>>>>> Stashed changes
