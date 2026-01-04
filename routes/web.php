@@ -94,7 +94,8 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::post('/store', [StaffController::class, 'store'])->name('store');
     Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
-    
+    // Inside the staff middleware group in routes/web.php
+    Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
     // Reward Management for Staff
     Route::prefix('rewards')->name('reward.')->group(function() {
         Route::get('/', [RewardController::class, 'index'])->name('index'); 

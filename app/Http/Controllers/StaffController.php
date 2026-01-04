@@ -137,6 +137,17 @@ class StaffController extends Controller
     /**
      * Store a new staff member.
      */
+    public function createFunctioning() 
+{
+    // Check if staff is logged in
+    if (!auth()->guard('staff')->check()) {
+        return redirect()->route('login');
+    }
+
+    // This looks for the file: resources/views/staff/add-stafffunctioning.blade.php
+    return view('staff.add-stafffunctioning');
+}
+
     public function store(Request $request): RedirectResponse
 {
     // 1. Ensure user is authenticated
@@ -181,7 +192,8 @@ class StaffController extends Controller
         'password' => Hash::make($request->password),
     ]);
 
-    return redirect()->route('staff.add-staff')->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
+    return redirect()->route('staff.add-stafffunctioning')
+    ->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
 }
 
     /**
