@@ -48,7 +48,6 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('reward.claimed');
     Route::post('/rewards/claim', [RewardController::class, 'claim'])->name('rewards.claim');
 
-    
     // Booking Management
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
@@ -79,13 +78,12 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/bookings', [StaffController::class, 'bookingManagement'])->name('bookingsmanage');
 
     // Fleet Management -> /staff/fleet
-    // FIX: Removed '/staff' from URI because the group prefix handles it
     Route::prefix('fleet')->name('fleet.')->group(function() {
-    Route::get('/', [StaffController::class, 'fleet'])->name('index');           // staff.fleet.index
-    Route::get('/create', [StaffController::class, 'createVehicle'])->name('create'); // staff.fleet.create
-    Route::post('/', [StaffController::class, 'storeVehicle'])->name('store');        // staff.fleet.store
-    Route::delete('/{id}', [StaffController::class, 'destroyVehicle'])->name('destroy'); // staff.fleet.destroy
-});
+        Route::get('/', [StaffController::class, 'fleet'])->name('index');           // staff.fleet.index
+        Route::get('/create', [StaffController::class, 'createVehicle'])->name('create'); // staff.fleet.create
+        Route::post('/', [StaffController::class, 'storeVehicle'])->name('store');        // staff.fleet.store
+        Route::delete('/{id}', [StaffController::class, 'destroyVehicle'])->name('destroy'); // staff.fleet.destroy
+    });
 
     // Staff Profile -> /staff/profile
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
@@ -99,17 +97,19 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
     
-    // Reward Management for Staff
-    Route::get('/dashboard/reward', function() {
-            return view('staff.rewards');
-        })->name('rewards');
+    // Reward Management -> /staff/rewards
+    // Prefix: staff.reward.
+    Route::prefix('rewards')->name('reward.')->group(function() {
+        Route::get('/', [StaffController::class, 'rewards'])->name('index'); 
+        Route::get('/create', [RewardController::class, 'create'])->name('create');
+        Route::post('/', [RewardController::class, 'store'])->name('store');
+        Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
+        Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
+        
+        // --- ADDED THIS LINE TO FIX YOUR ERROR ---
+        Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy'); 
+    });
 
-        // Your existing dashboard route
-        Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
-
-        // Reward management routes (under /staff/dashboard)
-        Route::get('/dashboard/reward', [RewardController::class, 'index'])->name('rewards');
-        Route::post('/dashboard/reward', [RewardController::class, 'store'])->name('rewards.store');
 });
 
 

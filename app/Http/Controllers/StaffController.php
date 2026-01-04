@@ -9,12 +9,10 @@ use App\Models\Booking;
 use App\Models\Fleet;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Illuminate\Support\Str;
 
 class StaffController extends Controller
 {
@@ -23,10 +21,6 @@ class StaffController extends Controller
      */
     public function index(): View
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
         $bookingsToManage = Booking::where('bookingStat', 'Pending')->count();
         $pickupsToday = Booking::whereDate('pickupDate', now())->where('bookingStat', 'Confirmed')->count();
         $returnsToday = Booking::whereDate('returnDate', now())->where('bookingStat', 'Active')->count();
@@ -43,10 +37,6 @@ class StaffController extends Controller
      */
     public function pickupReturn(): View
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
         $todayPickups = Booking::with(['customer', 'fleet'])
             ->whereDate('pickupDate', now())
             ->where('bookingStat', 'Confirmed')
@@ -69,10 +59,6 @@ class StaffController extends Controller
      */
     public function editProfile(Request $request): View
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
         return view('staff.profile.edit', [
             'user' => $request->user('staff'),
         ]);
@@ -117,11 +103,6 @@ class StaffController extends Controller
      */
     public function create(): View
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
-        // FIX: Changed from 'staff.add' to 'staff.add-staff'
         return view('staff.add-staff'); 
     }
 
@@ -129,73 +110,66 @@ class StaffController extends Controller
      * Store a new staff member.
      */
     public function store(Request $request): RedirectResponse
-{
-    // 1. Ensure user is authenticated
-    if (!Auth::guard('staff')->check()) {
-        return redirect()->route('login');
+    {
+        // 1. Pre-process Email
+        $fullEmail = $request->input('email_username') . '@hasta.com';
+        $request->merge(['email' => $fullEmail]);
+
+        // 2. Validate
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email_username' => ['required', 'string', 'max:50', 'alpha_dash'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:staff'],
+            'position' => ['required', 'string', 'max:50'],
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+        ]);
+
+        // 3. Auto-Generate Staff ID
+        $latestStaff = Staff::orderBy('staffID', 'desc')->first();
+        
+        if (!$latestStaff) {
+            $newStaffID = 'STAFF001';
+        } else {
+            $lastNumber = intval(substr($latestStaff->staffID, 5)); 
+            $newStaffID = 'STAFF' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        }
+
+        // 4. Create Staff
+        Staff::create([
+            'name' => $request->name,
+            'staffID' => $newStaffID,
+            'email' => $request->email,
+            'position' => $request->position,
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->route('staff.add-staff')->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
     }
-
-    // 2. Pre-process Email
-    // Combine the username input with the hardcoded domain
-    $fullEmail = $request->input('email_username') . '@hasta.com';
-
-    // Merge this full email back into the request data so we can validate 'email'
-    $request->merge(['email' => $fullEmail]);
-
-    // 3. Validate
-    $request->validate([
-        'name' => ['required', 'string', 'max:255'],
-        'email_username' => ['required', 'string', 'max:50', 'alpha_dash'], // Ensure username has no spaces/weird chars
-        'email' => ['required', 'string', 'email', 'max:255', 'unique:staff'], // Validate the FULL email
-        'position' => ['required', 'string', 'max:50'],
-        'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
-    ]);
-
-    // 4. Auto-Generate Staff ID
-    $latestStaff = Staff::orderBy('staffID', 'desc')->first();
-    
-    if (!$latestStaff) {
-        $newStaffID = 'STAFF001';
-    } else {
-        // Extract the number part from 'STAFF005'
-        // 'STAFF' is 5 characters long, so we substring from index 5
-        $lastNumber = intval(substr($latestStaff->staffID, 5)); 
-        $newStaffID = 'STAFF' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-    }
-
-    // 5. Create Staff
-    Staff::create([
-        'name' => $request->name,
-        'staffID' => $newStaffID,
-        'email' => $request->email, // This now contains 'username@hasta.com'
-        'position' => $request->position,
-        'password' => Hash::make($request->password),
-    ]);
-
-    return redirect()->route('staff.add-staff')->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
-}
 
     /**
      * Show reports page.
      */
     public function reports(): View
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
         return view('staff.report'); 
     }
 
     /**
-     * Display the Fleet Management page.
+     * Bookings management list for staff.
      */
+    public function bookingManagement(Request $request): View
+    {
+        // FIX: Ensure you have a view named 'staff.bookings' or similar. 
+        // 'staff.reports' is likely for the analytics page.
+        return view('staff.bookings'); 
+    }
+
     /**
      * Display the Fleet Management page with filtering and search.
      */
-    public function fleet(Request $request): View
+    public function fleet(Request $request)
     {
-        // 1. Calculate Stats for the Top Cards
+        // 1. Calculate Stats
         $stats = [
             'total'       => Fleet::count(),
             'available'   => Fleet::where('status', 'available')->count(),
@@ -203,10 +177,10 @@ class StaffController extends Controller
             'maintenance' => Fleet::where('status', 'maintenance')->count(),
         ];
 
-        // 2. Start the Query
+        // 2. Setup query
         $query = Fleet::query();
 
-        // 3. Handle Search (search by make, model, or plate number)
+        // 3. Search Logic
         if ($search = $request->input('search')) {
             $query->where(function($q) use ($search) {
                 $q->where('make', 'like', "%{$search}%")
@@ -215,48 +189,32 @@ class StaffController extends Controller
             });
         }
 
-        // 4. Handle Status Filter
-        // If filter is present and is NOT 'all', filter by status
+        // 4. Filter Logic
         if ($filter = $request->input('filter')) {
             if ($filter !== 'all') {
                 $query->where('status', $filter);
             }
         }
 
-        // 5. Get Results (Paginated)
-        $vehicles = $query->latest()->paginate(9);
+        $vehicles = $query->latest()->paginate(9)->withQueryString();
 
         return view('staff.fleet.index', compact('vehicles', 'stats'));
     }
-    
 
     /**
-     * Bookings management list for staff
+     * Display Rewards for Staff.
      */
-    public function bookingManagement(Request $request): View
-    {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
-        return view('staff.reports'); // Ensure this view exists
-    }
-
     public function rewards()
-{
-    // 1. Fetch data from the database
-    $activeRewards = Reward::where('rewardStatus', 'Active')->get();
-    $inactiveRewards = Reward::where('rewardStatus', 'Inactive')->get();
+    {
+        $activeRewards = Reward::where('rewardStatus', 'Active')->get();
+        $inactiveRewards = Reward::where('rewardStatus', 'Inactive')->get();
 
-    // 2. Prepare the $stats variable that the view is looking for
-    $stats = [
-        'total'  => Reward::count(),
-        'active' => $activeRewards->count(),
-        'slots'  => $activeRewards->sum('totalClaimable'),
-    ];
+        $stats = [
+            'total'  => Reward::count(),
+            'active' => $activeRewards->count(),
+            'slots'  => $activeRewards->sum('totalClaimable'),
+        ];
 
-    // 3. Pass all variables to the view using compact
-    return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
-}
-
+        return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
+    }
 }

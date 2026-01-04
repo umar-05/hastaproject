@@ -15,13 +15,13 @@ class Reward extends Model
     protected $keyType = 'string';
     
     protected $fillable = [
-        'rewardID', 
-        'rewardPoints', 
-        'voucherCode', 
-        'rewardType', 
-        'rewardAmount', 
-        'totalClaimable', 
-        'expiryDate', 
+        'rewardID',
+        'voucherCode',
+        'rewardPoints',
+        'rewardType',
+        'rewardAmount',
+        'totalClaimable',
+        'expiryDate',
         'rewardStatus',
     ];
 
