@@ -42,8 +42,14 @@
             <a href="{{ route('staff.report') }}" class="text-gray-700 hover:text-hasta-red transition">
                 Report
             </a>
-        
-        @elseauth('customer')
+
+            <a href="{{ route('staff.rewards') }}" class="text-gray-700 hover:text-hasta-red transition">
+                Rewards
+            </a>
+        @endauth
+
+        {{-- CASE B: CUSTOMER INTERFACE --}}
+        @auth('customer')
             <a href="{{ route('vehicles.index') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
                 Book Now
             </a>
@@ -59,36 +65,33 @@
             <a href="{{ route('faq') }}" class="text-gray-700 hover:text-hasta-red transition">
                 FAQ
             </a>
+        @endauth
 
-        @else
-            
+        {{-- CASE C: GUEST INTERFACE --}}
+        @guest
             {{-- 1. BOOK NOW BUTTON --}}
-            {{-- If Customer: Go to Vehicles. If Guest: Go to Login --}}
             <a href="{{ Auth::guard('customer')->check() ? route('vehicles.index') : route('login') }}" 
                class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
                 Book Now
             </a>
 
             {{-- 2. BOOKINGS LINK --}}
-            {{-- If Customer: Go to Bookings. If Guest: Go to Login --}}
             <a href="{{ Auth::guard('customer')->check() ? route('bookings.index') : route('login') }}" 
                class="text-gray-700 hover:text-hasta-red transition">
                 Bookings
             </a>
 
             {{-- 3. REWARDS LINK --}}
-            {{-- If Customer: Go to Rewards. If Guest: Go to Login --}}
-            <a href="{{ Auth::guard('customer')->check() ? route('rewards.index') : route('login') }}" 
+            <a href="{{ Auth::guard('customer')->check() ? route('reward.customer') : route('login') }}" 
                class="text-gray-700 hover:text-hasta-red transition">
                 Rewards
             </a>
 
             {{-- 4. FAQ LINK --}}
-            {{-- Accessible by everyone (Public Route) --}}
             <a href="{{ route('faq') }}" class="text-gray-700 hover:text-hasta-red transition">
                 FAQ
             </a>
-        @endauth
+        @endguest
     </nav>
 
     {{-- ============================== --}}

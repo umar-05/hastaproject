@@ -4,14 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
-use App\Models\Booking; // Assumed Booking model exists for dashboard stats
+use App\Models\Reward;
+use App\Models\Booking;
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse; // FIX: Added this import
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Illuminate\Support\Str;
 
 class StaffController extends Controller
 {
@@ -172,4 +174,22 @@ class StaffController extends Controller
 
         return view('staff.reports'); // Ensure this view exists
     }
+
+    public function rewards()
+{
+    // 1. Fetch data from the database
+    $activeRewards = Reward::where('rewardStatus', 'Active')->get();
+    $inactiveRewards = Reward::where('rewardStatus', 'Inactive')->get();
+
+    // 2. Prepare the $stats variable that the view is looking for
+    $stats = [
+        'total'  => Reward::count(),
+        'active' => $activeRewards->count(),
+        'slots'  => $activeRewards->sum('totalClaimable'),
+    ];
+
+    // 3. Pass all variables to the view using compact
+    return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
+}
+
 }

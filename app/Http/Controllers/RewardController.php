@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Reward;
 
 class RewardController extends Controller
 {
@@ -14,7 +15,19 @@ class RewardController extends Controller
      */
     public function index()
     {
-        return view('reward.customer');
+    // Fetch data for the staff dashboard tables
+    $activeRewards = Reward::where('rewardStatus', 'Active')->get();
+    $inactiveRewards = Reward::where('rewardStatus', 'Inactive')->get();
+
+    // Calculate stats for the summary cards
+    $stats = [
+        'total' => Reward::count(),
+        'active' => $activeRewards->count(),
+        'slots' => $activeRewards->sum('totalClaimable'),
+    ];
+
+    // CHANGE: Return the staff view, not the customer one
+    return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
     }
 
     /**
@@ -44,4 +57,39 @@ class RewardController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Reward claimed!']);
     }
+
+    public function store(Request $request)
+    {
+        // 1. Validate the incoming data
+        $validated = $request->validate([
+            // CHANGE: 'unique:rewards' -> 'unique:reward'
+            'voucherCode'    => 'required|string|unique:reward,voucherCode', 
+            'rewardType'     => 'required|string',
+            'rewardAmount'   => 'required|numeric|min:1',
+            'rewardPoints'   => 'required|integer|min:1',
+            'totalClaimable' => 'required|integer|min:1',
+            'expiryDate'     => 'required|date',
+            'rewardStatus'   => 'required|string',
+        ]);
+
+        // 2. Generate a manual ID (since rewardID is not auto-incrementing)
+        $rewardID = 'REW-' . strtoupper(\Illuminate\Support\Str::random(6));
+
+        // 3. Save to Database
+        \App\Models\Reward::create([
+            'rewardID'       => $rewardID,
+            'voucherCode'    => strtoupper($validated['voucherCode']),
+            'rewardType'     => $validated['rewardType'],
+            'rewardAmount'   => $validated['rewardAmount'],
+            'rewardPoints'   => $validated['rewardPoints'],
+            'totalClaimable' => $validated['totalClaimable'],
+            'expiryDate'     => $validated['expiryDate'],
+            'rewardStatus'   => $validated['rewardStatus'],
+        ]);
+
+        // 4. Redirect
+        return redirect()->route('staff.rewards')->with('success', 'Reward created successfully!');
+    }
+
+    
 }
