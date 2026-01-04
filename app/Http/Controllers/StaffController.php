@@ -6,14 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Staff;
 use App\Models\Reward;
 use App\Models\Booking;
+use App\Models\Fleet;
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Illuminate\Support\Str;
 
 class StaffController extends Controller
 {
@@ -22,12 +22,6 @@ class StaffController extends Controller
      */
     public function index(): View
     {
-        // Ensure user is authenticated
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
-        // Example stats logic - adjust status strings based on your actual database values
         $bookingsToManage = Booking::where('bookingStat', 'Pending')->count();
         $pickupsToday = Booking::whereDate('pickupDate', now())->where('bookingStat', 'Confirmed')->count();
         $returnsToday = Booking::whereDate('returnDate', now())->where('bookingStat', 'Active')->count();
@@ -44,21 +38,14 @@ class StaffController extends Controller
      */
     public function pickupReturn(): View
     {
-        // Ensure user is authenticated
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
-        // Get pickups scheduled for today
         $todayPickups = Booking::with(['customer', 'fleet'])
-            ->whereDate('pickup_date', now())
-            ->where('bookingStat', 'Confirmed') // Adjust status as needed
+            ->whereDate('pickupDate', now())
+            ->where('bookingStat', 'Confirmed')
             ->orderBy('pickupDate')
             ->get();
 
-        // Get active rentals that need returning
         $pendingReturns = Booking::with(['customer', 'fleet'])
-            ->where('bookingStat', 'Active') // Adjust status as needed
+            ->where('bookingStat', 'Active') 
             ->orderBy('returnDate')
             ->get();
 
@@ -73,14 +60,16 @@ class StaffController extends Controller
      */
     public function editProfile(Request $request): View
     {
-        // Ensure user is authenticated
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
         return view('staff.profile.edit', [
             'user' => $request->user('staff'),
         ]);
+    }
+
+    public function edit($staffID)
+    {
+        $staff = Staff::where('staffID', $staffID)->firstOrFail();
+        // Re-use the same "functioning" file!
+        return view('staff.add-stafffunctioning', compact('staff'));
     }
 
     /**
@@ -88,10 +77,8 @@ class StaffController extends Controller
      */
     public function updateProfile(Request $request): RedirectResponse
     {
-        // 1. Validate the input
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            // Use 'staffID' as the unique key to ignore
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('staff')->ignore($request->user('staff')->staffID, 'staffID')],
             'position' => ['nullable', 'string', 'max:255'],
             'phoneNum' => ['nullable', 'string', 'max:20'],
@@ -107,89 +94,192 @@ class StaffController extends Controller
             'accountNum' => ['nullable', 'string', 'max:50'],
         ]);
 
-        // 2. Fill the user model with validated data
         $user = $request->user('staff');
         $user->fill($validated);
 
-        // 3. Reset email verification if email changed
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
 
-        // 4. Save to Database
         $user->save();
 
         return Redirect::route('staff.profile.edit')->with('status', 'profile-updated');
     }
+
+    public function update(Request $request, $staffID): \Illuminate\Http\RedirectResponse
+{
+    // Find the staff by their custom staffID
+    $staff = Staff::where('staffID', $staffID)->firstOrFail();
+
+    // Validate the data
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'position' => ['required', 'string', 'max:50'],
+        'email' => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique('staff')->ignore($staff->staffID, 'staffID')],
+    ]);
+
+    // Save changes
+    $staff->update($validated);
+
+    // Redirect back to the staff record list
+    return redirect()->route('staff.add-staff')->with('status', "Staff member $staffID updated successfully!");
+}
 
     /**
      * Show form to add new staff.
      */
     public function create(): View
     {
-        // Ensure user is authenticated
         if (!Auth::guard('staff')->check()) {
             return redirect()->route('login');
         }
 
-        return view('staff.add'); // Ensure this view exists
+    $staffs = Staff::all();
+
+    // 3. Send the data to the page
+    return view('staff.add-staff', [
+        'staffs' => $staffs, // This fills the table
+        'totalStaffCount' => $staffs->count(), // Fills Card 1
+        'driverCount' => $staffs->where('position', 'Driver')->count(), // Fills Card 2
+        'adminCount' => $staffs->where('position', 'Administrator')->count(), // Fills Card 3
+        'managerCount' => $staffs->where('position', 'Manager')->count(), // Fills Card 4
+    ]);
+
+        // FIX: Changed from 'staff.add' to 'staff.add-staff'
+        return view('staff.add-staff'); 
     }
 
     /**
      * Store a new staff member.
      */
-    public function store(Request $request): RedirectResponse
-    {
-        // Ensure user is authenticated
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'staffID' => ['required', 'string', 'max:10', 'unique:staff'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:staff'],
-            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
-        ]);
-
-        Staff::create([
-            'name' => $request->name,
-            'staffID' => $request->staffID,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        return redirect()->route('staff.dashboard')->with('status', 'Staff member added successfully!');
+    public function createFunctioning() 
+{
+    // Check if staff is logged in
+    if (!auth()->guard('staff')->check()) {
+        return redirect()->route('login');
     }
+
+    // This looks for the file: resources/views/staff/add-stafffunctioning.blade.php
+    return view('staff.add-stafffunctioning');
+}
+
+    public function store(Request $request): RedirectResponse
+{
+    // 1. Ensure user is authenticated
+    if (!Auth::guard('staff')->check()) {
+        return redirect()->route('login');
+    }
+
+    // 2. Pre-process Email
+    // Combine the username input with the hardcoded domain
+    $fullEmail = $request->input('email_username') . '@hasta.com';
+
+    // Merge this full email back into the request data so we can validate 'email'
+    $request->merge(['email' => $fullEmail]);
+
+    // 3. Validate
+    $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'email_username' => ['required', 'string', 'max:50', 'alpha_dash'], // Ensure username has no spaces/weird chars
+        'email' => ['required', 'string', 'email', 'max:255', 'unique:staff'], // Validate the FULL email
+        'position' => ['required', 'string', 'max:50'],
+        'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+    ]);
+
+    // 4. Auto-Generate Staff ID
+    $latestStaff = Staff::orderBy('staffID', 'desc')->first();
+    
+    if (!$latestStaff) {
+        $newStaffID = 'STAFF001';
+    } else {
+        // Extract the number part from 'STAFF005'
+        // 'STAFF' is 5 characters long, so we substring from index 5
+        $lastNumber = intval(substr($latestStaff->staffID, 5)); 
+        $newStaffID = 'STAFF' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+    }
+
+    // 5. Create Staff
+    Staff::create([
+        'name' => $request->name,
+        'staffID' => $newStaffID,
+        'email' => $request->email, // This now contains 'username@hasta.com'
+        'position' => $request->position,
+        'password' => Hash::make($request->password),
+    ]);
+
+    return redirect()->route('staff.add-stafffunctioning')
+    ->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
+}
 
     /**
      * Show reports page.
      */
     public function reports(): View
     {
-        // Ensure user is authenticated
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
-        return view('staff.reports'); // Ensure this view exists
+        return view('staff.report'); 
     }
 
+    /**
+     * Bookings management list for staff.
+     */
+    public function bookingManagement(Request $request): View
+    {
+        // FIX: Ensure you have a view named 'staff.bookings' or similar. 
+        // 'staff.reports' is likely for the analytics page.
+        return view('staff.bookings'); 
+    }
+
+    /**
+     * Display the Fleet Management page with filtering and search.
+     */
+    public function fleet(Request $request)
+    {
+        // 1. Calculate Stats
+        $stats = [
+            'total'       => Fleet::count(),
+            'available'   => Fleet::where('status', 'available')->count(),
+            'rented'      => Fleet::where('status', 'rented')->count(),
+            'maintenance' => Fleet::where('status', 'maintenance')->count(),
+        ];
+
+        // 2. Setup query
+        $query = Fleet::query();
+
+        // 3. Search Logic
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('make', 'like', "%{$search}%")
+                  ->orWhere('model', 'like', "%{$search}%")
+                  ->orWhere('plate_number', 'like', "%{$search}%");
+            });
+        }
+
+        // 4. Filter Logic
+        if ($filter = $request->input('filter')) {
+            if ($filter !== 'all') {
+                $query->where('status', $filter);
+            }
+        }
+
+        $vehicles = $query->latest()->paginate(9)->withQueryString();
+
+        return view('staff.fleet.index', compact('vehicles', 'stats'));
+    }
+
+    /**
+     * Display Rewards for Staff.
+     */
     public function rewards()
-{
-    // 1. Fetch data from the database
-    $activeRewards = Reward::where('rewardStatus', 'Active')->get();
-    $inactiveRewards = Reward::where('rewardStatus', 'Inactive')->get();
+    {
+        $activeRewards = Reward::where('rewardStatus', 'Active')->get();
+        $inactiveRewards = Reward::where('rewardStatus', 'Inactive')->get();
 
-    // 2. Prepare the $stats variable that the view is looking for
-    $stats = [
-        'total'  => Reward::count(),
-        'active' => $activeRewards->count(),
-        'slots'  => $activeRewards->sum('totalClaimable'),
-    ];
+        $stats = [
+            'total'  => Reward::count(),
+            'active' => $activeRewards->count(),
+            'slots'  => $activeRewards->sum('totalClaimable'),
+        ];
 
-    // 3. Pass all variables to the view using compact
-    return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
-}
-
+        return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
+    }
 }

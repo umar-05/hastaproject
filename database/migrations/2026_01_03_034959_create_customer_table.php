@@ -32,7 +32,10 @@ return new class extends Migration
             $table->tinyText('emerelation')->nullable();
             $table->tinyText('bankName')->nullable();
             $table->bigInteger('accountNum')->nullable();
-            
+            $table->string('doc_ic_passport')->nullable(); 
+            $table->string('doc_license')->nullable();
+            $table->string('doc_matric')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
         });

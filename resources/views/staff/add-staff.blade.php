@@ -1,138 +1,135 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-bold text-2xl text-hasta-red leading-tight">
-            {{ __('Add New Staff Member') }}
-        </h2>
-    </x-slot>
+<x-staff-layout>
+    <div class="max-w-7xl mx-auto py-8 px-4">
+        
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">Staff Record</h2>
+            <p class="text-gray-500">Manage staff information and performance</p>
+        </div>
 
-    <div class="py-12 bg-gray-50">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-[30px] border border-gray-100">
-                <div class="p-8 md:p-12">
-                    
-                    <div class="mb-8">
-                        <h3 class="text-xl font-bold text-gray-900 flex items-center">
-                            <div class="p-2 bg-red-100 rounded-lg mr-3">
-                                <svg class="w-6 h-6 text-hasta-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                            </div>
-                            Staff Account Details
-                        </h3>
-                        <p class="mt-2 text-gray-500 text-sm ml-14">
-                            Create a new account for a staff member. They will receive an email to verify their account.
-                        </p>
-                    </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center">
+                <div class="h-14 w-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mr-4">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                </div>
+                <div>
+                    <p class="text-3xl font-bold text-gray-900">{{ $totalStaffCount ?? '24' }}</p>
+                    <p class="text-gray-500 text-sm">Total Staff</p>
+                </div>
+            </div>
 
-                    <form method="POST" action="{{ route('staff.store') }}">
-                        @csrf
+            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center">
+                <div class="h-14 w-14 rounded-xl bg-green-50 text-green-600 flex items-center justify-center mr-4">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1" /></svg>
+                </div>
+                <div>
+                    <p class="text-3xl font-bold text-gray-900">{{ $driverCount ?? '12' }}</p>
+                    <p class="text-gray-500 text-sm">Drivers</p>
+                </div>
+            </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            
-                            <div class="col-span-2 md:col-span-1">
-                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                    </div>
-                                    <input id="name" type="text" name="name" :value="old('name')" required autofocus placeholder="e.g. Ahmad Ali"
-                                        class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5 transition">
-                                </div>
-                                <x-input-error :messages="$errors->get('name')" class="mt-2" />
-                            </div>
+            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center">
+                <div class="h-14 w-14 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mr-4">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </div>
+                <div>
+                    <p class="text-3xl font-bold text-gray-900">{{ $adminCount ?? '8' }}</p>
+                    <p class="text-gray-500 text-sm">Admin Staff</p>
+                </div>
+            </div>
 
-                            <div class="col-span-2 md:col-span-1">
-                                <label for="phoneNum" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                        </svg>
-                                    </div>
-                                    <input id="phoneNum" type="text" name="phoneNum" :value="old('phoneNum')" placeholder="01X-XXXXXXX"
-                                        class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5 transition">
-                                </div>
-                                <x-input-error :messages="$errors->get('phoneNum')" class="mt-2" />
-                            </div>
-
-                            <div class="col-span-2">
-                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                                        </svg>
-                                    </div>
-                                    <input id="email" type="email" name="email" :value="old('email')" required placeholder="staff@hasta.com"
-                                        class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5 transition">
-                                </div>
-                                <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                            </div>
-
-                            <div class="col-span-2 md:col-span-1">
-                                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                        </svg>
-                                    </div>
-                                    <input id="password" type="password" name="password" required autocomplete="new-password" placeholder="••••••••"
-                                        class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5 transition">
-                                </div>
-                                <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                            </div>
-
-                            <div class="col-span-2 md:col-span-1">
-                                <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                        </svg>
-                                    </div>
-                                    <input id="password_confirmation" type="password" name="password_confirmation" required placeholder="••••••••"
-                                        class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50 py-2.5 transition">
-                                </div>
-                                <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-                            </div>
-
-                        </div>
-
-                        <div class="flex items-center justify-end space-x-4 pt-4 border-t border-gray-100">
-                            <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-gray-700 font-medium text-sm transition">
-                                Cancel
-                            </a>
-                            <button type="submit" class="bg-hasta-red hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:-translate-y-0.5 transition duration-150 ease-in-out">
-                                Create Staff Account
-                            </button>
-                        </div>
-
-                    </form>
+            <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center">
+                <div class="h-14 w-14 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center mr-4">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                </div>
+                <div>
+                    <p class="text-3xl font-bold text-gray-900">{{ $managerCount ?? '4' }}</p>
+                    <p class="text-gray-500 text-sm">Managers</p>
                 </div>
             </div>
         </div>
+
+        <div class="bg-white p-4 rounded-t-2xl border border-gray-200 border-b-0 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3 flex-1 min-w-[300px]">
+                <div class="relative flex-1 max-w-xs">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </span>
+                    <input type="text" placeholder="Search staff..." class="pl-10 w-full border-gray-200 rounded-lg focus:ring-[#bb1419] focus:border-[#bb1419] py-2">
+                </div>
+                <select class="border-gray-200 rounded-lg text-gray-600 py-2 focus:ring-[#bb1419] focus:border-[#bb1419]">
+                    <option>All Positions</option>
+                    <option>Drivers</option>
+                    <option>Admin Staff</option>
+                    <option>Manager</option>
+                </select>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button class="flex items-center px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 font-medium">
+                    Filter
+                </button>
+                <button class="flex items-center px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 font-medium">
+                    Export
+                </button>
+                <a href="{{ route('staff.add-stafffunctioning') }}" class="flex items-center px-4 py-2 bg-[#bb1419] text-white rounded-lg hover:bg-red-800 font-bold shadow-sm transition">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                    Add Staff
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-b-2xl overflow-hidden shadow-sm">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Staff ID</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Name</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Contact</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Status</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($staffs ?? [] as $staff)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ $staff->staffID }}</td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-bold text-gray-900">{{ $staff->name }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ $staff->email }}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Active</span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+    <div class="flex jus<td class="px-6 py-4 text-center">
+    <div class="flex justify-center items-center space-x-3">
+        {{-- Edit Button: Redirects to the hybrid form in Edit Mode --}}
+        <a href="{{ route('staff.edit-staff', $staff->staffID) }}" class="text-blue-600 hover:text-blue-900 transition" title="Edit Staff">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+        </a>
+
+        {{-- Delete Button: Submits a DELETE request --}}
+        <form action="{{ route('staff.destroy-staff', $staff->staffID) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this staff member?');" class="inline">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="text-red-600 hover:text-red-900 transition" title="Delete Staff">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </button>
+        </form>
     </div>
-@if (session('status'))
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-                title: 'Success!',
-                text: "{{ session('status') }}",
-                icon: 'success',
-                confirmButtonText: 'Add Another Staff',
-                confirmButtonColor: '#C84B43',
-                showCancelButton: true,
-                cancelButtonText: 'Go to Dashboard',
-            }).then((result) => {
-                
-                if (result.dismiss === Swal.DismissReason.cancel) {
-                    window.location.href = "{{ route('dashboard') }}";
-                }
-            });
-        });
-    </script>
-@endif
-</x-app-layout>
+</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-10 text-center text-gray-500">No staff found.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</x-staff-layout>

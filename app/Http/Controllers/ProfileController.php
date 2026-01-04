@@ -21,7 +21,7 @@ class ProfileController extends Controller
         $user = Auth::guard('customer')->user();
 
         return view('profile.edit', [
-            'user' => $user,
+            'user' => $request->user('customer'), // Explicitly specify 'customer' guard
         ]);
     }
 
@@ -30,12 +30,10 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $user = Auth::guard('customer')->user();
-
-        // Fill the user model with validated data
+        $user = $request->user('customer');
+        
         $user->fill($request->validated());
 
-        // Check if email changed to reset verification (optional)
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
@@ -54,7 +52,7 @@ class ProfileController extends Controller
             'password' => ['required', 'current_password'],
         ]);
 
-        $user = Auth::guard('customer')->user();
+        $user = $request->user('customer');
 
         Auth::guard('customer')->logout();
 
@@ -65,4 +63,37 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    /**
+ * Store the user's uploaded documents.
+ */
+public function storeDocuments(Request $request): RedirectResponse
+{
+    // 1. Validate the files
+    $request->validate([
+        'ic_passport' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'], // Max 5MB
+        'license'     => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+        'matric_card' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+    ]);
+
+    $user = $request->user('customer');
+
+    // 2. Handle File Uploads (Save to 'public' disk)
+    if ($request->hasFile('ic_passport')) {
+        $user->doc_ic_passport = $request->file('ic_passport')->store('documents', 'public');
+    }
+
+    if ($request->hasFile('license')) {
+        $user->doc_license = $request->file('license')->store('documents', 'public');
+    }
+
+    if ($request->hasFile('matric_card')) {
+        $user->doc_matric = $request->file('matric_card')->store('documents', 'public');
+    }
+
+    // 3. Save to Database
+    $user->save();
+
+    return Redirect::route('profile.edit')->with('status', 'documents-uploaded');
+}
 }

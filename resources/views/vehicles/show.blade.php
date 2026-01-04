@@ -132,7 +132,6 @@
                 <ul class="space-y-3 text-sm opacity-80">
                     <li><a href="{{ route('home') }}" class="hover:opacity-100">Home</a></li>
                     <li><a href="{{ route('contact') }}" class="hover:opacity-100">Contact us</a></li>
-                    <li><a href="{{ route('loyalty') }}" class="hover:opacity-100">Loyalty</a></li>
                 </ul>
             </div>
 

@@ -9,6 +9,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
@@ -60,7 +61,7 @@
         <div class="w-72 bg-gradient-to-b from-[#b91c1c] to-[#7f1d1d] flex-shrink-0 flex flex-col text-white shadow-xl z-20">
             
             <div class="h-24 flex items-center justify-center border-b border-white/10 p-4">
-                <img src="{{ asset('images/HASTALOGO.svg') }}" alt="HASTA Logo" class="h-10 w-auto"> {{-- Filter makes the red logo white for contrast --}}
+                <img src="{{ asset('images/HASTALOGO.svg') }}" alt="HASTA Logo" class="h-10 w-auto">
             </div>
 
             <div class="py-6 flex-1 overflow-y-auto">
@@ -72,7 +73,7 @@
                         Dashboard
                     </a>
 
-                    <a href="{{ route('bookings.index') }}" class="sidebar-link {{ request()->routeIs('bookings.*') ? 'active' : '' }}">
+                    <a href="{{ route('staff.bookingmanagement') }}" class="sidebar-link {{ request()->routeIs('staff.bookingmanagement') ? 'active' : '' }}">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         Bookings
                     </a>
@@ -82,12 +83,12 @@
                         Inspection / Pickup
                     </a>
 
-                    <a href="{{ route('vehicles.index') }}" class="sidebar-link {{ request()->routeIs('vehicles.*') ? 'active' : '' }}">
+                    <a href="{{ route('staff.fleet.index') }}" class="sidebar-link {{ request()->routeIs('staff.fleet.*') ? 'active' : '' }}">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v3.28a1 1 0 00.684.948l19.184 6.362M15 12h2a2 2 0 002-2V8a2 2 0 00-2-2h-4.143"></path></svg>
                         Fleet
                     </a>
 
-                    <a href="{{ route('staff.rewards') }}" class="sidebar-link {{ request()->routeIs('staff.reward*') ? 'active' : '' }}">
+                    <a href="{{ route('staff.reward.index') }}" class="sidebar-link {{ request()->routeIs('staff.reward.*') ? 'active' : '' }}">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
                         Rewards
                     </a>
@@ -126,8 +127,7 @@
         <div class="flex-1 flex flex-col overflow-hidden">
             
             <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 shadow-sm z-10">
-                <div>
-                    </div>
+                <div></div>
 
                 <div class="flex items-center space-x-6">
                     <div class="flex items-center space-x-3 border-l border-gray-100 pl-6">
@@ -151,53 +151,9 @@
 
             <main class="flex-1 overflow-y-auto bg-gray-50/50 p-8">
                 {{ $slot }}
+                @yield('content')
             </main>
         </div>
     </div>
-
-    <script>
-        // Temporarily disabled for testing
-        /*
-        // Prevent back button navigation after logout
-        (function() {
-            // Check if user is still authenticated
-            fetch('{{ route("auth.check") }}', {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            }).then(response => {
-                if (response.status === 401) {
-                    // User is not authenticated, force redirect to login
-                    window.location.replace('{{ route("login") }}');
-                }
-            }).catch(() => {
-                // If API call fails, force redirect to login
-                window.location.replace('{{ route("login") }}');
-            });
-
-            // Clear history state to prevent back navigation
-            if (window.history.replaceState) {
-                window.history.replaceState(null, null, window.location.href);
-            }
-
-            // Prevent back navigation
-            window.addEventListener('popstate', function(event) {
-                if (event.state === null) {
-                    // Force redirect to login
-                    window.location.replace('{{ route("login") }}');
-                }
-            });
-
-            // Additional protection: disable browser back button
-            window.history.pushState(null, null, window.location.href);
-            window.addEventListener('popstate', function() {
-                window.history.pushState(null, null, window.location.href);
-            });
-        })();
-        */
-    </script>
 </body>
 </html>
