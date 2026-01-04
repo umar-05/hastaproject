@@ -97,6 +97,11 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // Inside the staff middleware group in routes/web.php
     Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
     // Reward Management for Staff
+    // Add these inside the 'staff.' named group in web.php
+Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
+Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
+    Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
     Route::prefix('rewards')->name('reward.')->group(function() {
         Route::get('/', [RewardController::class, 'index'])->name('index'); 
         Route::get('/create', [RewardController::class, 'create'])->name('create');

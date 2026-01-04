@@ -76,6 +76,13 @@ class StaffController extends Controller
         ]);
     }
 
+    public function edit($staffID)
+    {
+        $staff = Staff::where('staffID', $staffID)->firstOrFail();
+        // Re-use the same "functioning" file!
+        return view('staff.add-stafffunctioning', compact('staff'));
+    }
+
     /**
      * Update the staff's profile information.
      */
@@ -109,6 +116,25 @@ class StaffController extends Controller
 
         return Redirect::route('staff.profile.edit')->with('status', 'profile-updated');
     }
+
+    public function update(Request $request, $staffID): \Illuminate\Http\RedirectResponse
+{
+    // Find the staff by their custom staffID
+    $staff = Staff::where('staffID', $staffID)->firstOrFail();
+
+    // Validate the data
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'position' => ['required', 'string', 'max:50'],
+        'email' => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique('staff')->ignore($staff->staffID, 'staffID')],
+    ]);
+
+    // Save changes
+    $staff->update($validated);
+
+    // Redirect back to the staff record list
+    return redirect()->route('staff.add-staff')->with('status', "Staff member $staffID updated successfully!");
+}
 
     /**
      * Show form to add new staff.
