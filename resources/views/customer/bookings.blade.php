@@ -254,5 +254,49 @@
         </div>
     </footer>
 
+    @auth('customer')
+    <script>
+        // Prevent back button navigation after logout for customers
+        (function() {
+            // Check if user is still authenticated
+            fetch('/api/auth-check', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            }).then(response => {
+                if (response.status === 401) {
+                    // User is not authenticated, force redirect to login
+                    window.location.replace('{{ route("login") }}');
+                }
+            }).catch(() => {
+                // If API call fails, force redirect to login to be safe
+                window.location.replace('{{ route("login") }}');
+            });
+
+            // Clear history state to prevent back navigation
+            if (window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.href);
+            }
+
+            // Prevent back navigation
+            window.addEventListener('popstate', function(event) {
+                if (event.state === null) {
+                    // Force redirect to login
+                    window.location.replace('{{ route("login") }}');
+                }
+            });
+
+            // Additional protection: disable browser back button
+            window.history.pushState(null, null, window.location.href);
+            window.addEventListener('popstate', function() {
+                window.history.pushState(null, null, window.location.href);
+            });
+        })();
+    </script>
+    @endauth
+
 </body>
 </html>

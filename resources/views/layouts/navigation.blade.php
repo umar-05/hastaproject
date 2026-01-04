@@ -1,21 +1,32 @@
-<header class="w-full bg-white">
+<header class="w-full bg-white shadow-sm">
     <div class="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
     
+    {{-- ============================== --}}
+    {{-- 1. LOGO SECTION                --}}
+    {{-- ============================== --}}
     <div class="flex items-center">
-        {{-- FIX: Direct Staff to 'staff.dashboard' --}}
-        @if(Auth::guard('staff')->check())
+        @auth('staff')
+            {{-- Staff -> Staff Dashboard --}}
             <a href="{{ route('staff.dashboard') }}">
-        @elseif(Auth::guard('customer')->check())
-            <a href="{{ route('home') }}">
         @else
-            <a href="{{ route('home') }}">
-        @endif
+            {{-- Guest OR Customer -> Home/Root --}}
+            <a href="{{ route('root') }}">
+        @endauth
             <img src="{{ asset('images/HASTALOGO.svg') }}" alt="HASTA Logo" class="h-10 w-auto">
         </a>
     </div>
 
+    {{-- ============================== --}}
+    {{-- 2. NAVIGATION LINKS            --}}
+    {{-- ============================== --}}
     <nav class="hidden md:flex items-center space-x-8 font-medium">
+        
+        {{-- CASE A: STAFF INTERFACE --}}
         @auth('staff')
+            <a href="{{ route('staff.dashboard') }}" class="text-gray-700 hover:text-hasta-red transition">
+                Dashboard
+            </a>
+
             <a href="{{ route('staff.add-staff') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
                 Add Staff
             </a>
@@ -28,55 +39,52 @@
                 Vehicles
             </a>
 
-            {{-- Placeholder routes (change back to route() when you create these pages) --}}
-            <a href="#" class="text-gray-700 hover:text-hasta-red transition">
-                Rewards
-            </a>
-
-            <a href="#" class="text-gray-700 hover:text-hasta-red transition">
+            <a href="{{ route('staff.report') }}" class="text-gray-700 hover:text-hasta-red transition">
                 Report
             </a>
         
-        @elseauth('customer')
-            <a href="{{ route('vehicles.index') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
-                Book Now
-            </a>
-
-            <a href="{{ route('bookings.index') }}" class="text-gray-700 hover:text-hasta-red transition">
-                Bookings
-            </a>
-
-            <a href="{{ route('rewards.index') }}" class="text-gray-700 hover:text-hasta-red transition">
-                Rewards
-            </a>
-
-            <a href="{{ route('faq') }}" class="text-gray-700 hover:text-hasta-red transition">
-                FAQ
-            </a>
-
+        {{-- CASE B: CUSTOMER & GUEST INTERFACE --}}
+        {{-- They see the same options, but the HREF changes based on login status --}}
         @else
-            <a href="{{ route('login') }}" class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
+            
+            {{-- 1. BOOK NOW BUTTON --}}
+            {{-- If Customer: Go to Vehicles. If Guest: Go to Login --}}
+            <a href="{{ Auth::guard('customer')->check() ? route('vehicles.index') : route('login') }}" 
+               class="bg-hasta-red hover:bg-red-700 text-white px-5 py-2 rounded-md font-bold transition shadow-md">
                 Book Now
             </a>
 
-            <a href="{{ route('login') }}" class="text-gray-700 hover:text-hasta-red transition">
+            {{-- 2. BOOKINGS LINK --}}
+            {{-- If Customer: Go to Bookings. If Guest: Go to Login --}}
+            <a href="{{ Auth::guard('customer')->check() ? route('bookings.index') : route('login') }}" 
+               class="text-gray-700 hover:text-hasta-red transition">
                 Bookings
             </a>
 
-            <a href="{{ route('login') }}" class="text-gray-700 hover:text-hasta-red transition">
+            {{-- 3. REWARDS LINK --}}
+            {{-- If Customer: Go to Rewards. If Guest: Go to Login --}}
+            <a href="{{ Auth::guard('customer')->check() ? route('rewards.index') : route('login') }}" 
+               class="text-gray-700 hover:text-hasta-red transition">
                 Rewards
             </a>
 
-            <a href="{{ route('login') }}" class="text-gray-700 hover:text-hasta-red transition">
+            {{-- 4. FAQ LINK --}}
+            {{-- Accessible by everyone (Public Route) --}}
+            <a href="{{ route('faq') }}" class="text-gray-700 hover:text-hasta-red transition">
                 FAQ
             </a>
         @endauth
     </nav>
 
+    {{-- ============================== --}}
+    {{-- 3. RIGHT SIDE (PROFILE/LOGIN)  --}}
+    {{-- ============================== --}}
     <div class="flex items-center space-x-6">
+        
+        {{-- IF LOGGED IN (Either Staff OR Customer) --}}
         @if(Auth::guard('staff')->check() || Auth::guard('customer')->check())
             
-            {{-- FIX: Conditional Link for Profile Edit --}}
+            {{-- Profile Link Logic --}}
             @if(Auth::guard('staff')->check())
                 <a href="{{ route('staff.profile.edit') }}" class="flex items-center text-sm font-medium text-gray-500 hover:text-red-600 transition duration-150 ease-in-out">
             @else
@@ -95,12 +103,15 @@
                 </span>
             </a>
 
+            {{-- Logout Button --}}
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="bg-hasta-red hover:bg-red-700 text-white font-bold py-2 px-8 rounded transition">
                     Logout
                 </button>
             </form>
+
+        {{-- IF GUEST (Not Logged In) --}}
         @else
             <a href="{{ route('login') }}" class="bg-hasta-red hover:bg-red-700 text-white font-bold py-2 px-8 rounded transition text-center">
                 Login
@@ -108,4 +119,48 @@
         @endif
     </div>
     </div>
+
+    @auth('staff')
+    <script>
+        // Prevent back button navigation after logout for staff
+        (function() {
+            // Check if user is still authenticated
+            fetch('/api/auth-check', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            }).then(response => {
+                if (response.status === 401) {
+                    // User is not authenticated, force redirect to login
+                    window.location.replace('{{ route("login") }}');
+                }
+            }).catch(() => {
+                // If API call fails, force redirect to login to be safe
+                window.location.replace('{{ route("login") }}');
+            });
+
+            // Clear history state to prevent back navigation
+            if (window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.href);
+            }
+
+            // Prevent back navigation
+            window.addEventListener('popstate', function(event) {
+                if (event.state === null) {
+                    // Force redirect to login
+                    window.location.replace('{{ route("login") }}');
+                }
+            });
+
+            // Additional protection: disable browser back button
+            window.history.pushState(null, null, window.location.href);
+            window.addEventListener('popstate', function() {
+                window.history.pushState(null, null, window.location.href);
+            });
+        })();
+    </script>
+    @endauth
 </header>
