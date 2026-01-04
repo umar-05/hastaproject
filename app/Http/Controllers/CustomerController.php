@@ -6,9 +6,35 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
+use App\Models\Customer;
 
 class CustomerController extends Controller
 {
+    public function index() {
+        $customers = Customer::all();
+        return view('staff.customermanagement', compact('customers'));
+    }
+
+    public function create()
+    {
+        return view('staff.create');
+    }
+
+    public function show($matricNum) {
+        $customer = Customer::where('matricNum', $matricNum)->firstOrFail();
+        return view('staff.customers.show', compact('customer'));
+    }
+
+    public function edit($matricNum) {
+        $customer = Customer::where('matricNum', $matricNum)->firstOrFail();
+        return view('staff.customers.edit', compact('customer'));
+    }
+
+    public function destroy($matricNum) {
+        Customer::where('matricNum', $matricNum)->delete();
+        return redirect()->back()->with('success', 'Customer deleted successfully');
+    }
+
     /**
      * Display the Customer Home / Dashboard page.
      * This corresponds to route('home')
@@ -37,4 +63,5 @@ class CustomerController extends Controller
     {
         return view('customer.faq');
     }
+
 }
