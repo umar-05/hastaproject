@@ -17,15 +17,12 @@ use App\Http\Controllers\StaffController;
 */
 
 // ==============================
-// 1. PUBLIC ROUTES
+// 1. PUBLIC ROUTES (Accessible by everyone)
 // ==============================
+// NOTE: We do NOT add 'prevent-back' here. This fixes the login loop.
 Route::get('/', fn() => view('home'))->name('root');
 Route::get('/faq', fn() => view('customer.faq'))->name('faq');
 Route::get('/contact', fn() => view('contact'))->name('contact');
-
-// Public Vehicle Browsing
-Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
-Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
 
 // OCR & Registration Logic (Guests only)
 Route::post('/ocr/process', [OcrController::class, 'process'])->name('ocr.process');
@@ -37,18 +34,26 @@ Route::post('/register/process-matric-card', [RegisteredUserController::class, '
 // ==============================
 // 2. CUSTOMER ROUTES (Guard: customer)
 // ==============================
-Route::middleware(['auth:customer', 'verified'])->group(function () {
-    // Customer Dashboard
+// ADDED: 'prevent-back'
+Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function () {
+    
+    // Dashboard
     Route::get('/home', [CustomerController::class, 'dashboard'])->name('home');
 
+    // Vehicle Booking (The "Book Now" Flow)
+    Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
+    Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
+    
     // Customer Rewards
     Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
     Route::get('/my-rewards', [RewardController::class, 'showClaimed'])->name('rewards.claimed');
     
-    // Booking Flow
+    // Booking Management
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
-    Route::post('/bookings/payment', [BookingController::class, 'payment'])->name('bookings.payment');
+    // Show single booking
+    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::match(['get','post'],'/bookings/payment', [BookingController::class, 'payment'])->name('bookings.payment');
     Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
@@ -59,26 +64,17 @@ Route::middleware(['auth:customer', 'verified'])->group(function () {
 // ==============================
 // 3. STAFF ROUTES (Guard: staff)
 // ==============================
-// Note: Changed 'auth' to 'auth:staff' to fix the login loop
-Route::middleware(['auth:staff'])->prefix('staff')->name('staff.')->group(function () {
+// ADDED: 'prevent-back'
+Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.')->group(function () {
     
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    // Staff Dashboard (This was causing the loop!)
-    Route::get('/dashboard', function () {
-        return view('dashboard'); 
-    })->name('dashboard');
-
-    Route::get('/staff/rewards', [StaffController::class, 'rewards'])->name('staff.rewards');
-=======
-=======
->>>>>>> Stashed changes
-    // --- 3.1 Staff Dashboard & Profile ---
+    // Staff Dashboard
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
+    Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingsmanage');
+
+    // Staff-Specific Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
->>>>>>> Stashed changes
 
     // --- 3.2 Staff Management & Utility ---
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
@@ -98,15 +94,7 @@ Route::middleware(['auth:staff'])->prefix('staff')->name('staff.')->group(functi
     
     // --- 3.5 Reward Management ---
     Route::prefix('rewards')->name('reward.')->group(function() {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        Route::get('/', [RewardController::class, 'index'])->name('index');
-=======
         Route::get('/', [RewardController::class, 'index'])->name('index'); 
->>>>>>> Stashed changes
-=======
-        Route::get('/', [RewardController::class, 'index'])->name('index'); 
->>>>>>> Stashed changes
         Route::get('/create', [RewardController::class, 'create'])->name('create');
         Route::post('/', [RewardController::class, 'store'])->name('store');
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
@@ -121,8 +109,8 @@ Route::middleware(['auth:staff'])->prefix('staff')->name('staff.')->group(functi
 // ==============================
 // 4. SHARED ROUTES (Profile)
 // ==============================
-// 'auth:customer,staff' means "Allow if logged in as Customer OR Staff"
-Route::middleware('auth:customer,staff')->group(function () {
+// ADDED: 'prevent-back'
+Route::middleware(['auth:customer', 'prevent-back'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -134,6 +122,15 @@ Route::middleware('auth:customer,staff')->group(function () {
 // ==============================
 require __DIR__.'/auth.php';
 
+// Fallback for default Laravel redirects
+// ADDED: 'prevent-back'
 Route::get('/dashboard', function () {
     return redirect()->route('staff.dashboard');
-})->middleware('auth:staff')->name('dashboard');
+})->middleware(['auth:staff', 'prevent-back'])->name('dashboard');
+
+// API endpoint to check authentication status
+Route::get('/api/auth-check', function () {
+    return Auth::guard('staff')->check() || Auth::guard('customer')->check() 
+        ? response()->json(['authenticated' => true]) 
+        : response()->json(['authenticated' => false], 401);
+})->name('auth.check');

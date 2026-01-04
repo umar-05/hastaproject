@@ -11,10 +11,13 @@ class Staff extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $table = 'staff';
+    
+    // Primary Key Configuration
     protected $primaryKey = 'staffID'; 
     public $incrementing = false;
     protected $keyType = 'string';
 
+    // Mass Assignment Allowlist
     protected $fillable = [
         'staffID',
         'position',
@@ -22,7 +25,7 @@ class Staff extends Authenticatable
         'email',
         'password',
         'phoneNum',
-        'icNum',
+        'icNum_passport',
         'address',
         'city',
         'postcode',
@@ -46,9 +49,6 @@ class Staff extends Authenticatable
      * The attributes that should be cast.
      */
     protected $casts = [
-        'phoneNum'   => 'integer',
-        'postcode'   => 'integer',
-        'emephoneNum'=> 'integer',
-        'accountNum' => 'integer',
+        'password' => 'hashed',
     ];
 }

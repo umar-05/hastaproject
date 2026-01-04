@@ -20,7 +20,7 @@
             
             <div class="relative z-10 max-w-xl">
                 <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6 drop-shadow-lg">
-                        Experience the road like never before
+                    Experience the road like never before
                 </h1>
                 <p class="text-sm md:text-base opacity-90 mb-8 max-w-md drop-shadow-md">
                     We believe your rental car should enhance your trip, not just be a part of it. Our fleet delivers a premium driving experience.
@@ -33,8 +33,6 @@
             </div>
         </section>
 
-        {{-- FIX 2: Active Booking Dashboard Section --}}
-        {{-- This only shows if the Controller passed $activeBooking and it is not null --}}
         @if(isset($activeBooking) && $activeBooking)
         <section class="mb-16 bg-gray-50 p-8 rounded-3xl border border-gray-100 shadow-sm">
             <div class="flex justify-between items-center mb-6">

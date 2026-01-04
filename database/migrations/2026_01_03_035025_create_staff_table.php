@@ -18,14 +18,14 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->bigInteger('phoneNum')->nullable();
-            $table->string('icNum')->unique()->nullable();
+            $table->string('phoneNum')->nullable();
+            $table->string('icNum_passport')->unique()->nullable();
             $table->text('address')->nullable();
             $table->text('city')->nullable();
             $table->integer('postcode')->nullable();
             $table->tinyText('state')->nullable();
             $table->string('eme_name')->nullable();
-            $table->integer('emephoneNum')->unique()->nullable();
+            $table->string('emephoneNum')->unique()->nullable();
             $table->tinyText('emerelation')->nullable();
             $table->tinyText('bankName')->nullable();
             $table->bigInteger('accountNum')->nullable();

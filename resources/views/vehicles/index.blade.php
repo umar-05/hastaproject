@@ -9,14 +9,18 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-@if(session('error'))
-    <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg mb-6 max-w-7xl mx-auto">
-        <strong>Error:</strong> {{ session('error') }}
-    </div>
-@endif
 <body class="font-sans antialiased text-gray-900 bg-white">
 
     @include('layouts.navigation')
+
+    {{-- Error Message Display --}}
+    @if(session('error'))
+        <div class="max-w-7xl mx-auto px-8 mt-6">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg">
+                <strong>Error:</strong> {{ session('error') }}
+            </div>
+        </div>
+    @endif
 
     <main class="max-w-7xl mx-auto px-8 py-12">
 
@@ -25,9 +29,8 @@
             <p class="text-gray-600 text-lg">Choose the perfect vehicle for your journey</p>
         </section>
 
-        <!-- Filter Buttons -->
         <div class="flex flex-wrap gap-3 mb-8">
-            <button class="filter-btn active bg-gray-200 text-gray-700 px-6 py-2 rounded-full hover:bg-gray-300 transition font-medium" data-filter="all">
+            <button class="filter-btn active bg-hasta-red text-white px-6 py-2 rounded-full hover:bg-red-700 transition font-medium" data-filter="all">
                 All vehicles
             </button>
             <button class="filter-btn bg-gray-200 text-gray-700 px-6 py-2 rounded-full hover:bg-gray-300 transition font-medium" data-filter="Sedan">
@@ -44,9 +47,9 @@
             </button>
         </div>
 
-        <!-- Vehicle Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
             @foreach($vehicles as $vehicle)
+            {{-- NOTICE: Changed back to array syntax since controller returns arrays --}}
             <div class="vehicle-card bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition" data-type="{{ $vehicle['type'] }}">
                 <div class="mb-4">
                     <img src="{{ asset('images/'.$vehicle['image']) }}" alt="{{ $vehicle['name'] }}" class="w-full h-40 object-contain">
@@ -79,15 +82,20 @@
                         <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
-                        Air Conditioner
+                        Air Cond
                     </span>
                     @endif
                 </div>
+
+                {{-- ========================================== --}}
+                {{-- FIX: PASSED $vehicle['id'] TO THE ROUTE      --}}
+                {{-- ========================================== --}}
                 <a href="{{ route('vehicles.show', $vehicle['id']) }}">
-                    <button class="w-full bg-hasta-red hover:bg-hasta-redHover text-white font-bold py-3 rounded transition">
+                    <button class="w-full bg-hasta-red hover:bg-red-700 text-white font-bold py-3 rounded transition">
                         View Details
                     </button>
                 </a>
+
             </div>
             @endforeach
         </div>
@@ -119,7 +127,6 @@
                 <ul class="space-y-3 text-sm opacity-80">
                     <li><a href="{{ route('home') }}" class="hover:opacity-100">Home</a></li>
                     <li><a href="{{ route('contact') }}" class="hover:opacity-100">Contact us</a></li>
-                    <li><a href="{{ route('loyalty') }}" class="hover:opacity-100">Loyalty</a></li>
                 </ul>
             </div>
 
@@ -135,8 +142,7 @@
             </div>
         </div>
         <div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-red-800 flex space-x-6">
-            <a href="#" class="bg-black rounded-full p-2"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg></a>
-            <a href="#" class="bg-black rounded-full p-2"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.012 3.584-.07 4.85c-.148 3.252-1.667 4.771-4.919 4.919-1.266.058-1.644.069-4.85.069s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.012-3.584.07-4.85c.148-3.252 1.667-4.771 4.919-4.919 1.266-.058 1.645-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+            <span class="text-xs opacity-50">&copy; 2026 HASTA Travel & Tours. All rights reserved.</span>
         </div>
     </footer>
 
@@ -170,4 +176,3 @@
     </script>
 </body>
 </html>
-

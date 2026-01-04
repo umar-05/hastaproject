@@ -21,7 +21,7 @@ class Customer extends Authenticatable
         'email', 
         'password', 
         'phoneNum',
-        'icNum',
+        'icNum_passport',
         'address', 
         'city', 
         'postcode', 

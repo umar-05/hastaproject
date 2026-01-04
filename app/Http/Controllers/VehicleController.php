@@ -9,7 +9,21 @@ class VehicleController extends Controller
 {
     public function index()
     {
-        $vehicles = \App\Models\Fleet::all(); // Fetches all cars from the database
+        // Map fleet models into the same array format used by the customer book-now view
+        $vehicles = \App\Models\Fleet::all()->map(function($fleet) {
+            $vehicleInfo = $this->getVehicleInfo($fleet->modelName, $fleet->year);
+            return [
+                'id' => $fleet->plateNumber,
+                'name' => $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : ''),
+                'type' => $vehicleInfo['type'],
+                'price' => $vehicleInfo['price'],
+                'image' => $vehicleInfo['image'],
+                'transmission' => 'Automat',
+                'fuel' => 'RON 95',
+                'ac' => true
+            ];
+        })->toArray();
+
         return view('vehicles.index', compact('vehicles'));
         $fleet = App\Models\Fleet::orderBy('model_name')->paginate(9);
 
@@ -32,11 +46,11 @@ class VehicleController extends Controller
     {
         // Fetch all vehicles from the database
         $vehicles = Fleet::where('status', 'available')->get()->map(function($fleet) {
-            $vehicleInfo = $this->getVehicleInfo($fleet->model_name, $fleet->year);
-            
+            $vehicleInfo = $this->getVehicleInfo($fleet->modelName, $fleet->year);
+
             return [
-                'id' => $fleet->fleet_id,
-                'name' => $fleet->model_name . ($fleet->year ? ' ' . $fleet->year : ''),
+                'id' => $fleet->plateNumber,
+                'name' => $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : ''),
                 'type' => $vehicleInfo['type'],
                 'price' => $vehicleInfo['price'],
                 'image' => $vehicleInfo['image'],
@@ -61,7 +75,7 @@ class VehicleController extends Controller
     {
         $modelName = strtolower($modelName);
         $year = $year ?? '';
-        
+
         // Determine vehicle type
         $type = 'Sedan'; // default
         if (strpos($modelName, 'axia') !== false || strpos($modelName, 'myvi') !== false) {
@@ -73,15 +87,15 @@ class VehicleController extends Controller
         } elseif (strpos($modelName, 'aruz') !== false) {
             $type = 'SUV';
         }
-        
+
         // Determine image filename
         $image = 'default-car.png';
         if (strpos($modelName, 'axia') !== false) {
-            $image = $year == 2024 ? 'axia-2024.png' : 'axia-2018.png';
+            $image = $year == 2024 ? 'axia-2024.png' : 'axia-2018.png';        
         } elseif (strpos($modelName, 'bezza') !== false) {
             $image = 'bezza-2018.png';
         } elseif (strpos($modelName, 'myvi') !== false) {
-            $image = $year >= 2020 ? 'myvi-2020.png' : 'myvi-2015.png';
+            $image = $year >= 2020 ? 'myvi-2020.png' : 'myvi-2015.png';        
         } elseif (strpos($modelName, 'saga') !== false) {
             $image = 'saga-2017.png';
         } elseif (strpos($modelName, 'alza') !== false) {
@@ -91,14 +105,14 @@ class VehicleController extends Controller
         } elseif (strpos($modelName, 'vellfire') !== false) {
             $image = 'vellfire-2020.png';
         }
-        
+
         // Determine price
         $price = 120; // default
         if (strpos($modelName, 'bezza') !== false) {
             $price = 140;
-        } elseif (strpos($modelName, 'myvi') !== false && $year >= 2020) {
+        } elseif (strpos($modelName, 'myvi') !== false && $year >= 2020) {     
             $price = 150;
-        } elseif (strpos($modelName, 'axia') !== false && $year == 2024) {
+        } elseif (strpos($modelName, 'axia') !== false && $year == 2024) {     
             $price = 130;
         } elseif (strpos($modelName, 'alza') !== false) {
             $price = 200;
@@ -107,7 +121,7 @@ class VehicleController extends Controller
         } elseif (strpos($modelName, 'vellfire') !== false) {
             $price = 500;
         }
-        
+
         return [
             'type' => $type,
             'price' => $price,
@@ -117,35 +131,35 @@ class VehicleController extends Controller
 
     public function show($id)
     {
-        // Try to find the fleet in database
-        $fleet = Fleet::where('fleet_id', $id)->first();
-        
+        // Try to find the fleet in database (fleet primary key is plateNumber)
+        $fleet = Fleet::where('plateNumber', $id)->first();
+
         if ($fleet) {
-            // If found in database, convert to array format for the view
-            $vehicleInfo = $this->getVehicleInfo($fleet->model_name, $fleet->year);
+            // If found in database, convert to array format for the view      
+            $vehicleInfo = $this->getVehicleInfo($fleet->modelName, $fleet->year);
             $vehicle = [
-                'id' => $fleet->fleet_id,
-                'name' => $fleet->model_name . ($fleet->year ? ' ' . $fleet->year : ''),
+                'id' => $fleet->plateNumber,
+                'name' => $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : ''),
                 'type' => $vehicleInfo['type'],
                 'price' => $vehicleInfo['price'],
                 'image' => $vehicleInfo['image'],
                 'transmission' => 'Automat',
                 'fuel' => 'RON 95',
                 'ac' => true,
-                'description' => 'A reliable vehicle for your travel needs.',
+                'description' => 'A reliable vehicle for your travel needs.',  
                 'seats' => 5,
                 'luggage' => 2
             ];
         } else {
             // If not found, check hardcoded data
             $hardcodedVehicles = $this->getHardcodedVehicles();
-            $vehicle = collect($hardcodedVehicles)->firstWhere('id', $id);
-            
+            $vehicle = collect($hardcodedVehicles)->firstWhere('id', $id);     
+
             if (!$vehicle) {
                 abort(404, 'Vehicle not found');
             }
         }
-        
+
         return view('vehicles.show', compact('vehicle'));
     }
 

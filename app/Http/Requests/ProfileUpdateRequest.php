@@ -23,7 +23,7 @@ class ProfileUpdateRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', 'unique:customer,email,'.$user->matricNum.',matricNum'],
             'phoneNum' => ['required', 'numeric'],
             'faculty' => ['required', 'string', 'max:255'],
-            'icNum' => ['required', 'string', 'max:20'],
+            'icNum_passport' => ['required', 'string', 'max:20'],
 
             // Optional / Nullable Fields (Address)
             'collegeAddress' => ['nullable', 'string'],

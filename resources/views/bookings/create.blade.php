@@ -52,7 +52,7 @@
                     <img src="{{ asset('images/' . $image) }}" alt="{{ $vehicleName }}" class="w-32 h-32 object-contain">
                     <div class="flex-1">
                         <h2 class="text-xl font-bold text-gray-800">{{ $vehicleName }}</h2>
-                        <p class="text-gray-600">{{ $car->plate_number }}</p>
+                        <p class="text-gray-600">{{ $car->plateNumber }}</p>
                         <div class="flex gap-4 mt-2">
                             <span class="text-red-600 font-semibold">RM{{ $pricePerDay }}/day</span>
                             <span class="text-gray-600">Deposit: RM{{ $car->deposit ?? 50 }}</span>
@@ -60,7 +60,7 @@
                     </div>
                 </div>
 
-                <input type="hidden" name="fleet_id" value="{{ $car->fleet_id }}">
+                <input type="hidden" name="plateNumber" value="{{ $car->plateNumber }}">
                 <input type="hidden" name="price_per_day" id="price_per_day_input" value="{{ $pricePerDay }}">
                 <input type="hidden" name="total_amount" id="total_amount_input" value="{{ $pricePerDay }}">
                 <input type="hidden" name="deposit_amount" id="deposit_amount_input" value="{{ $car->deposit ?? 50 }}">
