@@ -71,7 +71,7 @@
                 <button class="flex items-center px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 font-medium">
                     Export
                 </button>
-                <a href="{{ route('staff.add-staff') }}" class="flex items-center px-4 py-2 bg-[#bb1419] text-white rounded-lg hover:bg-red-800 font-bold shadow-sm transition">
+                <a href="{{ route('staff.add-stafffunctioning') }}" class="flex items-center px-4 py-2 bg-[#bb1419] text-white rounded-lg hover:bg-red-800 font-bold shadow-sm transition">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                     Add Staff
                 </a>
