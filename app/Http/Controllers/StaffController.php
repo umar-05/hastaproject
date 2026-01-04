@@ -119,6 +119,17 @@ class StaffController extends Controller
             return redirect()->route('login');
         }
 
+    $staffs = Staff::all();
+
+    // 3. Send the data to the page
+    return view('staff.add-staff', [
+        'staffs' => $staffs, // This fills the table
+        'totalStaffCount' => $staffs->count(), // Fills Card 1
+        'driverCount' => $staffs->where('position', 'Driver')->count(), // Fills Card 2
+        'adminCount' => $staffs->where('position', 'Administrator')->count(), // Fills Card 3
+        'managerCount' => $staffs->where('position', 'Manager')->count(), // Fills Card 4
+    ]);
+
         // FIX: Changed from 'staff.add' to 'staff.add-staff'
         return view('staff.add-staff'); 
     }
