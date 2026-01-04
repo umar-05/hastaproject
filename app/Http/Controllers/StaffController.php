@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
 use App\Models\Booking; 
+use App\Models\Fleet;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse; 
 use Illuminate\Support\Facades\Auth;
@@ -186,6 +187,49 @@ class StaffController extends Controller
     }
 
     /**
+     * Display the Fleet Management page.
+     */
+    /**
+     * Display the Fleet Management page with filtering and search.
+     */
+    public function fleet(Request $request): View
+    {
+        // 1. Calculate Stats for the Top Cards
+        $stats = [
+            'total'       => Fleet::count(),
+            'available'   => Fleet::where('status', 'available')->count(),
+            'rented'      => Fleet::where('status', 'rented')->count(),
+            'maintenance' => Fleet::where('status', 'maintenance')->count(),
+        ];
+
+        // 2. Start the Query
+        $query = Fleet::query();
+
+        // 3. Handle Search (search by make, model, or plate number)
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('make', 'like', "%{$search}%")
+                  ->orWhere('model', 'like', "%{$search}%")
+                  ->orWhere('plate_number', 'like', "%{$search}%");
+            });
+        }
+
+        // 4. Handle Status Filter
+        // If filter is present and is NOT 'all', filter by status
+        if ($filter = $request->input('filter')) {
+            if ($filter !== 'all') {
+                $query->where('status', $filter);
+            }
+        }
+
+        // 5. Get Results (Paginated)
+        $vehicles = $query->latest()->paginate(9);
+
+        return view('staff.fleet.index', compact('vehicles', 'stats'));
+    }
+    
+
+    /**
      * Bookings management list for staff
      */
     public function bookingManagement(Request $request): View
@@ -224,5 +268,55 @@ class StaffController extends Controller
             'pendingVerificationCount' => $pendingVerificationCount,
             'completedCount' => $completedCount,
         ]);
+    }
+
+    /**
+     * Show the form for creating a new vehicle.
+     */
+    public function createVehicle(): View
+    {
+        return view('staff.fleet.create');
+    }
+
+    /**
+     * Store a newly created vehicle in storage.
+     */
+    public function storeVehicle(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'make' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'plate_number' => 'required|string|max:20|unique:vehicles',
+            'year' => 'required|integer|min:2000|max:' . (date('Y') + 1),
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        $data = $request->except('image');
+        $data['status'] = 'available'; // Default status
+        $data['fuel_level'] = 100;     // Default fuel
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('vehicles', 'public');
+        }
+
+        Fleet::create($data);
+
+        return redirect()->route('staff.fleet.index')->with('status', 'Vehicle added successfully!');
+    }
+
+    /**
+     * Delete a vehicle (Functional Delete Button).
+     */
+    public function destroyVehicle($id): RedirectResponse
+    {
+        $vehicle = Fleet::findOrFail($id);
+        
+        // Optional: Delete the image file if exists
+        // if ($vehicle->image) Storage::disk('public')->delete($vehicle->image);
+
+        $vehicle->delete();
+
+        return redirect()->route('staff.fleet.index')
+            ->with('status', 'Vehicle deleted successfully.');
     }
 }
