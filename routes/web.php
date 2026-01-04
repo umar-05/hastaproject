@@ -42,10 +42,12 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     // Vehicle Booking
     Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
     Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
-    
-    // Rewards
-    Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
-    Route::get('/my-rewards', [RewardController::class, 'showClaimed'])->name('rewards.claimed');
+
+    // Rewards Store
+    Route::get('/rewards', [RewardController::class, 'index'])->name('reward.index');
+    Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('reward.claimed');
+    Route::post('/rewards/claim', [RewardController::class, 'claim'])->name('rewards.claim');
+
     
     // Booking Management
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
@@ -97,14 +99,17 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
     
-    // Reward Management -> /staff/rewards/...
-    Route::prefix('rewards')->name('reward.')->group(function() {
-        Route::get('/', [RewardController::class, 'index'])->name('index'); 
-        Route::get('/create', [RewardController::class, 'create'])->name('create');
-        Route::post('/', [RewardController::class, 'store'])->name('store');
-        Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
-        Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
-    });
+    // Reward Management for Staff
+    Route::get('/dashboard/reward', function() {
+            return view('staff.rewards');
+        })->name('rewards');
+
+        // Your existing dashboard route
+        Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
+
+        // Reward management routes (under /staff/dashboard)
+        Route::get('/dashboard/reward', [RewardController::class, 'index'])->name('rewards');
+        Route::post('/dashboard/reward', [RewardController::class, 'store'])->name('rewards.store');
 });
 
 

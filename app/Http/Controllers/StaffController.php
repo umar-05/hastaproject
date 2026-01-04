@@ -4,16 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
+use App\Models\Reward;
+use App\Models\Booking;
 use App\Models\Booking; 
 use App\Models\Fleet;
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse; 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class StaffController extends Controller
 {
@@ -238,85 +240,24 @@ class StaffController extends Controller
             return redirect()->route('login');
         }
 
-        $bookings = Booking::with(['customer', 'fleet', 'reward'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-
-        // Compute dashboard metrics (case-insensitive status checks)
-        $totalBookings = Booking::count();
-        $confirmedCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['confirmed'])->count();
-        $pendingCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['pending'])->count();
-        $completedCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['completed'])->count();
-
-        // Pending verification: if the `payment_status` column exists, use it;
-        // otherwise fall back to counting pending bookings.
-        if (Schema::hasColumn('booking', 'payment_status')) {
-            $pendingVerificationCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['pending'])
-                ->where(function($q) {
-                    $q->whereNull('payment_status')
-                      ->orWhereRaw('LOWER(payment_status) <> ?', ['paid']);
-                })->count();
-        } else {
-            $pendingVerificationCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['pending'])->count();
-        }
-
-        return view('staff.bookingmanagement', [
-            'bookings' => $bookings,
-            'totalBookings' => $totalBookings,
-            'confirmedCount' => $confirmedCount,
-            'pendingCount' => $pendingCount,
-            'pendingVerificationCount' => $pendingVerificationCount,
-            'completedCount' => $completedCount,
-        ]);
+        return view('staff.reports'); // Ensure this view exists
     }
 
-    /**
-     * Show the form for creating a new vehicle.
-     */
-    public function createVehicle(): View
-    {
-        return view('staff.fleet.create');
-    }
+    public function rewards()
+{
+    // 1. Fetch data from the database
+    $activeRewards = Reward::where('rewardStatus', 'Active')->get();
+    $inactiveRewards = Reward::where('rewardStatus', 'Inactive')->get();
 
-    /**
-     * Store a newly created vehicle in storage.
-     */
-    public function storeVehicle(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'make' => 'required|string|max:255',
-            'model' => 'required|string|max:255',
-            'plate_number' => 'required|string|max:20|unique:vehicles',
-            'year' => 'required|integer|min:2000|max:' . (date('Y') + 1),
-            'image' => 'nullable|image|max:2048',
-        ]);
+    // 2. Prepare the $stats variable that the view is looking for
+    $stats = [
+        'total'  => Reward::count(),
+        'active' => $activeRewards->count(),
+        'slots'  => $activeRewards->sum('totalClaimable'),
+    ];
 
-        $data = $request->except('image');
-        $data['status'] = 'available'; // Default status
-        $data['fuel_level'] = 100;     // Default fuel
+    // 3. Pass all variables to the view using compact
+    return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
+}
 
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('vehicles', 'public');
-        }
-
-        Fleet::create($data);
-
-        return redirect()->route('staff.fleet.index')->with('status', 'Vehicle added successfully!');
-    }
-
-    /**
-     * Delete a vehicle (Functional Delete Button).
-     */
-    public function destroyVehicle($id): RedirectResponse
-    {
-        $vehicle = Fleet::findOrFail($id);
-        
-        // Optional: Delete the image file if exists
-        // if ($vehicle->image) Storage::disk('public')->delete($vehicle->image);
-
-        $vehicle->delete();
-
-        return redirect()->route('staff.fleet.index')
-            ->with('status', 'Vehicle deleted successfully.');
-    }
 }

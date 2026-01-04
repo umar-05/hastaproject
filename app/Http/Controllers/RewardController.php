@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Reward;
+use App\Models\RewardRedemption;
 
 class RewardController extends Controller
 {
@@ -13,26 +15,37 @@ class RewardController extends Controller
      * @return \Illuminate\View\View
      */
     public function index()
-    {
-        // In real app: fetch user's stamps from DB
-        // For demo, we'll pass dummy data or let frontend handle it
-        return view('rewards.customer');
-    }
+{
+    $user = Auth::user();
+
+    $availableRewards = Reward::active() // Uses your scopeActive from Reward.php
+        ->where('totalClaimable', '>', 0)
+        // This hides rewards the user has already claimed
+        ->whereDoesntHave('redemptions', function($query) use ($user) {
+            $query->where('matricNum', $user->matricNum);
+        })
+        ->get();
+
+    return view('reward.customer', compact('availableRewards'));
+}
+
+
 
     /**
      * Show the user's claimed rewards.
      *
      * @return \Illuminate\View\View
      */
-    public function showClaimed()
+    public function claimed()
     {
-        // In a real app, you'd fetch from the database:
-        // $claimedRewards = Auth::user()->claimedRewards;
+        $customer = Auth::user();
 
-        // For now, we'll pass an empty array — the frontend will load from localStorage
-        // (or later you can replace this with real DB data)
+        // Fetch rewards claimed by this user, including the reward details
+        $myRewards = RewardRedemption::with('reward')
+            ->where('matricNum', $customer->matricNum)
+            ->get();
 
-        return view('rewards.my-rewards');
+        return view('reward.claimed', compact('myRewards'));
     }
 
     /**
@@ -42,17 +55,64 @@ class RewardController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function claim(Request $request)
+
+public function claim(Request $request)
+{
+    $request->validate(['rewardID' => 'required|exists:reward,rewardID']);
+    
+    $reward = Reward::where('rewardID', $request->rewardID)->first();
+    $customer = Auth::user();
+
+    // 2. Logic: Ensure user has enough stamps
+    if ($customer->stamps < $reward->rewardPoints) {
+        return back()->with('error', 'Not enough stamps!');
+    }
+
+    // 3. Create the Database Link
+    \App\Models\Reward::create([
+        'matricNum' => $customer->matricNum,
+        'rewardID' => $reward->rewardID,
+        'redemptionDate' => now(),
+    ]);
+
+    // 4. Update the Reward table (reduce slots)
+    $reward->decrement('totalClaimable');
+
+    return redirect()->route('reward.claimed')->with('success', 'Reward claimed successfully!');
+}
+
+    public function store(Request $request)
     {
-        $request->validate([
-            'code' => 'required|string',
-            'title' => 'required|string',
-            'description' => 'required|string',
+        // 1. Validate the incoming data
+        $validated = $request->validate([
+            // CHANGE: 'unique:rewards' -> 'unique:reward'
+            'voucherCode'    => 'required|string|unique:reward,voucherCode', 
+            'rewardType'     => 'required|string',
+            'rewardAmount'   => 'required|numeric|min:1',
+            'rewardPoints'   => 'required|integer|min:1',
+            'totalClaimable' => 'required|integer|min:1',
+            'expiryDate'     => 'required|date',
+            'rewardStatus'   => 'required|string',
         ]);
 
-        // Example: Save to claimed_rewards table
-        // Auth::user()->claimedRewards()->create($request->only('code', 'title', 'description'));
+        // 2. Generate a manual ID (since rewardID is not auto-incrementing)
+        $rewardID = 'REW-' . strtoupper(\Illuminate\Support\Str::random(6));
 
-        return response()->json(['success' => true, 'message' => 'Reward claimed!']);
+        // 3. Save to Database
+        \App\Models\Reward::create([
+            'rewardID'       => $rewardID,
+            'voucherCode'    => strtoupper($validated['voucherCode']),
+            'rewardType'     => $validated['rewardType'],
+            'rewardAmount'   => $validated['rewardAmount'],
+            'rewardPoints'   => $validated['rewardPoints'],
+            'totalClaimable' => $validated['totalClaimable'],
+            'expiryDate'     => $validated['expiryDate'],
+            'rewardStatus'   => $validated['rewardStatus'],
+        ]);
+
+        // 4. Redirect
+        return redirect()->route('staff.rewards')->with('success', 'Reward created successfully!');
     }
+
+    
 }

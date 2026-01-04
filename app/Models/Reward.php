@@ -11,14 +11,17 @@ class Reward extends Model
 
     protected $table = 'reward';
     protected $primaryKey = 'rewardID';
-
+    public $incrementing = false;
+    protected $keyType = 'string';
+    
     protected $fillable = [
-        'rewardPoints',
-        'voucherCode',
-        'rewardType',
-        'rewardAmount',
-        'totalClaimable',
-        'expiryDate',
+        'rewardID', 
+        'rewardPoints', 
+        'voucherCode', 
+        'rewardType', 
+        'rewardAmount', 
+        'totalClaimable', 
+        'expiryDate', 
         'rewardStatus',
     ];
 
@@ -35,6 +38,17 @@ class Reward extends Model
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'rewardID', 'rewardID');
+    }
+
+    public function staff()
+    {
+        return $this->belongsToMany(Staff::class, 'rewardmanagement', 'rewardID', 'staffID');
+    }
+
+    public function redemptions()
+    {
+        // A reward can be redeemed many times by different customers
+        return $this->hasMany(RewardRedemption::class, 'rewardID', 'rewardID');
     }
 
     /**
