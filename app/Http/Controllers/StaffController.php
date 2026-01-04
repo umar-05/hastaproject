@@ -10,6 +10,7 @@ use App\Models\Fleet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
@@ -224,9 +225,40 @@ class StaffController extends Controller
      */
     public function bookingManagement(Request $request): View
     {
-        // FIX: Ensure you have a view named 'staff.bookings' or similar. 
-        // 'staff.reports' is likely for the analytics page.
-        return view('staff.bookings'); 
+        if (!Auth::guard('staff')->check()) {
+            return redirect()->route('login');
+        }
+
+        $bookings = Booking::with(['customer', 'fleet', 'reward'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        // Compute dashboard metrics (case-insensitive status checks)
+        $totalBookings = Booking::count();
+        $confirmedCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['confirmed'])->count();
+        $pendingCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['pending'])->count();
+        $completedCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['completed'])->count();
+
+        // Pending verification: if the `payment_status` column exists, use it;
+        // otherwise fall back to counting pending bookings.
+        if (Schema::hasColumn('booking', 'payment_status')) {
+            $pendingVerificationCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['pending'])
+                ->where(function($q) {
+                    $q->whereNull('payment_status')
+                      ->orWhereRaw('LOWER(payment_status) <> ?', ['paid']);
+                })->count();
+        } else {
+            $pendingVerificationCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['pending'])->count();
+        }
+
+        return view('staff.bookingmanagement', [
+            'bookings' => $bookings,
+            'totalBookings' => $totalBookings,
+            'confirmedCount' => $confirmedCount,
+            'pendingCount' => $pendingCount,
+            'pendingVerificationCount' => $pendingVerificationCount,
+            'completedCount' => $completedCount,
+        ]);
     }
 
     /**
