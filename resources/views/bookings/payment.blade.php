@@ -7,14 +7,7 @@
 
         <form action="{{ route('bookings.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            <input type="hidden" name="fleet_id" value="{{ $booking_data['fleet_id'] }}">
-            <input type="hidden" name="start_date" value="{{ $booking_data['start_date'] }}">
-            <input type="hidden" name="start_time" value="{{ $booking_data['start_time'] }}">
-            <input type="hidden" name="end_date" value="{{ $booking_data['end_date'] }}">
-            <input type="hidden" name="end_time" value="{{ $booking_data['end_time'] }}">
-            <input type="hidden" name="pickup_location" value="{{ $booking_data['pickup_location'] }}">
-            <input type="hidden" name="return_location" value="{{ $booking_data['return_location'] }}">
-            {{-- Hidden fields from previous step --}}
+            {{-- Hidden fields from previous step (booking_data contains keys like `plateNumber`, `start_date`, etc.) --}}
             @foreach($booking_data as $key => $value)
                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
             @endforeach
