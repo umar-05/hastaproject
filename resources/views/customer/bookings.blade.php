@@ -20,11 +20,11 @@
         </div>
 
         <nav class="hidden md:flex items-center space-x-8 font-medium">
-            <a href="{{ route('vehicles.index') }}" class="text-gray-700 hover:text-hasta-red transition">
+            <a href="{{ route('vehicles.index') }}" class="bg-hasta-red text-white px-5 py-2 rounded-md font-bold transition shadow-md">
                 Book Now
             </a>
 
-            <a href="{{ route('bookings.index') }}" class="bg-hasta-red text-white px-5 py-2 rounded-md font-bold transition shadow-md">
+            <a href="{{ route('bookings.index') }}" class="text-gray-700 hover:text-hasta-red transition">
                 Bookings
             </a>
 
@@ -97,10 +97,10 @@
                         
                         if ($booking->fleet) {
                             $fleet = $booking->fleet;
-                            $vehicleName = $fleet->model_name . ($fleet->year ? ' ' . $fleet->year : '');
+                            $vehicleName = $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : '');
                             
                             // Get vehicle info
-                            $modelName = strtolower($fleet->model_name);
+                            $modelName = strtolower($fleet->modelName);
                             $year = $fleet->year ?? 0;
                             
                             // Determine image
@@ -145,43 +145,43 @@
                                         <p class="text-sm text-gray-500">{{ $vehicleType }}</p>
                                     </div>
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold ml-4 flex-shrink-0
-                                        @if($booking->booking_stat === 'confirmed') bg-green-100 text-green-800
-                                        @elseif($booking->booking_stat === 'pending') bg-yellow-100 text-yellow-800
-                                        @elseif($booking->booking_stat === 'completed') bg-blue-100 text-blue-800
+                                        @if(($booking->bookingStat ?? '') === 'confirmed') bg-green-100 text-green-800
+                                        @elseif(($booking->bookingStat ?? '') === 'pending') bg-yellow-100 text-yellow-800
+                                        @elseif(($booking->bookingStat ?? '') === 'completed') bg-blue-100 text-blue-800
                                         @else bg-red-100 text-red-800
                                         @endif">
-                                        {{ ucfirst($booking->booking_stat) }}
+                                        {{ ucfirst($booking->bookingStat ?? 'unknown') }}
                                     </span>
                                 </div>
                                 
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4 text-sm">
                                     <div>
                                         <p class="text-gray-500 text-xs mb-1">Pick Up</p>
-                                        <p class="font-semibold">{{ \Carbon\Carbon::parse($booking->pickup_date)->format('d M Y') }}</p>
-                                        <p class="text-xs text-gray-600 mt-1">{{ $booking->pickup_loc }}</p>
+                                        <p class="font-semibold">{{ optional($booking->pickupDate)->format('d M Y') ?? (\Carbon\Carbon::parse($booking->pickupDate ?? $booking->pickup_date)->format('d M Y')) }}</p>
+                                        <p class="text-xs text-gray-600 mt-1">{{ $booking->pickupLoc ?? $booking->pickup_loc }}</p>
                                     </div>
                                     <div>
                                         <p class="text-gray-500 text-xs mb-1">Return</p>
-                                        <p class="font-semibold">{{ \Carbon\Carbon::parse($booking->return_date)->format('d M Y') }}</p>
-                                        <p class="text-xs text-gray-600 mt-1">{{ $booking->return_loc }}</p>
+                                        <p class="font-semibold">{{ optional($booking->returnDate)->format('d M Y') ?? (\Carbon\Carbon::parse($booking->returnDate ?? $booking->return_date)->format('d M Y')) }}</p>
+                                        <p class="text-xs text-gray-600 mt-1">{{ $booking->returnLoc ?? $booking->return_loc }}</p>
                                     </div>
                                     <div>
                                         <p class="text-gray-500 text-xs mb-1">Total Amount</p>
-                                        <p class="font-semibold text-hasta-red">RM{{ number_format($booking->total_price, 2) }}</p>
-                                        <p class="text-xs text-gray-600 mt-1">{{ ucfirst($booking->payment_status) }}</p>
+                                        <p class="font-semibold text-hasta-red">RM{{ number_format($booking->totalPrice ?? $booking->total_price ?? 0, 2) }}</p>
+                                        <p class="text-xs text-gray-600 mt-1">{{ ucfirst($booking->payment_status ?? 'pending') }}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Action Buttons -->
                             <div class="flex flex-col gap-2 flex-shrink-0">
-                                <a href="{{ route('bookings.show', $booking->booking_id) }}" 
+                                <a href="{{ route('bookings.show', $booking->bookingID ?? $booking->booking_id) }}" 
                                    class="bg-hasta-red hover:bg-red-700 text-white font-bold px-4 py-2 rounded-md transition text-sm text-center whitespace-nowrap">
                                     View Details
                                 </a>
                                 
-                                @if($booking->booking_stat !== 'completed' && $booking->booking_stat !== 'cancelled')
-                                    <form action="{{ route('bookings.cancel', $booking->booking_id) }}" 
+                                @if(($booking->bookingStat ?? $booking->booking_stat) !== 'completed' && ($booking->bookingStat ?? $booking->booking_stat) !== 'cancelled')
+                                    <form action="{{ route('bookings.cancel', $booking->bookingID) }}" 
                                           method="POST" 
                                           onsubmit="return confirm('Are you sure you want to cancel this booking?');"
                                           class="inline">
@@ -253,50 +253,6 @@
             <a href="#" class="bg-black rounded-full p-2"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.012 3.584-.07 4.85c-.148 3.252-1.667 4.771-4.919 4.919-1.266.058-1.644.069-4.85.069s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.012-3.584.07-4.85c.148-3.252 1.667-4.771 4.919-4.919 1.266-.058 1.645-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
         </div>
     </footer>
-
-    @auth('customer')
-    <script>
-        // Prevent back button navigation after logout for customers
-        (function() {
-            // Check if user is still authenticated
-            fetch('/api/auth-check', {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            }).then(response => {
-                if (response.status === 401) {
-                    // User is not authenticated, force redirect to login
-                    window.location.replace('{{ route("login") }}');
-                }
-            }).catch(() => {
-                // If API call fails, force redirect to login to be safe
-                window.location.replace('{{ route("login") }}');
-            });
-
-            // Clear history state to prevent back navigation
-            if (window.history.replaceState) {
-                window.history.replaceState(null, null, window.location.href);
-            }
-
-            // Prevent back navigation
-            window.addEventListener('popstate', function(event) {
-                if (event.state === null) {
-                    // Force redirect to login
-                    window.location.replace('{{ route("login") }}');
-                }
-            });
-
-            // Additional protection: disable browser back button
-            window.history.pushState(null, null, window.location.href);
-            window.addEventListener('popstate', function() {
-                window.history.pushState(null, null, window.location.href);
-            });
-        })();
-    </script>
-    @endauth
 
 </body>
 </html>

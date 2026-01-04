@@ -43,7 +43,7 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     // Vehicle Booking (The "Book Now" Flow)
     Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
     Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
-
+    
     // Customer Rewards
     Route::get('/rewards', [RewardController::class, 'index'])->name('rewards.index');
     Route::get('/my-rewards', [RewardController::class, 'showClaimed'])->name('rewards.claimed');
@@ -51,7 +51,9 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     // Booking Management
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
-    Route::post('/bookings/payment', [BookingController::class, 'payment'])->name('bookings.payment');
+    // Show single booking
+    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::match(['get','post'],'/bookings/payment', [BookingController::class, 'payment'])->name('bookings.payment');
     Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
