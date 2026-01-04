@@ -8,6 +8,7 @@ use App\Models\Reward;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class BookingController extends Controller
 {
@@ -155,38 +156,33 @@ class BookingController extends Controller
             
             $finalPrice = $basePrice - $discount;
             
-            // Get customer_id from authenticated user (using user ID as customer_id for now)
+            // Get customer matric number from authenticated user
             $customerId = auth()->id();
             if (!$customerId) {
                 return redirect()->route('login')
                     ->with('error', 'Please login to make a booking.');
             }
             
-            // Create booking with your table structure
+            // Create booking matching the database schema (booking table)
             $booking = Booking::create([
-                'customer_id' => $customerId,
-                'fleet_id' => $validated['fleet_id'],
-                'reward_id' => $request->reward_id,
-                'voucher_code' => $request->voucher_code,
-                'pickup_date' => $startDate,
-                'pickup_time' => $validated['start_time'],
-                'return_date' => $endDate,
-                'return_time' => $validated['end_time'],
-                'pickup_loc' => $validated['pickup_location'],
-                'return_loc' => $validated['return_location'],
-                'base_price' => $basePrice,
-                'discount' => $discount,
-                'total_price' => $finalPrice + ($request->input('deposit_amount') ? (float)$request->input('deposit_amount') : 50),
+                'bookingID' => Str::uuid()->toString(),
+                'matricNum' => $customerId,
+                'plateNumber' => $fleet->plateNumber,
+                'rewardID' => $request->reward_id,
+                'destination' => $request->input('destination', null),
+                'pickupDate' => date('Y-m-d H:i:s', strtotime($startDate . ' ' . $validated['start_time'])),
+                'returnDate' => date('Y-m-d H:i:s', strtotime($endDate . ' ' . $validated['end_time'])),
+                'pickupLoc' => $validated['pickup_location'],
+                'returnLoc' => $validated['return_location'],
+                'totalPrice' => $finalPrice,
                 'deposit' => $request->input('deposit_amount', 50),
-                'booking_stat' => 'pending',
-                'payment_status' => 'pending',
-                'notes' => $request->notes ?? null,
+                'bookingStat' => 'pending',
             ]);
             
             DB::commit();
             
             return redirect()->route('bookings.index')
-                ->with('success', 'Booking created successfully! Booking ID: #' . $booking->booking_id);
+                ->with('success', 'Booking created successfully! Booking ID: #' . $booking->bookingID);
                 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -240,8 +236,8 @@ class BookingController extends Controller
             }
             
             $booking = Booking::with(['fleet', 'reward'])
-                ->where('booking_id', $bookingId)
-                ->where('customer_id', $customerId)
+                ->where('bookingID', $bookingId)
+                ->where('matricNum', $customerId)
                 ->firstOrFail();
             
             return view('bookings.show', compact('booking'));
@@ -269,15 +265,14 @@ class BookingController extends Controller
             }
             
             $bookings = Booking::with('fleet')
-                ->where('customer_id', $customerId)
+                ->where('matricNum', $customerId)
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
             
             return view('customer.bookings', compact('bookings'));
             
         } catch (\Exception $e) {
-            return redirect()->route('book-now')
-                ->with('error', 'Error loading bookings: ' . $e->getMessage());
+            dd($e->getMessage());
         }
     }
 
@@ -312,13 +307,13 @@ class BookingController extends Controller
     public function cancel($bookingId)
     {
         try {
-            $booking = Booking::where('booking_id', $bookingId)->firstOrFail();
-            
-            if ($booking->booking_stat === 'completed' || $booking->booking_stat === 'cancelled') {
+            $booking = Booking::where('bookingID', $bookingId)->firstOrFail();
+
+            if ($booking->bookingStat === 'completed' || $booking->bookingStat === 'cancelled') {
                 return back()->with('error', 'This booking cannot be cancelled.');
             }
-            
-            $booking->update(['booking_stat' => 'cancelled']);
+
+            $booking->update(['bookingStat' => 'cancelled']);
             
             return back()->with('success', 'Booking cancelled successfully.');
         } catch (\Exception $e) {
