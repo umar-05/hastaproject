@@ -45,6 +45,12 @@ class Reward extends Model
         return $this->belongsToMany(Staff::class, 'rewardmanagement', 'rewardID', 'staffID');
     }
 
+    public function redemptions()
+    {
+        // A reward can be redeemed many times by different customers
+        return $this->hasMany(RewardRedemption::class, 'rewardID', 'rewardID');
+    }
+
     /**
      * Scopes
      */

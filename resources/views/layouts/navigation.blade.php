@@ -58,7 +58,7 @@
                 Bookings
             </a>
 
-            <a href="{{ route('reward.customer') }}" class="text-gray-700 hover:text-hasta-red transition">
+            <a href="{{ route('reward.index') }}" class="text-gray-700 hover:text-hasta-red transition">
                 Rewards
             </a>
 
@@ -82,7 +82,7 @@
             </a>
 
             {{-- 3. REWARDS LINK --}}
-            <a href="{{ Auth::guard('customer')->check() ? route('reward.customer') : route('login') }}" 
+            <a href="{{ Auth::guard('customer')->check() ? route('reward.index') : route('login') }}" 
                class="text-gray-700 hover:text-hasta-red transition">
                 Rewards
             </a>

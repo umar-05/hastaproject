@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Reward;
+use App\Models\RewardRedemption;
 
 class RewardController extends Controller
 {
@@ -14,21 +15,21 @@ class RewardController extends Controller
      * @return \Illuminate\View\View
      */
     public function index()
-    {
-    // Fetch data for the staff dashboard tables
-    $activeRewards = Reward::where('rewardStatus', 'Active')->get();
-    $inactiveRewards = Reward::where('rewardStatus', 'Inactive')->get();
+{
+    $user = Auth::user();
 
-    // Calculate stats for the summary cards
-    $stats = [
-        'total' => Reward::count(),
-        'active' => $activeRewards->count(),
-        'slots' => $activeRewards->sum('totalClaimable'),
-    ];
+    $availableRewards = Reward::active() // Uses your scopeActive from Reward.php
+        ->where('totalClaimable', '>', 0)
+        // This hides rewards the user has already claimed
+        ->whereDoesntHave('redemptions', function($query) use ($user) {
+            $query->where('matricNum', $user->matricNum);
+        })
+        ->get();
 
-    // CHANGE: Return the staff view, not the customer one
-    return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
-    }
+    return view('reward.customer', compact('availableRewards'));
+}
+
+
 
     /**
      * Show the user's claimed rewards.
@@ -37,7 +38,14 @@ class RewardController extends Controller
      */
     public function claimed()
     {
-        return view('reward.claimed');
+        $customer = Auth::user();
+
+        // Fetch rewards claimed by this user, including the reward details
+        $myRewards = RewardRedemption::with('reward')
+            ->where('matricNum', $customer->matricNum)
+            ->get();
+
+        return view('reward.claimed', compact('myRewards'));
     }
 
     /**
@@ -47,16 +55,31 @@ class RewardController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function claim(Request $request)
-    {
-        $request->validate([
-            'code' => 'required|string',
-            'title' => 'required|string',
-            'description' => 'required|string',
-        ]);
 
-        return response()->json(['success' => true, 'message' => 'Reward claimed!']);
+public function claim(Request $request)
+{
+    $request->validate(['rewardID' => 'required|exists:reward,rewardID']);
+    
+    $reward = Reward::where('rewardID', $request->rewardID)->first();
+    $customer = Auth::user();
+
+    // 2. Logic: Ensure user has enough stamps
+    if ($customer->stamps < $reward->rewardPoints) {
+        return back()->with('error', 'Not enough stamps!');
     }
+
+    // 3. Create the Database Link
+    \App\Models\Reward::create([
+        'matricNum' => $customer->matricNum,
+        'rewardID' => $reward->rewardID,
+        'redemptionDate' => now(),
+    ]);
+
+    // 4. Update the Reward table (reduce slots)
+    $reward->decrement('totalClaimable');
+
+    return redirect()->route('reward.claimed')->with('success', 'Reward claimed successfully!');
+}
 
     public function store(Request $request)
     {

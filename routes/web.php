@@ -45,14 +45,9 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
 
     // Rewards Store
-Route::get('/rewards', function () {
-    return view('reward.customer');
-})->name('reward.customer');
-
-// My Wallet
-Route::get('/rewards/my-claimed', function () {
-    return view('reward.claimed');
-})->name('rewards.claimed');
+    Route::get('/rewards', [RewardController::class, 'index'])->name('reward.index');
+    Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('reward.claimed');
+    Route::post('/rewards/claim', [RewardController::class, 'claim'])->name('rewards.claim');
 
     
     // Booking Management
