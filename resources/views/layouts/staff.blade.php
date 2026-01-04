@@ -134,10 +134,10 @@
                              {{ substr(Auth::guard('staff')->user()->name ?? 'S', 0, 1) }}
                          </div>
                          
-                         <form method="POST" action="{{ route('logout') }}" class="ml-2">
+                         <form method="POST" action="{{ route('logout') }}" class="ml-2" onsubmit="console.log('Logout form submitted')">
                             @csrf
-                            <button type="submit" class="text-gray-400 hover:text-red-600 p-1 rounded hover:bg-red-50 transition" title="Logout">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                            <button type="submit" class="text-gray-400 hover:text-red-600 p-2 rounded hover:bg-red-50 transition text-lg" title="Logout" onclick="console.log('Logout button clicked')" style="min-width: 40px; min-height: 40px; display: flex; align-items: center; justify-content: center;">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                             </button>
                          </form>
                     </div>
@@ -149,5 +149,50 @@
             </main>
         </div>
     </div>
+
+    <script>
+        // Temporarily disabled for testing
+        /*
+        // Prevent back button navigation after logout
+        (function() {
+            // Check if user is still authenticated
+            fetch('{{ route("auth.check") }}', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            }).then(response => {
+                if (response.status === 401) {
+                    // User is not authenticated, force redirect to login
+                    window.location.replace('{{ route("login") }}');
+                }
+            }).catch(() => {
+                // If API call fails, force redirect to login
+                window.location.replace('{{ route("login") }}');
+            });
+
+            // Clear history state to prevent back navigation
+            if (window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.href);
+            }
+
+            // Prevent back navigation
+            window.addEventListener('popstate', function(event) {
+                if (event.state === null) {
+                    // Force redirect to login
+                    window.location.replace('{{ route("login") }}');
+                }
+            });
+
+            // Additional protection: disable browser back button
+            window.history.pushState(null, null, window.location.href);
+            window.addEventListener('popstate', function() {
+                window.history.pushState(null, null, window.location.href);
+            });
+        })();
+        */
+    </script>
 </body>
 </html>

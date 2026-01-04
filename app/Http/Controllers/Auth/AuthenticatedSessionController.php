@@ -51,26 +51,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        // Log out whichever guard was active
-        if (Auth::guard('customer')->check()) {
-            Auth::guard('customer')->logout();
-        } elseif (Auth::guard('staff')->check()) {
-            Auth::guard('staff')->logout();
-        }
+        // Simple logout for all guards
+        Auth::guard('staff')->logout();
+        Auth::guard('customer')->logout();
+        Auth::guard('web')->logout();
 
+        // Clear session completely
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // Force redirect to login
+        return redirect('/login');
     }
-
-    public function logout(Request $request)
-{
-    Auth::guard('web')->logout();
-
-    $request->session()->invalidate(); // Invalidates the session
-    $request->session()->regenerateToken(); // Regenerates the CSRF token
-
-    return redirect('/login'); // Or wherever you want them to go
-}
 }

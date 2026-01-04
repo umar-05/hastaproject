@@ -20,6 +20,11 @@ class StaffController extends Controller
      */
     public function index(): View
     {
+        // Ensure user is authenticated
+        if (!Auth::guard('staff')->check()) {
+            return redirect()->route('login');
+        }
+
         // Example stats logic - adjust status strings based on your actual database values
         $bookingsToManage = Booking::where('bookingStat', 'Pending')->count();
         $pickupsToday = Booking::whereDate('pickupDate', now())->where('bookingStat', 'Confirmed')->count();
@@ -37,6 +42,11 @@ class StaffController extends Controller
      */
     public function pickupReturn(): View
     {
+        // Ensure user is authenticated
+        if (!Auth::guard('staff')->check()) {
+            return redirect()->route('login');
+        }
+
         // Get pickups scheduled for today
         $todayPickups = Booking::with(['customer', 'fleet'])
             ->whereDate('pickup_date', now())
@@ -61,6 +71,11 @@ class StaffController extends Controller
      */
     public function editProfile(Request $request): View
     {
+        // Ensure user is authenticated
+        if (!Auth::guard('staff')->check()) {
+            return redirect()->route('login');
+        }
+
         return view('staff.profile.edit', [
             'user' => $request->user('staff'),
         ]);
@@ -110,6 +125,11 @@ class StaffController extends Controller
      */
     public function create(): View
     {
+        // Ensure user is authenticated
+        if (!Auth::guard('staff')->check()) {
+            return redirect()->route('login');
+        }
+
         return view('staff.add'); // Ensure this view exists
     }
 
@@ -118,6 +138,11 @@ class StaffController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Ensure user is authenticated
+        if (!Auth::guard('staff')->check()) {
+            return redirect()->route('login');
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'staffID' => ['required', 'string', 'max:10', 'unique:staff'],
@@ -140,6 +165,11 @@ class StaffController extends Controller
      */
     public function reports(): View
     {
+        // Ensure user is authenticated
+        if (!Auth::guard('staff')->check()) {
+            return redirect()->route('login');
+        }
+
         return view('staff.reports'); // Ensure this view exists
     }
 }

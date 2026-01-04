@@ -113,3 +113,10 @@ require __DIR__.'/auth.php';
 Route::get('/dashboard', function () {
     return redirect()->route('staff.dashboard');
 })->middleware(['auth:staff', 'prevent-back'])->name('dashboard');
+
+// API endpoint to check authentication status
+Route::get('/api/auth-check', function () {
+    return Auth::guard('staff')->check() || Auth::guard('customer')->check() 
+        ? response()->json(['authenticated' => true]) 
+        : response()->json(['authenticated' => false], 401);
+})->name('auth.check');
