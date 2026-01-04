@@ -72,7 +72,7 @@
                         Dashboard
                     </a>
 
-                    <a href="{{ route('staff.bookingsmanage') }}" class="sidebar-link {{ request()->routeIs('bookings.*') ? 'active' : '' }}">
+                    <a href="{{ route('staff.bookingmanagement') }}" class="sidebar-link {{ request()->routeIs('staff.bookingmanagement') ? 'active' : '' }}">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         Bookings
                     </a>
@@ -82,7 +82,7 @@
                         Inspection / Pickup
                     </a>
 
-                    <a href="{{ route('vehicles.index') }}" class="sidebar-link {{ request()->routeIs('vehicles.*') ? 'active' : '' }}">
+                    <a href="{{ route('staff.fleet.index') }}" class="sidebar-link {{ request()->routeIs('staff.fleet.*') ? 'active' : '' }}">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v3.28a1 1 0 00.684.948l19.184 6.362M15 12h2a2 2 0 002-2V8a2 2 0 00-2-2h-4.143"></path></svg>
                         Fleet
                     </a>
@@ -151,7 +151,7 @@
             </header>
 
             <main class="flex-1 overflow-y-auto bg-gray-50/50 p-8">
-                {{ $slot }}
+                @yield('content')
             </main>
         </div>
     </div>

@@ -18,7 +18,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 
                 {{-- Card 1: Manage Booking (LINKED) --}}
-                <a href="{{ route('staff.bookingsmanage') }}" class="block group">
+                <a href="{{ route('staff.bookingmanagement') }}">
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center group-hover:shadow-md group-hover:border-red-200 transition duration-200">
                         <div class="p-4 rounded-xl bg-red-50 text-hasta-red group-hover:bg-red-100 transition">
                             {{-- Calendar Icon --}}
