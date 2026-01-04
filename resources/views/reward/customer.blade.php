@@ -70,8 +70,7 @@
                         <span class="text-xs text-gray-500 block mb-2">Cost: 3 stamps</span>
                         <button 
                             class="w-full md:w-auto px-6 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition"
-                            onclick="claimReward('Car Rental Discount', '15% Off Your Next Car Rental', 'RENTAL-15P-8A3B')"
-                        >
+                            onclick="claimReward(1, 'Car Rental Discount', '15% Off Your Next Car Rental', 'RENTAL-15P-8A3B')">
                             Claim Reward
                         </button>
                     </div>
@@ -111,8 +110,7 @@
             <div class="space-y-3">
             <button 
                 onclick="window.location.href='/rewards/claimed'" 
-                class="w-full py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700"
-            >
+                class="w-full py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700">
                 Done
             </button>
                 <button onclick="document.getElementById('rewardModal').classList.add('hidden')" class="w-full py-2 text-gray-500 text-sm">
@@ -123,10 +121,32 @@
     </div>
 
     <script>
-        function claimReward(title, description, code) {
-            // Optional: You can add an AJAX call here to save to your database
-            document.getElementById('modalCode').textContent = code;
-            document.getElementById('rewardModal').classList.remove('hidden');
-        }
+function claimReward(id, title, description, code) {
+    let claimed = JSON.parse(localStorage.getItem('claimedRewards') || '[]');
+    
+    // 1. Calculate the date (1 year from now)
+    const now = new Date();
+    const expiry = new Date();
+    expiry.setFullYear(now.getFullYear() + 1); 
+
+    const exists = claimed.some(r => r.id === id && r.code === code);
+    
+    if (!exists) {
+        // 2. Add 'expiryDate' to the object
+        claimed.push({ 
+            id: id,
+            title: title, 
+            description: description, 
+            code: code, 
+            claimedAt: now.toISOString(),
+            expiryDate: expiry.toISOString() // This is the missing piece!
+        });
+        localStorage.setItem('claimedRewards', JSON.stringify(claimed));
+    }
+
+    document.getElementById('modalCode').textContent = code;
+    document.getElementById('rewardModal').classList.remove('hidden');
+}
     </script>
+    
 </x-app-layout>
