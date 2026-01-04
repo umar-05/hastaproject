@@ -83,7 +83,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 <p class="text-gray-600 text-lg mb-6">You don't have any bookings yet.</p>
-                <a href="{{ route('book-now') }}" class="inline-block bg-hasta-red hover:bg-red-700 text-white font-bold px-8 py-3 rounded-md transition">
+                <a href="{{ route('vehicles.index') }}" class="inline-block bg-hasta-red hover:bg-red-700 text-white font-bold px-8 py-3 rounded-md transition">
                     Browse Vehicles
                 </a>
             </div>

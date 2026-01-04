@@ -31,7 +31,7 @@ class BookingController extends Controller
 
             return view('bookings.create', compact('car', 'rewards', 'pricePerDay', 'image', 'vehicleName'));
         } catch (\Exception $e) {
-            return redirect()->route('book-now')
+            return redirect()->route('vehicles.index')
                 ->with('error', 'Vehicle not found: ' . $e->getMessage());     
         }
     }
@@ -186,8 +186,7 @@ not found.');
             $bookings = Booking::with('fleet')->where('matricNum', $customerId)->orderBy('created_at', 'desc')->paginate(10);
             return view('customer.bookings', compact('bookings'));
         } catch (\Exception $e) {
-            return redirect()->route('book-now')->with('error', 'Error loading 
-bookings');
+            return redirect()->route('vehicles.index')->with('error', 'Error loading bookings');
         }
     }
 
