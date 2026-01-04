@@ -8,6 +8,7 @@ use App\Models\Reward;
 use App\Models\Booking;
 use App\Models\Fleet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
@@ -64,6 +65,13 @@ class StaffController extends Controller
         ]);
     }
 
+    public function edit($staffID)
+    {
+        $staff = Staff::where('staffID', $staffID)->firstOrFail();
+        // Re-use the same "functioning" file!
+        return view('staff.add-stafffunctioning', compact('staff'));
+    }
+
     /**
      * Update the staff's profile information.
      */
@@ -98,53 +106,110 @@ class StaffController extends Controller
         return Redirect::route('staff.profile.edit')->with('status', 'profile-updated');
     }
 
+    public function update(Request $request, $staffID): \Illuminate\Http\RedirectResponse
+{
+    // Find the staff by their custom staffID
+    $staff = Staff::where('staffID', $staffID)->firstOrFail();
+
+    // Validate the data
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'position' => ['required', 'string', 'max:50'],
+        'email' => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique('staff')->ignore($staff->staffID, 'staffID')],
+    ]);
+
+    // Save changes
+    $staff->update($validated);
+
+    // Redirect back to the staff record list
+    return redirect()->route('staff.add-staff')->with('status', "Staff member $staffID updated successfully!");
+}
+
     /**
      * Show form to add new staff.
      */
     public function create(): View
     {
+        if (!Auth::guard('staff')->check()) {
+            return redirect()->route('login');
+        }
+
+    $staffs = Staff::all();
+
+    // 3. Send the data to the page
+    return view('staff.add-staff', [
+        'staffs' => $staffs, // This fills the table
+        'totalStaffCount' => $staffs->count(), // Fills Card 1
+        'driverCount' => $staffs->where('position', 'Driver')->count(), // Fills Card 2
+        'adminCount' => $staffs->where('position', 'Administrator')->count(), // Fills Card 3
+        'managerCount' => $staffs->where('position', 'Manager')->count(), // Fills Card 4
+    ]);
+
+        // FIX: Changed from 'staff.add' to 'staff.add-staff'
         return view('staff.add-staff'); 
     }
 
     /**
      * Store a new staff member.
      */
-    public function store(Request $request): RedirectResponse
-    {
-        // 1. Pre-process Email
-        $fullEmail = $request->input('email_username') . '@hasta.com';
-        $request->merge(['email' => $fullEmail]);
-
-        // 2. Validate
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email_username' => ['required', 'string', 'max:50', 'alpha_dash'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:staff'],
-            'position' => ['required', 'string', 'max:50'],
-            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
-        ]);
-
-        // 3. Auto-Generate Staff ID
-        $latestStaff = Staff::orderBy('staffID', 'desc')->first();
-        
-        if (!$latestStaff) {
-            $newStaffID = 'STAFF001';
-        } else {
-            $lastNumber = intval(substr($latestStaff->staffID, 5)); 
-            $newStaffID = 'STAFF' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-        }
-
-        // 4. Create Staff
-        Staff::create([
-            'name' => $request->name,
-            'staffID' => $newStaffID,
-            'email' => $request->email,
-            'position' => $request->position,
-            'password' => Hash::make($request->password),
-        ]);
-
-        return redirect()->route('staff.add-staff')->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
+    public function createFunctioning() 
+{
+    // Check if staff is logged in
+    if (!auth()->guard('staff')->check()) {
+        return redirect()->route('login');
     }
+
+    // This looks for the file: resources/views/staff/add-stafffunctioning.blade.php
+    return view('staff.add-stafffunctioning');
+}
+
+    public function store(Request $request): RedirectResponse
+{
+    // 1. Ensure user is authenticated
+    if (!Auth::guard('staff')->check()) {
+        return redirect()->route('login');
+    }
+
+    // 2. Pre-process Email
+    // Combine the username input with the hardcoded domain
+    $fullEmail = $request->input('email_username') . '@hasta.com';
+
+    // Merge this full email back into the request data so we can validate 'email'
+    $request->merge(['email' => $fullEmail]);
+
+    // 3. Validate
+    $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'email_username' => ['required', 'string', 'max:50', 'alpha_dash'], // Ensure username has no spaces/weird chars
+        'email' => ['required', 'string', 'email', 'max:255', 'unique:staff'], // Validate the FULL email
+        'position' => ['required', 'string', 'max:50'],
+        'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+    ]);
+
+    // 4. Auto-Generate Staff ID
+    $latestStaff = Staff::orderBy('staffID', 'desc')->first();
+    
+    if (!$latestStaff) {
+        $newStaffID = 'STAFF001';
+    } else {
+        // Extract the number part from 'STAFF005'
+        // 'STAFF' is 5 characters long, so we substring from index 5
+        $lastNumber = intval(substr($latestStaff->staffID, 5)); 
+        $newStaffID = 'STAFF' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+    }
+
+    // 5. Create Staff
+    Staff::create([
+        'name' => $request->name,
+        'staffID' => $newStaffID,
+        'email' => $request->email, // This now contains 'username@hasta.com'
+        'position' => $request->position,
+        'password' => Hash::make($request->password),
+    ]);
+
+    return redirect()->route('staff.add-stafffunctioning')
+    ->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
+}
 
     /**
      * Show reports page.

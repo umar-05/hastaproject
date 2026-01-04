@@ -8,6 +8,7 @@ use App\Models\Reward;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth; // Added for cleaner guard checks
 
 class BookingController extends Controller
 {
@@ -162,6 +163,19 @@ class BookingController extends Controller
     public function show($bookingId)
     {
         try {
+            // --- MODIFIED: ALLOW STAFF ACCESS ---
+            if (Auth::guard('staff')->check()) {
+                // Staff can see ANY booking, no matricNum check needed
+                $booking = Booking::with(['fleet', 'reward'])
+                    ->where('bookingID', $bookingId)
+                    ->firstOrFail();
+                
+                // You can point this to a specific staff view if you have one, 
+                // otherwise it uses the common show view.
+                return view('bookings.show', compact('booking'));
+            }
+            // ------------------------------------
+
             $customerId = auth()->id();
             if (!$customerId) return redirect()->route('login');
 
@@ -172,21 +186,33 @@ class BookingController extends Controller
 
             return view('bookings.show', compact('booking'));
         } catch (\Exception $e) {
-            return redirect()->route('bookings.index')->with('error', 'Booking 
-not found.');
+            return redirect()->route('bookings.index')->with('error', 'Booking not found.');
         }
     }
 
     public function index()
     {
         try {
+            // --- MODIFIED: STAFF DASHBOARD LOGIC ---
+            // This handles the access to resources/views/staff/bookingmanagement.blade.php
+            if (Auth::guard('staff')->check()) {
+                // Staff sees ALL bookings
+                $bookings = Booking::with('fleet')->orderBy('created_at', 'desc')->paginate(10);
+                
+                // This is the file you specifically asked for:
+                return view('staff.bookingmanagement', compact('bookings'));
+            }
+            // ---------------------------------------
+
+            // CUSTOMER LOGIC (Existing)
             $customerId = auth()->id();
             if (!$customerId) return redirect()->route('login');
 
             $bookings = Booking::with('fleet')->where('matricNum', $customerId)->orderBy('created_at', 'desc')->paginate(10);
             return view('customer.bookings', compact('bookings'));
+
         } catch (\Exception $e) {
-            return redirect()->route('vehicles.index')->with('error', 'Error loading bookings');
+            return redirect()->route('vehicles.index')->with('error', 'Error loading bookings: ' . $e->getMessage());
         }
     }
 
@@ -205,7 +231,18 @@ not found.');
     public function cancel($bookingId)
     {
         try {
-            $booking = Booking::where('bookingID', $bookingId)->firstOrFail(); 
+            // Check if user is staff OR the owner of the booking
+            $isStaff = Auth::guard('staff')->check();
+            
+            $query = Booking::where('bookingID', $bookingId);
+            
+            if (!$isStaff) {
+                // If not staff, ensure they own the booking
+                $query->where('matricNum', auth()->id());
+            }
+
+            $booking = $query->firstOrFail(); 
+            
             if ($booking->bookingStat === 'completed' || $booking->bookingStat === 'cancelled') {
                 return back()->with('error', 'Cannot cancel.');
             }

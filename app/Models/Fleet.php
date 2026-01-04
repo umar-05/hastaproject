@@ -6,13 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Fleet extends Model
+
 {
     use HasFactory;
-
+    
     protected $table = 'fleet';
     protected $primaryKey = 'plateNumber';
     public $incrementing = false;
     protected $keyType = 'string';
+    protected $guarded = [];
 
     protected $fillable = [
         'plateNumber',
@@ -46,11 +48,18 @@ class Fleet extends Model
     /**
      * Relationships
      */
-
+    public function maintenance()
+    {
+        // Parameter 2: Foreign Key (name of the column in the 'maintenances' table)
+        // Parameter 3: Local Key (name of the column in this 'fleet' table)
+        return $this->hasMany(Maintenance::class, 'plateNumber', 'plateNumber'); 
+    }
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'plateNumber', 'plateNumber');
     }
+    
+
 
     /**
      * Availability Logic

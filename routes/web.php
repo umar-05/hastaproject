@@ -74,8 +74,21 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // Dashboard -> /staff/dashboard
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
-    // Booking Management -> /staff/bookings
-    Route::get('/bookings', [StaffController::class, 'bookingManagement'])->name('bookingsmanage');
+    Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
+
+    // Fleet management (Staff)
+    Route::prefix('fleet')->name('fleet.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Staff\FleetController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Staff\FleetController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Staff\FleetController::class, 'store'])->name('store');
+        // Edit / Update / Destroy (uses plateNumber as the primary key)
+        Route::get('/{plateNumber}/edit', [\App\Http\Controllers\Staff\FleetController::class, 'edit'])->name('edit');
+        Route::match(['put','patch'],'/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'update'])->name('update');
+        Route::delete('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'destroy'])->name('destroy');
+        // Show a single vehicle (uses plateNumber as the primary key)
+        Route::get('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'show'])->name('show');
+        // Additional staff fleet routes (edit/delete) can be added here
+    });
 
     // Fleet Management -> /staff/fleet
     Route::prefix('fleet')->name('fleet.')->group(function() {
@@ -96,9 +109,14 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // Operational
     Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
-    
-    // Reward Management -> /staff/rewards
-    // Prefix: staff.reward.
+    // Inside the staff middleware group in routes/web.php
+    Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
+    // Reward Management for Staff
+    // Add these inside the 'staff.' named group in web.php
+Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
+Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
+    Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
     Route::prefix('rewards')->name('reward.')->group(function() {
         Route::get('/', [StaffController::class, 'rewards'])->name('index'); 
         Route::get('/create', [RewardController::class, 'create'])->name('create');
