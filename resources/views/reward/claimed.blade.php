@@ -59,54 +59,42 @@
             // Sort by newest first
             rewards.sort((a, b) => new Date(b.claimedAt) - new Date(a.claimedAt));
 
-                listEl.innerHTML = rewards.map(reward => `
-                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 transition hover:shadow-md border-l-4 border-l-green-500">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div class="flex items-center gap-2">
-                                        <span class="px-2 py-0.5 bg-green-100 text-green-800 text-xs font-bold rounded uppercase tracking-wider">
-                                            Active Reward
-                                        </span>
-                                        <span class="text-xs text-gray-400">
-                                            Claimed: ${new Date(reward.claimedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                        </span>
-                                    </div>
-                                    <span class="text-[10px] font-mono text-gray-400 bg-gray-50 px-2 py-1 rounded border">
-                                        REF: #00${reward.id || 'N/A'}
-                                    </span>
-                                </div>
-                                
-                                <h3 class="text-xl font-bold text-gray-800 mb-1">${reward.title}</h3>
-                                <p class="text-gray-600 text-sm mb-4">${reward.description}</p>
-                                
-                                <div class="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-between mb-4">
-                                    <div>
-                                        <p class="text-[10px] uppercase text-gray-400 font-bold mb-1">Promo Code</p>
-                                        <span class="font-mono text-lg font-extrabold text-red-600 tracking-widest">
-                                            ${reward.code}
-                                        </span>
-                                    </div>
-                                    <button onclick="copyToClipboard('${reward.code}', this)" class="text-sm text-blue-600 font-semibold hover:text-blue-800 flex items-center gap-1">
-                                        <i class="far fa-copy"></i> <span>Copy</span>
-                                    </button>
-                                </div>
-
-                               <div class="flex items-center text-sm text-amber-600 font-bold">
-    <i class="far fa-clock mr-2"></i>
-    Valid until: ${reward.expiryDate ? 
-        new Date(reward.expiryDate).toLocaleDateString('en-GB', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        }) : 
-        'No expiry data found (Try re-claiming)'
-    }
-</div>
-                            </div>
-                        </div>
+listEl.innerHTML = rewards.map(reward => `
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 transition hover:shadow-md border-l-4 border-l-green-500">
+        <div class="flex justify-between items-start">
+            <div class="flex-1">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 bg-green-100 text-green-800 text-xs font-bold rounded uppercase tracking-wider">
+                            Active Reward
+                        </span>
+                        <span class="text-xs text-gray-400">
+                            Claimed: ${new Date(reward.claimedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
                     </div>
-                `).join('');
+                    <span class="text-[10px] font-mono text-gray-400 bg-gray-50 px-2 py-1 rounded border">
+                        REF: #00${reward.id || 'N/A'}
+                    </span>
+                </div>
+                
+                <h3 class="text-xl font-bold text-gray-800 mb-1">${reward.title}</h3>
+                <p class="text-gray-600 text-sm mb-4">${reward.description}</p>
+                
+                <div class="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] uppercase text-gray-400 font-bold mb-1">Promo Code</p>
+                        <span class="font-mono text-lg font-extrabold text-red-600 tracking-widest">
+                            ${reward.code}
+                        </span>
+                    </div>
+                    <button onclick="copyToClipboard('${reward.code}', this)" class="text-sm text-blue-600 font-semibold hover:text-blue-800 flex items-center gap-1">
+                        <i class="far fa-copy"></i> <span>Copy</span>
+                    </button>
+                </div>
+                </div>
+        </div>
+    </div>
+`).join('');
         }
     }
 
