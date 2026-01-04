@@ -9,6 +9,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
@@ -128,9 +129,9 @@
                         <p class="text-[10px] font-bold text-red-200 uppercase tracking-widest opacity-70">Administration</p>
                     </div>
 
-                    <a href="#" class="sidebar-link">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        Customers
+                    <a href="{{ route('staff.customermanagement') }}" class="sidebar-link {{ request()->routeIs('staff.customermanagement') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                        Customer
                     </a>
 
                     <a href="{{ route('staff.add-staff') }}" class="sidebar-link {{ request()->routeIs('staff.add-staff') ? 'active' : '' }}">
@@ -153,9 +154,7 @@
         <div class="flex-1 flex flex-col overflow-hidden">
             
             <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 shadow-sm z-10">
-                <div>
-                    {{-- Header Left Content if needed --}}
-                </div>
+                <div></div>
 
                 <div class="flex items-center space-x-6">
                     <div class="flex items-center space-x-3 border-l border-gray-100 pl-6">
@@ -178,6 +177,7 @@
             </header>
 
             <main class="flex-1 overflow-y-auto bg-gray-50/50 p-8">
+                {{ $slot }}
                 @yield('content')
             </main>
         </div>

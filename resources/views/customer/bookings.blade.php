@@ -28,7 +28,7 @@
                 Bookings
             </a>
 
-            <a href="{{ route('rewards.index') }}" class="text-gray-700 hover:text-hasta-red transition">
+            <a href="{{ route('reward.index') }}" class="text-gray-700 hover:text-hasta-red transition">
                 Rewards
             </a>
 

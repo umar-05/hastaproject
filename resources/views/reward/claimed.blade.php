@@ -1,0 +1,170 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-bold text-xl text-gray-800 leading-tight flex items-center gap-2">
+            <i class="fas fa-wallet text-red-600"></i>
+            {{ __('My Reward Wallet') }}
+        </h2>
+    </x-slot>
+
+    {{-- CUSTOM STYLES & ANIMATIONS --}}
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeInUp 0.6s ease-out forwards; }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+    </style>
+
+    <div class="py-12 bg-[#F8FAFC] min-h-screen font-sans">
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+            
+            {{-- 1. NAVIGATION PILLS --}}
+            <div class="flex justify-center mb-10 animate-fade-in">
+                <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-100 inline-flex">
+                    <a href="{{ route('reward.index') }}" 
+                       class="px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 {{ request()->routeIs('reward.index') ? 'bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg transform scale-105' : 'text-gray-500 hover:bg-gray-50' }}">
+                        <i class="fas fa-store"></i> Rewards Store
+                    </a>
+                    <a href="{{ route('reward.claimed') }}" 
+                       class="px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 {{ request()->routeIs('reward.claimed') ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg transform scale-105' : 'text-gray-500 hover:bg-gray-50' }}">
+                        <i class="fas fa-wallet"></i> My Wallet
+                    </a>
+                </div>
+            </div>
+
+            {{-- 2. HERO SECTION: WALLET HEADER --}}
+            <div class="animate-fade-in relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#B91C1C] via-[#DC2626] to-[#EF4444] shadow-2xl shadow-red-200 p-10 mb-12 text-white flex flex-col md:flex-row items-center justify-between">
+                
+                {{-- Decorative Background --}}
+                <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-black opacity-10 rounded-full blur-2xl"></div>
+
+                <div class="relative z-10 text-center md:text-left">
+                    <div class="inline-block px-3 py-1 rounded-full bg-red-900/30 border border-red-400/30 text-xs font-bold uppercase tracking-widest mb-3 backdrop-blur-sm">
+                        Secure Vault
+                    </div>
+                    <h1 class="text-4xl font-black tracking-tight mb-2">My Reward Wallet</h1>
+                    <p class="text-red-100 font-medium max-w-lg leading-relaxed">
+                        Here are the discount codes you've successfully claimed. 
+                        Use them at checkout to save big!
+                    </p>
+                </div>
+
+                <div class="relative z-10 mt-6 md:mt-0">
+                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 text-center min-w-[140px]">
+                        <span class="block text-4xl font-black">{{ $myRewards->count() }}</span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider opacity-80">Active Codes</span>
+                    </div>
+                </div>
+            </div>
+
+            {{-- 3. REWARDS LIST --}}
+            <div class="animate-fade-in delay-100">
+                <div class="flex items-end justify-between mb-8">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800">Your Vouchers</h2>
+                        <p class="text-slate-500 text-sm">Tap "Copy" to use a code instantly.</p>
+                    </div>
+                    <div class="hidden md:block h-px bg-slate-200 flex-1 ml-6 relative top-[-10px]"></div>
+                </div>
+
+                <div id="rewardsList" class="space-y-6">
+                    @forelse($myRewards as $redemption)
+                        <div class="group bg-white rounded-[2.5rem] p-1 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-red-500/5 hover:-translate-y-1 transition-all duration-300">
+                            <div class="p-8 flex flex-col md:flex-row gap-8 items-center">
+                                
+                                {{-- Left: Icon & Value --}}
+                                <div class="flex flex-col items-center justify-center min-w-[120px] text-center border-b md:border-b-0 md:border-r border-slate-100 pb-6 md:pb-0 md:pr-8">
+                                    <div class="h-16 w-16 rounded-2xl bg-green-50 text-green-500 flex items-center justify-center text-2xl shadow-inner mb-3">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <h3 class="text-2xl font-black text-slate-800 leading-none">
+                                        {{ $redemption->reward->rewardAmount }}{{ $redemption->reward->rewardType == 'Discount' ? '%' : '' }}
+                                    </h3>
+                                    <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">OFF</span>
+                                </div>
+
+                                {{-- Center: Details --}}
+                                <div class="flex-1 text-center md:text-left">
+                                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
+                                        <span class="px-3 py-1 bg-green-50 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wide">
+                                            Active
+                                        </span>
+                                        <span class="text-xs text-slate-400 font-bold tracking-wide">
+                                            <i class="far fa-clock mr-1"></i> Claimed: {{ \Carbon\Carbon::parse($redemption->redemptionDate)->format('d M Y') }}
+                                        </span>
+                                    </div>
+                                    
+                                    <h4 class="text-lg font-bold text-slate-800 mb-2">
+                                        {{ $redemption->reward->rewardType }} Voucher
+                                    </h4>
+                                    
+                                    <div class="text-sm text-slate-500 font-medium bg-orange-50 border border-orange-100 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg">
+                                        <i class="far fa-calendar-times text-orange-500"></i>
+                                        <span>Expires on {{ \Carbon\Carbon::parse($redemption->reward->expiryDate)->format('d M Y') }}</span>
+                                    </div>
+                                </div>
+
+                                {{-- Right: Code & Action --}}
+                                <div class="w-full md:w-auto bg-slate-50 rounded-2xl p-5 border border-slate-100 flex flex-col items-center gap-3 min-w-[200px]">
+                                    <div class="text-center">
+                                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-1">Promo Code</span>
+                                        <span class="font-mono text-xl font-black text-slate-800 tracking-widest select-all">
+                                            {{ $redemption->reward->voucherCode }}
+                                        </span>
+                                    </div>
+                                    <button onclick="copyToClipboard('{{ $redemption->reward->voucherCode }}', this)" 
+                                            class="w-full py-2.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl text-sm hover:bg-slate-800 hover:text-white hover:border-slate-800 transition-all active:scale-95 flex items-center justify-center gap-2 group-btn">
+                                        <i class="far fa-copy"></i> <span>Copy Code</span>
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    @empty
+                        {{-- Empty State --}}
+                        <div class="bg-white rounded-[2.5rem] text-center py-20 border border-slate-100 shadow-sm">
+                            <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i class="fas fa-ticket-alt text-4xl text-slate-300"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-2">Your wallet is empty</h3>
+                            <p class="text-slate-500 max-w-sm mx-auto mb-8">You haven't claimed any rewards yet. Collect stamps and head to the store!</p>
+                            
+                            <a href="{{ route('reward.index') }}" class="inline-flex items-center gap-2 bg-red-600 text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 hover:-translate-y-1 transition-all">
+                                <span>Go Earn Stamps</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Script for Copy Functionality --}}
+    <script>
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const span = btn.querySelector('span');
+                const icon = btn.querySelector('i');
+                const originalText = span.textContent;
+                
+                // Change UI to indicate success
+                span.textContent = 'Copied!';
+                icon.className = 'fas fa-check';
+                btn.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200', 'hover:bg-slate-800');
+
+                // Revert after 2 seconds
+                setTimeout(() => {
+                    span.textContent = originalText;
+                    icon.className = 'far fa-copy';
+                    btn.classList.remove('bg-green-500', 'text-white', 'border-green-500');
+                    btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200', 'hover:bg-slate-800');
+                }, 2000);
+            });
+        }
+    </script>
+</x-app-layout>

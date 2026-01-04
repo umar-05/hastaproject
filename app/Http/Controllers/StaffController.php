@@ -4,15 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
-use App\Models\Booking; 
+use App\Models\Reward;
+use App\Models\Booking;
+use App\Models\Fleet;
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse; 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Schema;
 
 class StaffController extends Controller
 {
@@ -21,10 +23,6 @@ class StaffController extends Controller
      */
     public function index(): View
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
         $bookingsToManage = Booking::where('bookingStat', 'Pending')->count();
         $pickupsToday = Booking::whereDate('pickupDate', now())->where('bookingStat', 'Confirmed')->count();
         $returnsToday = Booking::whereDate('returnDate', now())->where('bookingStat', 'Active')->count();
@@ -41,10 +39,6 @@ class StaffController extends Controller
      */
     public function pickupReturn(): View
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
         $todayPickups = Booking::with(['customer', 'fleet'])
             ->whereDate('pickupDate', now())
             ->where('bookingStat', 'Confirmed')
@@ -67,13 +61,16 @@ class StaffController extends Controller
      */
     public function editProfile(Request $request): View
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
         return view('staff.profile.edit', [
             'user' => $request->user('staff'),
         ]);
+    }
+
+    public function edit($staffID)
+    {
+        $staff = Staff::where('staffID', $staffID)->firstOrFail();
+        // Re-use the same "functioning" file!
+        return view('staff.add-stafffunctioning', compact('staff'));
     }
 
     /**
@@ -110,6 +107,25 @@ class StaffController extends Controller
         return Redirect::route('staff.profile.edit')->with('status', 'profile-updated');
     }
 
+    public function update(Request $request, $staffID): \Illuminate\Http\RedirectResponse
+{
+    // Find the staff by their custom staffID
+    $staff = Staff::where('staffID', $staffID)->firstOrFail();
+
+    // Validate the data
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'position' => ['required', 'string', 'max:50'],
+        'email' => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique('staff')->ignore($staff->staffID, 'staffID')],
+    ]);
+
+    // Save changes
+    $staff->update($validated);
+
+    // Redirect back to the staff record list
+    return redirect()->route('staff.add-staff')->with('status', "Staff member $staffID updated successfully!");
+}
+
     /**
      * Show form to add new staff.
      */
@@ -119,6 +135,17 @@ class StaffController extends Controller
             return redirect()->route('login');
         }
 
+    $staffs = Staff::all();
+
+    // 3. Send the data to the page
+    return view('staff.add-staff', [
+        'staffs' => $staffs, // This fills the table
+        'totalStaffCount' => $staffs->count(), // Fills Card 1
+        'driverCount' => $staffs->where('position', 'Driver')->count(), // Fills Card 2
+        'adminCount' => $staffs->where('position', 'Administrator')->count(), // Fills Card 3
+        'managerCount' => $staffs->where('position', 'Manager')->count(), // Fills Card 4
+    ]);
+
         // FIX: Changed from 'staff.add' to 'staff.add-staff'
         return view('staff.add-staff'); 
     }
@@ -126,6 +153,17 @@ class StaffController extends Controller
     /**
      * Store a new staff member.
      */
+    public function createFunctioning() 
+{
+    // Check if staff is logged in
+    if (!auth()->guard('staff')->check()) {
+        return redirect()->route('login');
+    }
+
+    // This looks for the file: resources/views/staff/add-stafffunctioning.blade.php
+    return view('staff.add-stafffunctioning');
+}
+
     public function store(Request $request): RedirectResponse
 {
     // 1. Ensure user is authenticated
@@ -170,7 +208,8 @@ class StaffController extends Controller
         'password' => Hash::make($request->password),
     ]);
 
-    return redirect()->route('staff.add-staff')->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
+    return redirect()->route('staff.add-stafffunctioning')
+    ->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
 }
 
     /**
@@ -178,15 +217,11 @@ class StaffController extends Controller
      */
     public function reports(): View
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
         return view('staff.report'); 
     }
 
     /**
-     * Bookings management list for staff
+     * Bookings management list for staff.
      */
     public function bookingManagement(Request $request): View
     {
@@ -224,5 +259,59 @@ class StaffController extends Controller
             'pendingVerificationCount' => $pendingVerificationCount,
             'completedCount' => $completedCount,
         ]);
+    }
+
+    /**
+     * Display the Fleet Management page with filtering and search.
+     */
+    public function fleet(Request $request)
+    {
+        // 1. Calculate Stats
+        $stats = [
+            'total'       => Fleet::count(),
+            'available'   => Fleet::where('status', 'available')->count(),
+            'rented'      => Fleet::where('status', 'rented')->count(),
+            'maintenance' => Fleet::where('status', 'maintenance')->count(),
+        ];
+
+        // 2. Setup query
+        $query = Fleet::query();
+
+        // 3. Search Logic
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('make', 'like', "%{$search}%")
+                  ->orWhere('model', 'like', "%{$search}%")
+                  ->orWhere('plate_number', 'like', "%{$search}%");
+            });
+        }
+
+        // 4. Filter Logic
+        if ($filter = $request->input('filter')) {
+            if ($filter !== 'all') {
+                $query->where('status', $filter);
+            }
+        }
+
+        $vehicles = $query->latest()->paginate(9)->withQueryString();
+
+        return view('staff.fleet.index', compact('vehicles', 'stats'));
+    }
+
+    /**
+     * Display Rewards for Staff.
+     */
+    public function rewards()
+    {
+        $activeRewards = Reward::where('rewardStatus', 'Active')->get();
+        $inactiveRewards = Reward::where('rewardStatus', 'Inactive')->get();
+
+        $stats = [
+            'total'  => Reward::count(),
+            'active' => $activeRewards->count(),
+            'slots'  => $activeRewards->sum('totalClaimable'),
+        ];
+
+        return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
     }
 }

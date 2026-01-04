@@ -1,214 +1,284 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Your Loyalty Rewards</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-bold text-xl text-gray-800 leading-tight flex items-center gap-2">
+            <i class="fas fa-crown text-red-600"></i>
+            {{ __('Loyalty Rewards') }}
+        </h2>
+    </x-slot>
+
+    {{-- CUSTOM STYLES & ANIMATIONS --}}
     <style>
-        body { background-color: #f9fafb; font-family: 'Inter', sans-serif; }
-        .stamp { 
-            width: 44px; height: 44px; 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; border: 2px solid #e5e7eb; border-radius: 50%; 
-            font-size: 14px;
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .stamp.filled { 
-            background-color: #ef4444; color: white; border-color: #ef4444; 
+        .animate-fade-in { animation: fadeInUp 0.6s ease-out forwards; }
+        .delay-100 { animation-delay: 0.1s; }
+
+        /* Stamp Styles */
+        .stamp-container { perspective: 1000px; }
+        .stamp {
+            width: 50px; height: 50px; /* Optimal size */
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; border-radius: 50%;
+            font-size: 18px; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
         }
-        .reward-card { transition: all 0.2s; }
-        .reward-card.unavailable { opacity: 0.7; }
+        /* Empty State */
+        .stamp.empty {
+            background-color: rgba(255,255,255,0.15);
+            border: 2px dashed rgba(255,255,255,0.4);
+            color: rgba(255,255,255,0.6);
+        }
+        /* Filled State */
+        .stamp.filled {
+            background-color: #ffffff;
+            color: #b91c1c; /* HASTA Red */
+            border: 2px solid white;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+        /* Active Pulse for filled stamps */
+        .stamp.filled::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%; border: 2px solid white;
+            animation: ripple 1.5s infinite;
+        }
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
     </style>
-</head>
-<body class="min-h-screen">
 
-<div class="max-w-3xl mx-auto p-6">
-    <!-- Header -->
-    <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-800">Loyalty Rewards</h1>
-        <p class="text-gray-600">
-            Earn 1 stamp for every rental of <strong>10+ hours</strong>.<br>
-            Every <strong>3 stamps</strong> = 1 redeemable reward!
-        </p>
-    </div>
-
-    <!-- Stamps Progress -->
-    <div class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-200">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="font-medium text-gray-800">Your Stamps</h2>
-            <span class="text-lg font-bold text-red-600">5 Stamps</span>
-        </div>
-        
-        <!-- Stamp Visualization (show up to 9 for clarity) -->
-        <div class="flex flex-wrap gap-3 mb-4">
-            <!-- Stamps are NOT consumed — just show total -->
-            <div class="stamp filled">1</div>
-            <div class="stamp filled">2</div>
-            <div class="stamp filled">3</div>
-            <div class="stamp filled">4</div>
-            <div class="stamp filled">5</div>
-            <!-- Empty for future -->
-            <div class="stamp">6</div>
-            <div class="stamp">7</div>
-            <div class="stamp">8</div>
-            <div class="stamp">9</div>
-        </div>
-
-        <!-- Reward Eligibility -->
-        <div class="bg-blue-50 rounded-lg p-4">
-            <div class="flex items-start">
-                <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-3"></i>
-                <div>
-                    <p class="text-sm text-gray-700">
-                        You have <strong>5 stamps</strong> → <strong>1 reward(s)</strong> available to claim!
-                        <br><span class="font-medium">Unclaimed rewards stay available.</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Claimable Rewards Section -->
-    <div class="mb-8">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Available Rewards</h2>
-        
-<!-- Reward 1: Claimable -->
-<div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200 mb-4 reward-card">
-    <div class="flex justify-between">
-        <div>
-            <span class="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full mb-2">
-                <i class="fas fa-car"></i> Car Rental Discount
-            </span>
-            <h3 class="font-bold text-gray-800">15% Off Your Next Car Rental</h3>
-            <p class="text-sm text-gray-600 mt-1">
-                Apply this code during checkout to get discount on your rental.
-            </p>
-        </div>
-        <div class="text-right">
-            <span class="text-sm text-gray-500 block mb-2">Requires: 3 stamps</span>
-            <button 
-                class="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700"
-                onclick="claimReward('Car Rental Discount', '15% Off Your Next Car Rental', 'RENTAL-15P-8A3B')"
-            >
-                Claim Reward
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal -->
-<div id="rewardModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl p-6 max-w-sm w-full mx-4 text-center">
-        <div class="text-green-500 text-4xl mb-4">
-            <i class="fas fa-gift"></i>
-        </div>
-        <h3 class="font-bold text-lg text-gray-800 mb-2">Reward Claimed!</h3>
-        <p class="text-gray-600 text-sm mb-4">
-            Your code: <br>
-            <span class="font-mono font-bold bg-gray-100 px-2 py-1 rounded inline-block mt-1" id="modalCode"></span>
-        </p>
-        <div class="flex flex-col gap-2">
-            <button 
-                onclick="goToMyRewards()"
-                class="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700"
-            >
-                View All My Rewards
-            </button>
-            <button 
-                onclick="document.getElementById('rewardModal').classList.add('hidden')"
-                class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg"
-            >
-                Close
-            </button>
-        </div>
-    </div>
-</div>
-
-<script>
-// Simulate saving claimed rewards in browser storage
-function claimReward(title, description, code) {
-    // Get existing rewards
-    let claimed = JSON.parse(localStorage.getItem('claimedRewards') || '[]');
-    
-    // Avoid duplicates
-    const exists = claimed.some(r => r.code === code);
-    if (!exists) {
-        claimed.push({ title, description, code, claimedAt: new Date().toISOString() });
-        localStorage.setItem('claimedRewards', JSON.stringify(claimed));
-    }
-
-    // Show modal
-    document.getElementById('modalCode').textContent = code;
-    document.getElementById('rewardModal').classList.remove('hidden');
-}
-
-function goToMyRewards() {
-    window.location.href = "{{ route('rewards.claimed') }}";
-}
-</script>
-
-<script>
-function showRewardModal(code) {
-    document.getElementById('modalCode').textContent = code;
-    document.getElementById('rewardModal').classList.remove('hidden');
-    navigator.clipboard.writeText(code).then(() => {
-        // Optional: show "Copied!" briefly
-    });
-}
-</script>
-
-        <!-- Reward 2: Not Yet Eligible (Need 6 stamps for 2nd reward) -->
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200 reward-card unavailable">
-            <div class="flex justify-between">
-                <div>
-                    <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full mb-2">
-                        <i class="fas fa-clock"></i> Extra Rental Hours
-                    </span>
-                    <h3 class="font-bold text-gray-800">+1.5 Free Hours on Next Rental</h3>
-                    <p class="text-sm text-gray-600 mt-1">
-                        Apply this code during checkout to extend your rental.
-                    </p>
-                    <div class="mt-2">
-                        <span class="text-xs font-mono bg-gray-100 px-2 py-1 rounded text-gray-400">RENTAL-1H30-XXXX</span>
+    <div class="py-12 bg-[#F8FAFC] min-h-screen font-sans">
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
+            
+            {{-- 1. NOTIFICATIONS --}}
+            @if(session('success'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" 
+                     class="animate-fade-in mb-8 p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 rounded-r-xl shadow-sm flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-emerald-100 p-2 rounded-full"><i class="fas fa-check"></i></div>
+                        <span class="font-bold">{{ session('success') }}</span>
                     </div>
                 </div>
-                <div class="text-right">
-                    <span class="text-sm text-gray-500 block mb-2">Requires: 6 stamps</span>
-                    <button 
-                        class="px-4 py-2 bg-gray-300 text-gray-500 text-sm rounded-lg cursor-not-allowed"
-                        disabled
-                    >
-                        Need 1 More Stamp
-                    </button>
+            @endif
+
+            @if(session('error'))
+                <div class="animate-fade-in mb-8 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-xl shadow-sm flex items-center gap-3">
+                    <div class="bg-red-100 p-2 rounded-full"><i class="fas fa-times"></i></div>
+                    <span class="font-bold">{{ session('error') }}</span>
+                </div>
+            @endif
+            
+            {{-- 2. NAVIGATION PILLS --}}
+            <div class="flex justify-center mb-12 animate-fade-in">
+                <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-100 inline-flex">
+                    <a href="{{ route('reward.index') }}" 
+                       class="px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 {{ request()->routeIs('reward.index') ? 'bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg transform scale-105' : 'text-gray-500 hover:bg-gray-50' }}">
+                        <i class="fas fa-store"></i> Rewards Store
+                    </a>
+                    <a href="{{ route('reward.claimed') }}" 
+                       class="px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 {{ request()->routeIs('reward.claimed') ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg transform scale-105' : 'text-gray-500 hover:bg-gray-50' }}">
+                        <i class="fas fa-wallet"></i> My Wallet
+                    </a>
+                </div>
+            </div>
+
+            {{-- 3. HERO SECTION: LOYALTY CARD --}}
+            {{-- Added mb-16 for more space below, and adjusted p-8 md:p-10 for tighter internal padding --}}
+            <div x-data="{ page: {{ Auth::user()->stamps > 10 ? 2 : 1 }} }" 
+                 class="animate-fade-in relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#B91C1C] via-[#DC2626] to-[#EF4444] shadow-2xl shadow-red-200 p-8 md:p-10 mb-20 text-white">
+                
+                {{-- Decorative Background --}}
+                <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-black opacity-10 rounded-full blur-2xl"></div>
+
+                <div class="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between">
+                    
+                    {{-- Left: Text Info --}}
+                    <div class="text-center md:text-left space-y-2 max-w-md">
+                        <h1 class="text-4xl md:text-5xl font-black tracking-tight leading-tight">
+                            {{ Auth::user()->stamps }} <span class="text-red-100 text-3xl block md:inline">Stamps Collected</span>
+                        </h1>
+                        <p class="text-red-100 font-medium text-lg leading-relaxed pt-2">
+                            Rent for <span class="text-white font-bold border-b-2 border-white/40">10 hours+</span> to earn a stamp. 
+                            Collect 20 to reach maximum status!
+                        </p>
+                    </div>
+
+                    {{-- Right: Slider Stamp Grid --}}
+                    <div class="flex-1 w-full max-w-xl flex items-center justify-center gap-6">
+                        
+                        {{-- LEFT ARROW (Visible with bg-white/20) --}}
+                        <button @click="page = 1" 
+                                :class="page === 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'"
+                                class="p-4 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all duration-300 backdrop-blur-md shadow-lg flex-shrink-0">
+                            <i class="fas fa-chevron-left text-xl"></i>
+                        </button>
+
+                        {{-- STAMPS CONTAINER --}}
+                        <div class="flex-1 min-h-[140px] md:min-h-[120px] relative flex items-center justify-center">
+                            
+                            {{-- PAGE 1 (1-10) --}}
+                            <div x-show="page === 1" 
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0 transform -translate-x-8"
+                                 x-transition:enter-end="opacity-100 transform translate-x-0"
+                                 x-transition:leave="transition ease-in duration-200"
+                                 x-transition:leave-start="opacity-100 transform translate-x-0"
+                                 x-transition:leave-end="opacity-0 transform -translate-x-8"
+                                 class="absolute inset-0 flex flex-wrap justify-center gap-3 md:gap-4 content-center">
+                                @for ($i = 1; $i <= 10; $i++)
+                                    <div class="stamp-container" title="Stamp {{ $i }}">
+                                        <div class="stamp {{ $i <= Auth::user()->stamps ? 'filled' : 'empty' }}">
+                                            @if($i <= Auth::user()->stamps) <i class="fas fa-check"></i> @else {{ $i }} @endif
+                                        </div>
+                                    </div>
+                                @endfor
+                            </div>
+
+                            {{-- PAGE 2 (11-20) --}}
+                            <div x-show="page === 2" style="display: none;"
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0 transform translate-x-8"
+                                 x-transition:enter-end="opacity-100 transform translate-x-0"
+                                 x-transition:leave="transition ease-in duration-200"
+                                 x-transition:leave-start="opacity-100 transform translate-x-0"
+                                 x-transition:leave-end="opacity-0 transform translate-x-8"
+                                 class="absolute inset-0 flex flex-wrap justify-center gap-3 md:gap-4 content-center">
+                                @for ($i = 11; $i <= 20; $i++)
+                                    <div class="stamp-container" title="Stamp {{ $i }}">
+                                        <div class="stamp {{ $i <= Auth::user()->stamps ? 'filled' : 'empty' }}">
+                                            @if($i <= Auth::user()->stamps) <i class="fas fa-check"></i> @else {{ $i }} @endif
+                                        </div>
+                                    </div>
+                                @endfor
+                            </div>
+                        </div>
+
+                        {{-- RIGHT ARROW (Visible with bg-white/20) --}}
+                        <button @click="page = 2" 
+                                :class="page === 2 ? 'opacity-0 pointer-events-none' : 'opacity-100'"
+                                class="p-4 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all duration-300 backdrop-blur-md shadow-lg flex-shrink-0">
+                            <i class="fas fa-chevron-right text-xl"></i>
+                        </button>
+                    </div>
+
+                </div>
+
+                {{-- Gamification Notification --}}
+                @if(Auth::user()->stamps >= 3)
+                <div class="mt-6 bg-white/10 border border-white/20 rounded-xl p-3 flex items-center justify-center gap-3 backdrop-blur-sm animate-pulse">
+                    <i class="fas fa-gift text-yellow-300"></i>
+                    <p class="text-sm font-bold">
+                        Great job! You have enough stamps to claim a reward below.
+                    </p>
+                </div>
+                @endif
+            </div>
+
+            {{-- 4. AVAILABLE REWARDS GRID --}}
+            <div class="animate-fade-in delay-100">
+                <div class="flex items-end justify-between mb-8">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800">Available Rewards</h2>
+                        <p class="text-slate-500 text-sm">Exchange your hard-earned stamps for vouchers.</p>
+                    </div>
+                    <div class="hidden md:block h-px bg-slate-200 flex-1 ml-6 relative top-[-10px]"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-5">
+                    @forelse($availableRewards as $reward)
+                        <div class="group relative bg-white rounded-3xl p-1 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-red-500/5 hover:-translate-y-1 transition-all duration-300">
+                            <div class="flex flex-col md:flex-row items-center p-6 gap-6">
+                                
+                                {{-- Icon/Visual Side --}}
+                                <div class="w-full md:w-auto flex justify-center">
+                                    <div class="h-20 w-20 rounded-2xl {{ $reward->rewardType == 'Discount' ? 'bg-purple-50 text-purple-500' : 'bg-blue-50 text-blue-500' }} flex items-center justify-center text-3xl shadow-inner group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fas {{ $reward->rewardType == 'Discount' ? 'fa-percent' : 'fa-clock' }}"></i>
+                                    </div>
+                                </div>
+
+                                {{-- Content Side --}}
+                                <div class="flex-1 text-center md:text-left">
+                                    <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
+                                        <span class="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest">
+                                            {{ $reward->rewardType }}
+                                        </span>
+                                        @if($reward->totalClaimable < 5)
+                                            <span class="px-2.5 py-0.5 rounded-md bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                                                Hot
+                                            </span>
+                                        @endif
+                                    </div>
+                                    
+                                    <h3 class="text-xl font-bold text-slate-800 leading-tight mb-2">
+                                        {{ $reward->rewardAmount }}{{ $reward->rewardType == 'Discount' ? '%' : '' }} Off Your Next Purchase
+                                    </h3>
+                                    
+                                    <div class="flex items-center justify-center md:justify-start gap-4 text-sm text-slate-500 font-medium">
+                                        <span class="flex items-center gap-1.5">
+                                            <i class="fas fa-ticket-alt text-slate-300"></i> {{ $reward->totalClaimable }} left
+                                        </span>
+                                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                                        <span class="flex items-center gap-1.5 {{ Auth::user()->stamps >= $reward->rewardPoints ? 'text-green-600 font-bold' : 'text-slate-400' }}">
+                                            <i class="fas fa-stamp"></i> Cost: {{ $reward->rewardPoints }} Stamps
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{-- Action Side --}}
+                                <div class="w-full md:w-auto">
+                                    @if(Auth::user()->stamps >= $reward->rewardPoints)
+                                        <form action="{{ route('rewards.claim') }}" method="POST" onsubmit="return confirm('Confirm claim for {{ $reward->rewardPoints }} stamps?')">
+                                            @csrf
+                                            <input type="hidden" name="rewardID" value="{{ $reward->rewardID }}">
+                                            <button type="submit" 
+                                                    class="w-full md:w-auto px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-[#B91C1C] transition-all duration-300 shadow-lg shadow-gray-200 active:scale-95 flex items-center justify-center gap-2 group-hover:shadow-red-200">
+                                                <span>Claim</span>
+                                                <i class="fas fa-arrow-right opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all"></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        {{-- Locked State --}}
+                                        <div class="flex flex-col items-center">
+                                            <button disabled class="w-full md:w-auto px-8 py-4 bg-slate-50 text-slate-300 border border-slate-100 rounded-2xl font-bold cursor-not-allowed flex items-center gap-2">
+                                                <i class="fas fa-lock"></i> Locked
+                                            </button>
+                                            <span class="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+                                                Need {{ $reward->rewardPoints - Auth::user()->stamps }} More
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-20">
+                            <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-box-open text-3xl text-slate-300"></i>
+                            </div>
+                            <h3 class="text-slate-800 font-bold text-lg">No Rewards Available</h3>
+                            <p class="text-slate-400 text-sm">Check back later for new offers!</p>
+                        </div>
+                    @endforelse
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- How It Works -->
-    <div class="bg-gray-50 rounded-xl p-5 border">
-        <h3 class="font-semibold text-gray-800 mb-3">How Loyalty Rewards Work</h3>
-        <ul class="text-sm text-gray-600 space-y-2">
-            <li class="flex items-start">
-                <span class="text-red-500 mr-2">•</span>
-                <span>Rent a vehicle for <strong>10+ hours</strong> → earn <strong>1 stamp</strong>.</span>
-            </li>
-            <li class="flex items-start">
-                <span class="text-red-500 mr-2">•</span>
-                <span>Every <strong>3 stamps</strong> = <strong>1 reward</strong> (discount or extra hours).</span>
-            </li>
-            <li class="flex items-start">
-                <span class="text-red-500 mr-2">•</span>
-                <span>Stamps <strong>never expire</strong> and <strong>are not deducted</strong> when you claim.</span>
-            </li>
-            <li class="flex items-start">
-                <span class="text-red-500 mr-2">•</span>
-                <span>Unclaimed rewards stay available until you redeem them.</span>
-            </li>
-        </ul>
-    </div>
-</div>
-
-</body>
-</html>
+    {{-- Optional: Confetti Script for Success --}}
+    @if(session('success'))
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#B91C1C', '#EF4444', '#ffffff']
+        });
+    </script>
+    @endif
+</x-app-layout>
