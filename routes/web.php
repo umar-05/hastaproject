@@ -60,7 +60,6 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
 });
 
 
-
 // ==============================
 // 3. STAFF ROUTES (Guard: staff)
 // ==============================
@@ -70,29 +69,33 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // Staff Dashboard
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
-    Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingsmanage');
+    Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
+
+    // Fleet management (Staff)
+    Route::prefix('fleet')->name('fleet.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Staff\FleetController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Staff\FleetController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Staff\FleetController::class, 'store'])->name('store');
+        // Edit / Update / Destroy (uses plateNumber as the primary key)
+        Route::get('/{plateNumber}/edit', [\App\Http\Controllers\Staff\FleetController::class, 'edit'])->name('edit');
+        Route::match(['put','patch'],'/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'update'])->name('update');
+        Route::delete('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'destroy'])->name('destroy');
+        // Show a single vehicle (uses plateNumber as the primary key)
+        Route::get('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'show'])->name('show');
+        // Additional staff fleet routes (edit/delete) can be added here
+    });
 
     // Staff-Specific Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
 
-    // --- 3.2 Staff Management & Utility ---
+    // Staff Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
     Route::post('/store', [StaffController::class, 'store'])->name('store');
     Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
     
-    // --- 3.3 Fleet Management (MENGGUNAKAN FOLDER VIEW: staff/fleet) ---
-    // VehicleController digunakan, tetapi routes/names adalah 'fleet'
-    // Nama Route: staff.fleet.index, staff.fleet.create, staff.fleet.show, dll.
-    Route::resource('fleet', VehicleController::class)->names('fleet'); 
-
-    // --- 3.4 Booking Management (Staff View) ---
-    // BookingController digunakan.
-    // Nama Route: staff.bookings.index, staff.bookings.show, dll.
-    Route::resource('bookings', BookingController::class)->names('bookings'); 
-    
-    // --- 3.5 Reward Management ---
+    // Reward Management for Staff
     Route::prefix('rewards')->name('reward.')->group(function() {
         Route::get('/', [RewardController::class, 'index'])->name('index'); 
         Route::get('/create', [RewardController::class, 'create'])->name('create');
@@ -100,9 +103,6 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
         Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
     });
-
-    // --- 3.6 API & Custom Actions ---
-    Route::post('/validate-voucher', [BookingController::class, 'validateVoucher'])->name('validateVoucher');
 });
 
 
