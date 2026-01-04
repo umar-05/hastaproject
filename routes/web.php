@@ -44,17 +44,16 @@ Route::middleware(['auth:customer', 'verified'])->group(function () {
     Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
     Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
 
-    // Customer Rewards
-    Route::get('/rewards', function () {
+    // Rewards Store
+Route::get('/rewards', function () {
     return view('reward.customer');
 })->name('reward.customer');
 
-    Route::get('/rewards/my-claimed', function () {
-        return view('rewards.claimed'); // This looks for resources/views/rewards/claimed.blade.php
-    })->name('rewards.claimed')->middleware(['auth:customer', 'verified']);
+// My Wallet
+Route::get('/rewards/my-claimed', function () {
+    return view('reward.claimed');
+})->name('rewards.claimed');
 
-    // The route the "Claim" button is looking for
-    Route::get('/rewards/claimed', [RewardController::class, 'claimed'])->name('rewards.claimed');
     
     // Booking Management
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
