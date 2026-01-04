@@ -182,7 +182,7 @@ class StaffController extends Controller
             return redirect()->route('login');
         }
 
-        return view('staff.reports'); 
+        return view('staff.report'); 
     }
 
     /**
