@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Staff;
 use App\Models\Reward;
 use App\Models\Booking;
-use App\Models\Booking; 
 use App\Models\Fleet;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
