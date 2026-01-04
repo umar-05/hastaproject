@@ -92,7 +92,7 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($staffs ?? [] as $staff)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ $staff->id }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ $staff->staffID }}</td>
                         <td class="px-6 py-4">
                             <div class="text-sm font-bold text-gray-900">{{ $staff->name }}</div>
                         </td>
