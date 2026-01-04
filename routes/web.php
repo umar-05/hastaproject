@@ -57,6 +57,16 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
+
+    Route::middleware(['auth:customer', 'prevent-back'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    
+    // === ADD THIS NEW ROUTE ===
+    Route::post('/profile/documents', [ProfileController::class, 'storeDocuments'])->name('profile.documents.store');
+    
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    });
 });
 
 
