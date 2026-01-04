@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -135,10 +136,271 @@
 
                 <div class="mt-3">
                     <button class="btn btn-warning w-100">Manage Info</button>
+=======
+@extends('layouts.app') 
+
+@section('content')
+
+{{-- Import Carbon for date manipulation --}}
+@php use Carbon\Carbon; @endphp
+
+<div class="container-fluid py-4">
+    {{-- Top Section: Vehicle Basic Info --}}
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-3"><a href="{{ url('/vehicles.index') }}" class="text-danger text-decoration-none">&lt; Back to Fleet</a></h2>
+            
+            <div class="card p-4 mb-4 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        {{-- Uses your modelName field --}}
+                        <h3>{{ $car->modelName }}</h3>
+                        {{-- Uses your plateNumber field --}}
+                        <p class="text-muted">{{ $car->plateNumber }}</p>
+                    </div>
+                    {{-- Status Badge (Dynamic) --}}
+                    @php
+                        $status = strtolower($car->status);
+                        $statusClass = match($status) {
+                            'maintenance' => 'bg-warning text-dark',
+                            'booked' => 'bg-danger text-white',
+                            'available' => 'bg-success text-white',
+                            default => 'bg-secondary text-white',
+                        };
+                    @endphp
+                    <span class="badge {{ $statusClass }} p-2">{{ strtoupper($status) }}</span> 
                 </div>
             </div>
         </div>
     </div>
+
+    {{-- Main 2-Column Layout --}}
+    <div class="row">
+        {{-- LEFT COLUMN: Details, Specs, Other Cars --}}
+        <div class="col-lg-8">
+            {{-- Vehicle Specs and Image --}}
+            <div class="card mb-4 p-4 shadow-sm">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="bg-light p-5 rounded text-center mb-4" style="height: 250px;">
+                            <p class="text-muted mt-5">Image Placeholder ({{ $car->photos ?? 'N/A' }})</p>
+                        </div>
+                        {{-- Technical Specification --}}
+                        <h4>Technical Specification</h4>
+                        <div class="d-flex justify-content-between mt-3">
+                            <div class="text-center p-3 border rounded">
+                                <strong>{{ $car->year }}</strong><br>Year
+                            </div>
+                            <div class="text-center p-3 border rounded">
+                                <strong>{{ $car->color ?? 'N/A' }}</strong><br>Color
+                            </div>
+                            <div class="text-center p-3 border rounded">
+                                <strong>{{ number_format($car->odometer ?? 0) }} km</strong><br>Odometer
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Right side of the top card: Owner Info, Tax, Insurance, Documents --}}
+                    <div class="col-md-7 border-start ps-4">
+                        <h4>Status & Documentation</h4>
+                        
+                        {{-- Owner Information --}}
+                        <div class="detail-group">
+                            <h5 class="d-flex justify-content-between">
+                                Owner Information 
+                                <a href="#" class="edit-link text-danger text-decoration-none">✏️ Edit</a>
+                            </h5>
+                            <p>Name: <strong>{{ $car->ownerName ?? 'N/A' }}</strong></p>
+                            <p>Phone: <strong>{{ $car->ownerPhone ?? 'N/A' }}</strong></p>
+                            <p>Email: <strong>{{ $car->ownerEmail ?? 'N/A' }}</strong></p>
+                        </div>
+
+                        {{-- Road Tax --}}
+                        <div class="detail-group">
+                            @php
+                                $taxExpiry = $car->taxExpirydate ? Carbon::parse($car->taxExpirydate) : null;
+                                $isTaxActive = $taxExpiry && $taxExpiry->isFuture();
+                                $taxStatusClass = $isTaxActive ? 'bg-success' : 'bg-danger';
+                                $taxStatusText = $isTaxActive ? 'ACTIVE' : 'EXPIRED';
+                            @endphp
+                            <h5 class="d-flex justify-content-between">
+                                Road Tax <span class="badge {{ $taxStatusClass }}">{{ $taxStatusText }}</span>
+                            </h5>
+                            <p>Active Date: <strong>{{ $car->taxActivedate ? Carbon::parse($car->taxActivedate)->format('d/m/Y') : 'N/A' }}</strong></p>
+                            <p>Expiry Date: <strong>{{ $car->taxExpirydate ? $taxExpiry->format('d/m/Y') : 'N/A' }}</strong></p>
+                        </div>
+                        
+                        {{-- Documents --}}
+                        <div class="detail-group">
+                            <h5>Documents</h5>
+                            <div class="d-flex">
+                                <button class="btn btn-sm btn-info me-2">Download Grant</button>
+                                <button class="btn btn-sm btn-info me-2">Download Road Tax</button>
+                            </div>
+                        </div>
+
+                        {{-- Note --}}
+                        <div class="detail-group">
+                            <h5>Note</h5>
+                            <p>{{ $car->note ?? 'No notes recorded.' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Maintenance History Section --}}
+            <div class="card p-4 mb-4 shadow-sm">
+                <h4>Maintenance History</h4>
+                @if($maintenanceHistory->isNotEmpty())
+                    @foreach($maintenanceHistory as $maintenance)
+                    <div class="maintenance-item d-flex justify-content-between py-2 border-bottom">
+                        <div>
+                            {{-- Uses your description field --}}
+                            <strong>{{ $maintenance->description }}</strong>
+                            <p class="text-muted mb-0 small">
+                                ID: {{ $maintenance->maintenanceID }} | 
+                                {{-- Uses your mDate and mTime fields --}}
+                                {{ Carbon::parse($maintenance->mDate)->format('Y-m-d') }} 
+                                @if($maintenance->mTime) ({{ $maintenance->mTime }}) @endif
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            {{-- Uses your cost field --}}
+                            <span class="font-weight-bold text-danger">RM {{ number_format($maintenance->cost, 2) }}</span>
+                            <br><small class="text-muted">{{ number_format($maintenance->odometerReading ?? 0) }} km</small>
+                        </div>
+                    </div>
+                    @endforeach
+                @else
+                    <p class="text-muted">No maintenance history found for this vehicle.</p>
+                @endif
+                <div class="text-right mt-3">
+                    <button class="btn btn-sm btn-outline-danger">View Full History</button>
+                </div>
+            </div>
+
+            {{-- Other Cars Section --}}
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Other Cars</h4>
+                    <a href="{{ url('/vehicles') }}" class="text-danger text-decoration-none">View all</a>
+                </div>
+                <div class="row">
+                    @foreach($otherCars as $otherCar)
+                    <div class="col-md-4">
+                        <div class="card p-3 car-card shadow-sm">
+                            <div class="car-placeholder bg-light mb-2" style="height: 80px;"></div>
+                            <h5>{{ $otherCar->modelName }}</h5>
+                            <p class="text-muted">{{ $otherCar->plateNumber }}</p>
+                            <div class="d-flex justify-content-between small text-muted mb-3">
+                                <span>🗓️ {{ $otherCar->year }}</span>
+                                <span>⛽ {{ $otherCar->fuel_level ?? 0 }}%</span>
+                                <span>🛣️ {{ number_format($otherCar->odometer ?? 0) }} km</span>
+                            </div>
+                            <a href="{{ route('staff.fleet.show', $otherCar->plateNumber) }}" class="btn btn-sm btn-danger">View Details</a>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+
+        {{-- RIGHT COLUMN: Availability and Booking History --}}
+        <div class="col-lg-4">
+            {{-- Availability Calendar --}}
+            <div class="card p-4 mb-4 shadow-sm">
+                <h4>Availability Calendar</h4>
+                {{-- Legend --}}
+                <div class="d-flex justify-content-around mb-3 small">
+                    <span class="text-success"><span class="legend-box bg-success"></span> Available</span>
+                    <span class="text-danger"><span class="legend-box bg-danger"></span> Booked</span>
+                    <span class="text-warning"><span class="legend-box bg-warning"></span> Maint</span>
+                </div>
+
+                {{-- Calendar Grid (Simplified) --}}
+                <div class="calendar-grid">
+                    @php
+                        // Current month (January 2026 for context)
+                        $calendarStartDay = 4; // Jan 1, 2026 is a Thursday (4th day)
+                        $daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                    @endphp
+
+                    @foreach($daysOfWeek as $day)
+                        <div class="day-header text-center small text-muted">{{ $day }}</div>
+                    @endforeach
+
+                    @for ($i = 0; $i < $calendarStartDay; $i++)
+                        <div class="calendar-cell empty"></div>
+                    @endfor
+
+                    @for ($day = 1; $day <= 31; $day++)
+                        @php
+                            $status = $availabilityData['calendar'][$day] ?? 'available'; 
+                            $statusClass = match($status) {
+                                'available' => 'cell-available',
+                                'booked' => 'cell-booked',
+                                'maintenance' => 'cell-maintenance',
+                                default => 'cell-default',
+                            };
+                        @endphp
+                        <div class="calendar-cell day-{{ $day }} text-center {{ $statusClass }}">
+                            {{ $day }}
+                        </div>
+                    @endfor
+                </div>
+
+                {{-- Availability Summary --}}
+                <div class="d-flex justify-content-around text-center mt-4">
+                    <div><h3 class="text-success">{{ $availabilityData['available_days'] }}</h3><p class="small text-muted">Available Days</p></div>
+                    <div><h3 class="text-danger">{{ $availabilityData['booked_days'] }}</h3><p class="small text-muted">Booked Days</p></div>
+                    <div><h3 class="text-warning">{{ $availabilityData['maintenance_days'] }}</h3><p class="small text-muted">Maintenance Days</p></div>
+                </div>
+            </div>
+
+            {{-- Booking History --}}
+            <div class="card p-4 shadow-sm">
+                <h4>Booking History</h4>
+                @if($bookingHistory->isNotEmpty())
+                    @foreach($bookingHistory as $booking)
+                    <div class="booking-item py-3 border-bottom d-flex justify-content-between">
+                        <div>
+                            {{-- Uses your customerName field --}}
+                            <strong>{{ $booking->customerName ?? 'N/A' }}</strong>
+                            <p class="text-muted mb-0 small">ID: {{ $booking->bookingID }}</p>
+                            {{-- Uses your pickupDate and returnDate fields --}}
+                            <p class="text-muted mb-0 small">Out: {{ Carbon::parse($booking->pickupDate)->format('d/m/Y') }}</p>
+                            @php
+                                $duration = Carbon::parse($booking->pickupDate)->diffInDays(Carbon::parse($booking->returnDate));
+                            @endphp
+                            <p class="text-muted mb-0 small">Duration: {{ $duration }} days</p>
+                        </div>
+                        <div class="text-right">
+                            {{-- Uses your totalPrice field --}}
+                            <span class="font-weight-bold text-danger">RM {{ number_format($booking->totalPrice, 2) }}</span>
+                            <br>
+                            @php
+                                $statusClass = match(strtoupper($booking->bookingStat)) {
+                                    'ONGOING' => 'bg-primary text-white',
+                                    'COMPLETED' => 'bg-success text-white',
+                                    default => 'bg-secondary text-white',
+                                };
+                            @endphp
+                            <span class="badge {{ $statusClass }}">{{ strtoupper($booking->bookingStat) }}</span>
+                        </div>
+                    </div>
+                    @endforeach
+                @else
+                    <p class="text-muted">No recent booking history found for this vehicle.</p>
+                @endif
+                <div class="text-right mt-3">
+                    <button class="btn btn-sm btn-outline-danger">View All Bookings</button>
+>>>>>>> Stashed changes
+                </div>
+            </div>
+        </div>
+    </div>
+<<<<<<< Updated upstream
 
     <!-- Technical Specification -->
     <div class="mt-5">
@@ -224,3 +486,48 @@ function switchImage(thumb, url) {
 
 </body>
 </html>
+=======
+</div>
+
+{{-- Essential Styling (Place this in a style tag or your main CSS file) --}}
+<style>
+    .detail-group { margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #eee; }
+    .detail-group h5 { font-size: 1.1rem; }
+    .detail-group p { margin-bottom: 0.25rem; font-size: 0.9rem; }
+    .edit-link { font-size: 0.8rem; }
+    .car-card { border: 1px solid #ccc; }
+
+    /* Calendar Grid Styles */
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        text-align: center;
+    }
+    .day-header { font-weight: bold; }
+    .calendar-cell {
+        padding: 5px;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+        font-size: 0.8rem;
+    }
+    /* Cell Backgrounds */
+    .cell-available { background-color: #e6ffe6; color: #155724; } 
+    .cell-booked { background-color: #f8d7da; color: #721c24; } 
+    .cell-maintenance { background-color: #fff3cd; color: #856404; } 
+    .legend-box {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+</style>
+
+@endsection
+>>>>>>> Stashed changes

@@ -24,6 +24,12 @@ class DatabaseSeeder extends Seeder
 
         // 3. Seed the Fleet (vehicles)
         $this->call(FleetSeeder::class);
+        // 4. Seed Relationship Data (Maintenance and Booking)
+        $this->call([
+            FleetSeeder::class, // Your existing seeder for basic car data
+            RelationshipDataSeeder::class, // The new seeder for Maint/Booking
+        ]);
+
 
         // 4. Seed Bookings last (as they depend on both Customers and Fleet)
         // $this->call(BookingSeeder::class);

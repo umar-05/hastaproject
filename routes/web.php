@@ -55,33 +55,59 @@ Route::middleware(['auth:customer', 'verified'])->group(function () {
 });
 
 
+
 // ==============================
 // 3. STAFF ROUTES (Guard: staff)
 // ==============================
 // Note: Changed 'auth' to 'auth:staff' to fix the login loop
 Route::middleware(['auth:staff'])->prefix('staff')->name('staff.')->group(function () {
     
+<<<<<<< Updated upstream
     // Staff Dashboard (This was causing the loop!)
     Route::get('/dashboard', function () {
         return view('dashboard'); 
     })->name('dashboard');
 
     Route::get('/staff/rewards', [StaffController::class, 'rewards'])->name('staff.rewards');
+=======
+    // --- 3.1 Staff Dashboard & Profile ---
+    Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
-    // Staff Management
+    Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
+    Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
+>>>>>>> Stashed changes
+
+    // --- 3.2 Staff Management & Utility ---
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
     Route::post('/store', [StaffController::class, 'store'])->name('store');
     Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
     
-    // Reward Management for Staff
+    // --- 3.3 Fleet Management (MENGGUNAKAN FOLDER VIEW: staff/fleet) ---
+    // VehicleController digunakan, tetapi routes/names adalah 'fleet'
+    // Nama Route: staff.fleet.index, staff.fleet.create, staff.fleet.show, dll.
+    Route::resource('fleet', VehicleController::class)->names('fleet'); 
+
+    // --- 3.4 Booking Management (Staff View) ---
+    // BookingController digunakan.
+    // Nama Route: staff.bookings.index, staff.bookings.show, dll.
+    Route::resource('bookings', BookingController::class)->names('bookings'); 
+    
+    // --- 3.5 Reward Management ---
     Route::prefix('rewards')->name('reward.')->group(function() {
+<<<<<<< Updated upstream
         Route::get('/', [RewardController::class, 'index'])->name('index');
+=======
+        Route::get('/', [RewardController::class, 'index'])->name('index'); 
+>>>>>>> Stashed changes
         Route::get('/create', [RewardController::class, 'create'])->name('create');
         Route::post('/', [RewardController::class, 'store'])->name('store');
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
         Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
     });
+
+    // --- 3.6 API & Custom Actions ---
+    Route::post('/validate-voucher', [BookingController::class, 'validateVoucher'])->name('validateVoucher');
 });
 
 

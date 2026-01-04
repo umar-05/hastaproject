@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('modelName');
             $table->integer('year');
             $table->string('photos')->nullable();
+            $table->string('color')->nullable(); // UI: Silver
             
             $table->string('ownerName')->nullable();
             $table->bigInteger('ownerIc')->nullable();

@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('maintenance', function (Blueprint $table) {
             $table->string('maintenanceID')->primary();
+            $table->string('plateNumber');
+            $table->foreign('plateNumber')->references('plateNumber')->on('fleet')->onDelete('cascade');
 
             $table->text('description')->nullable();
             $table->date('mDate')->nullable();

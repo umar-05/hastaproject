@@ -11,6 +11,21 @@ class VehicleController extends Controller
     {
         $vehicles = \App\Models\Fleet::all(); // Fetches all cars from the database
         return view('vehicles.index', compact('vehicles'));
+        $fleet = App\Models\Fleet::orderBy('model_name')->paginate(9);
+
+    // Calculate summary statistics for the dashboard cards
+    $totalVehicles = App\Models\Fleet::count();
+    $availableCount = App\Models\Fleet::where('status', 'available')->count();
+    $rentedCount = App\Models\Fleet::where('status', 'booked')->count();
+    $maintenanceCount = App\Models\Fleet::where('status', 'maintenance')->count();
+
+    return view('staff.fleet.index', [
+        'fleet' => $fleet,
+        'totalVehicles' => $totalVehicles,
+        'availableCount' => $availableCount,
+        'rentedCount' => $rentedCount,
+        'maintenanceCount' => $maintenanceCount,
+    ]);
     }
 
     public function bookNow()
