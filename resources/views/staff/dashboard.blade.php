@@ -8,7 +8,7 @@
                 <h2 class="font-bold text-2xl text-gray-800 tracking-tight">
                     DASHBOARD
                 </h2>
-                {{-- Date/Time Display (Optional Touch) --}}
+                {{-- Date/Time Display --}}
                 <div class="text-sm text-gray-500 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
                     {{ now()->format('l, d M Y') }}
                 </div>
@@ -17,26 +17,28 @@
             {{-- 1. TOP METRICS CARDS --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 
-                {{-- Card 1: Manage Booking --}}
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center hover:shadow-md transition">
-                    <div class="p-4 rounded-xl bg-red-50 text-hasta-red">
-                        {{-- Calendar Icon --}}
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                {{-- Card 1: Manage Booking (LINKED) --}}
+                <a href="{{ route('staff.bookingsmanage') }}" class="block group">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center group-hover:shadow-md group-hover:border-red-200 transition duration-200">
+                        <div class="p-4 rounded-xl bg-red-50 text-hasta-red group-hover:bg-red-100 transition">
+                            {{-- Calendar Icon --}}
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div class="ml-5">
+                            <h4 class="text-3xl font-bold text-gray-800">5</h4>
+                            <p class="text-sm text-gray-500 font-medium">Manage Booking</p>
+                        </div>
                     </div>
-                    <div class="ml-5">
-                        <h4 class="text-3xl font-bold text-gray-800">5</h4>
-                        <p class="text-sm text-gray-500 font-medium">Manage Booking</p>
-                    </div>
-                </div>
+                </a>
 
                 {{-- Card 2: Pickup Today --}}
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center hover:shadow-md transition">
                     <div class="p-4 rounded-xl bg-gray-50 text-gray-600">
                         {{-- Car Icon --}}
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" /> {{-- Simple Arrow Up Icon for pickup --}}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </div>
@@ -77,8 +79,7 @@
 
                     {{-- Chart Container --}}
                     <div class="relative h-64 w-full">
-                        
-                        {{-- Y-Axis Grid Lines (Optional background lines) --}}
+                        {{-- Y-Axis Grid Lines --}}
                         <div class="absolute inset-0 flex flex-col justify-between text-xs text-gray-300 pointer-events-none">
                             <div class="border-b border-gray-100 h-0 w-full"></div>
                             <div class="border-b border-gray-100 h-0 w-full"></div>
@@ -87,116 +88,29 @@
                             <div class="border-b border-gray-100 h-0 w-full"></div>
                         </div>
 
-                        {{-- Chart Bars & Axes --}}
+                        {{-- Chart Bars --}}
                         <div class="relative h-full flex items-end justify-between pl-6 pb-6">
-                            
-                            {{-- Y-Axis Labels --}}
                             <div class="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 pb-6">
-                                <span>12</span>
-                                <span>9</span>
-                                <span>6</span>
-                                <span>3</span>
-                                <span>0</span>
+                                <span>12</span><span>9</span><span>6</span><span>3</span><span>0</span>
                             </div>
 
-                            {{-- Bar 1 --}}
+                            {{-- Sample Bars --}}
                             <div class="w-full flex flex-col items-center group">
-                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 10%;"></div>
+                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm h-[40%] group-hover:opacity-80 transition duration-300"></div>
                                 <span class="text-xs text-gray-400 mt-3">1 Jan</span>
                             </div>
-
-                            {{-- Bar 2 (High) --}}
                             <div class="w-full flex flex-col items-center group">
-                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 80%;"></div>
+                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm h-[80%] group-hover:opacity-80 transition"></div>
                                 <span class="text-xs text-gray-400 mt-3">2 Jan</span>
                             </div>
-
-                            {{-- Bar 3 --}}
                             <div class="w-full flex flex-col items-center group">
-                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 0%;"></div>
-                                <span class="text-xs text-gray-400 mt-3">3 Jan</span>
-                            </div>
-
-                            {{-- Bar 4 --}}
-                            <div class="w-full flex flex-col items-center group">
-                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 60%;"></div>
+                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm h-[60%] group-hover:opacity-80 transition"></div>
                                 <span class="text-xs text-gray-400 mt-3">4 Jan</span>
                             </div>
-
-                            {{-- Bar 5 --}}
                             <div class="w-full flex flex-col items-center group">
-                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 45%;"></div>
-                                <span class="text-xs text-gray-400 mt-3">5 Jan</span>
-                            </div>
-
-                            {{-- Bar 6 --}}
-                            <div class="w-full flex flex-col items-center group">
-                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 0%;"></div>
-                                <span class="text-xs text-gray-400 mt-3">6 Jan</span>
-                            </div>
-
-                            {{-- Bar 7 --}}
-                            <div class="w-full flex flex-col items-center group">
-                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 20%;"></div>
-                                <span class="text-xs text-gray-400 mt-3">7 Jan</span>
-                            </div>
-
-                            {{-- Bar 8 (Highest) --}}
-                            <div class="w-full flex flex-col items-center group">
-                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm relative group-hover:opacity-80 transition duration-300" style="height: 95%;"></div>
+                                <div class="w-2/3 bg-[#bb1419] rounded-t-sm h-[95%] group-hover:opacity-80 transition"></div>
                                 <span class="text-xs text-gray-400 mt-3">8 Jan</span>
                             </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                    {{-- CSS Only Bar Chart Representation --}}
-                    <div class="relative h-64 flex items-end justify-between px-4 pb-6 border-b border-gray-100 space-x-4">
-                        {{-- Y-Axis Labels --}}
-                        <div class="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 -ml-6">
-                            <span>12</span><span>9</span><span>6</span><span>3</span><span>0</span>
-                        </div>
-
-                        {{-- Bar 1 --}}
-                        <div class="w-full flex flex-col items-center group">
-                            <div class="w-full max-w-[40px] bg-red-100 rounded-t-sm h-[0%] group-hover:h-[20%] transition-all duration-500 relative"></div>
-                            <span class="text-xs text-gray-400 mt-2">1 Jan</span>
-                        </div>
-                        {{-- Bar 2 (High) --}}
-                        <div class="w-full flex flex-col items-center group">
-                            <div class="w-full max-w-[40px] bg-hasta-red rounded-t-sm h-[70%] relative group-hover:opacity-80 transition"></div>
-                            <span class="text-xs text-gray-400 mt-2">2 Jan</span>
-                        </div>
-                        {{-- Bar 3 --}}
-                        <div class="w-full flex flex-col items-center group">
-                            <div class="w-full max-w-[40px] bg-red-100 rounded-t-sm h-[0%] transition-all"></div>
-                            <span class="text-xs text-gray-400 mt-2">3 Jan</span>
-                        </div>
-                        {{-- Bar 4 (Med) --}}
-                        <div class="w-full flex flex-col items-center group">
-                            <div class="w-full max-w-[40px] bg-hasta-red rounded-t-sm h-[60%] relative group-hover:opacity-80 transition"></div>
-                            <span class="text-xs text-gray-400 mt-2">4 Jan</span>
-                        </div>
-                         {{-- Bar 5 --}}
-                        <div class="w-full flex flex-col items-center group">
-                            <div class="w-full max-w-[40px] bg-red-100 rounded-t-sm h-[0%] transition-all"></div>
-                            <span class="text-xs text-gray-400 mt-2">5 Jan</span>
-                        </div>
-                        {{-- Bar 6 (Low) --}}
-                        <div class="w-full flex flex-col items-center group">
-                            <div class="w-full max-w-[40px] bg-hasta-red rounded-t-sm h-[40%] relative group-hover:opacity-80 transition"></div>
-                            <span class="text-xs text-gray-400 mt-2">6 Jan</span>
-                        </div>
-                        {{-- Bar 7 --}}
-                        <div class="w-full flex flex-col items-center group">
-                            <div class="w-full max-w-[40px] bg-red-100 rounded-t-sm h-[0%] transition-all"></div>
-                            <span class="text-xs text-gray-400 mt-2">7 Jan</span>
-                        </div>
-                         {{-- Bar 8 (Highest) --}}
-                        <div class="w-full flex flex-col items-center group">
-                            <div class="w-full max-w-[40px] bg-hasta-red rounded-t-sm h-[90%] relative group-hover:opacity-80 transition"></div>
-                            <span class="text-xs text-gray-400 mt-2">8 Jan</span>
                         </div>
                     </div>
                 </div>
@@ -204,28 +118,15 @@
                 {{-- RIGHT: Car Availability Check --}}
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h3 class="font-semibold text-lg text-gray-800 mb-6">Car Availability</h3>
-                    
                     <form action="#" class="space-y-4">
-                        {{-- Car ID Select --}}
-                        <div>
-                            <select class="w-full border-gray-200 rounded-lg text-gray-600 focus:border-red-500 focus:ring-red-200 py-3">
-                                <option>Select Car ID</option>
-                                <option>P001 - Proton Saga</option>
-                                <option>H002 - Honda City</option>
-                            </select>
-                        </div>
-
-                        {{-- Date 1 --}}
-                        <div>
-                            <input type="date" class="w-full border-gray-200 rounded-lg text-gray-600 focus:border-red-500 focus:ring-red-200 py-3">
-                        </div>
-
-                        {{-- Date 2 --}}
-                        <div>
-                            <input type="date" class="w-full border-gray-200 rounded-lg text-gray-600 focus:border-red-500 focus:ring-red-200 py-3">
-                        </div>
-
-                        <button class="w-full bg-hasta-red hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow-md transition duration-200 mt-4">
+                        <select class="w-full border-gray-200 rounded-lg text-gray-600 focus:border-red-500 focus:ring-red-200 py-3">
+                            <option>Select Car ID</option>
+                            <option>P001 - Proton Saga</option>
+                            <option>H002 - Honda City</option>
+                        </select>
+                        <input type="date" class="w-full border-gray-200 rounded-lg text-gray-600 focus:border-red-500 focus:ring-red-200 py-3">
+                        <input type="date" class="w-full border-gray-200 rounded-lg text-gray-600 focus:border-red-500 focus:ring-red-200 py-3">
+                        <button class="w-full bg-hasta-red hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow-md transition duration-200">
                             CHECK
                         </button>
                     </form>
@@ -234,51 +135,27 @@
 
             {{-- 3. BOTTOM SECTION: Car Types & Status --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
-                {{-- Car Type Progress Bars --}}
+                {{-- Car Type Progress --}}
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h3 class="font-semibold text-lg text-gray-800 mb-6">Car Type</h3>
-                    
                     <div class="space-y-6">
-                        {{-- Item 1 --}}
+                        @foreach([['Proton Alza', 75], ['Sedan', 60], ['SUV', 30]] as $type)
                         <div>
                             <div class="flex justify-between text-sm font-medium text-gray-600 mb-1">
-                                <span>Proton Alza</span>
-                                <span>75%</span>
+                                <span>{{ $type[0] }}</span>
+                                <span>{{ $type[1] }}%</span>
                             </div>
                             <div class="w-full bg-gray-100 rounded-full h-2.5">
-                                <div class="bg-black h-2.5 rounded-full" style="width: 75%"></div>
+                                <div class="bg-black h-2.5 rounded-full" style="width: {{ $type[1] }}%"></div>
                             </div>
                         </div>
-
-                        {{-- Item 2 --}}
-                        <div>
-                            <div class="flex justify-between text-sm font-medium text-gray-600 mb-1">
-                                <span>Sedan</span>
-                                <span>60%</span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2.5">
-                                <div class="bg-black h-2.5 rounded-full" style="width: 60%"></div>
-                            </div>
-                        </div>
-
-                        {{-- Item 3 --}}
-                        <div>
-                            <div class="flex justify-between text-sm font-medium text-gray-600 mb-1">
-                                <span>SUV</span>
-                                <span>30%</span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2.5">
-                                <div class="bg-black h-2.5 rounded-full" style="width: 30%"></div>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
 
-                {{-- Booking Status Legend --}}
+                {{-- Status Legend --}}
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h3 class="font-semibold text-lg text-gray-800 mb-6">Booking Status</h3>
-                    
                     <div class="space-y-4">
                         <div class="flex items-center">
                             <span class="w-3 h-3 rounded-full bg-gray-300 mr-3"></span>
@@ -293,11 +170,8 @@
                             <span class="text-gray-600 font-medium">Pending (15%)</span>
                         </div>
                     </div>
-
-                    {{-- Optional: Small decorative pie chart circle could go here --}}
                 </div>
-
             </div>
         </div>
     </div>
-</x-staff-layout>
+</x-staff-layout>   

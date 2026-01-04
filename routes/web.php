@@ -19,6 +19,7 @@ use App\Http\Controllers\StaffController;
 // ==============================
 // 1. PUBLIC ROUTES (Accessible by everyone)
 // ==============================
+// NOTE: We do NOT add 'prevent-back' here. This fixes the login loop.
 Route::get('/', fn() => view('home'))->name('root');
 Route::get('/faq', fn() => view('customer.faq'))->name('faq');
 Route::get('/contact', fn() => view('contact'))->name('contact');
@@ -33,9 +34,8 @@ Route::post('/register/process-matric-card', [RegisteredUserController::class, '
 // ==============================
 // 2. CUSTOMER ROUTES (Guard: customer)
 // ==============================
-// MOVED: Vehicles, Bookings, Rewards are now here.
-// Guests trying to access these URLs will be redirected to Login automatically.
-Route::middleware(['auth:customer', 'verified'])->group(function () {
+// ADDED: 'prevent-back'
+Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function () {
     
     // Dashboard
     Route::get('/home', [CustomerController::class, 'dashboard'])->name('home');
@@ -68,10 +68,15 @@ Route::get('/rewards/my-claimed', function () {
 // ==============================
 // 3. STAFF ROUTES (Guard: staff)
 // ==============================
-Route::middleware(['auth:staff'])->prefix('staff')->name('staff.')->group(function () {
+// ADDED: 'prevent-back'
+Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.')->group(function () {
     
     // Staff Dashboard
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
+
+    Route::get('/booking-management', function () {
+        return view('staff.bookingmanagement');
+    })->name('bookingsmanage'); 
 
     // Staff-Specific Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
@@ -84,17 +89,21 @@ Route::middleware(['auth:staff'])->prefix('staff')->name('staff.')->group(functi
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
     
     // Reward Management for Staff
-    Route::prefix('dashboard/reward')->name('rewards.')->group(function() {
-            Route::get('/staff', [StaffController::class, 'rewards'])->name('staff');
-        });
+    Route::prefix('rewards')->name('reward.')->group(function() {
+        Route::get('/', [RewardController::class, 'index'])->name('index'); 
+        Route::get('/create', [RewardController::class, 'create'])->name('create');
+        Route::post('/', [RewardController::class, 'store'])->name('store');
+        Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
+        Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
+    });
 });
 
 
 // ==============================
 // 4. SHARED ROUTES (Profile)
 // ==============================
-// Used mostly by Customers now, since Staff have their own profile routes above.
-Route::middleware('auth:customer')->group(function () {
+// ADDED: 'prevent-back'
+Route::middleware(['auth:customer', 'prevent-back'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -107,6 +116,14 @@ Route::middleware('auth:customer')->group(function () {
 require __DIR__.'/auth.php';
 
 // Fallback for default Laravel redirects
+// ADDED: 'prevent-back'
 Route::get('/dashboard', function () {
     return redirect()->route('staff.dashboard');
-})->middleware('auth:staff')->name('dashboard');
+})->middleware(['auth:staff', 'prevent-back'])->name('dashboard');
+
+// API endpoint to check authentication status
+Route::get('/api/auth-check', function () {
+    return Auth::guard('staff')->check() || Auth::guard('customer')->check() 
+        ? response()->json(['authenticated' => true]) 
+        : response()->json(['authenticated' => false], 401);
+})->name('auth.check');

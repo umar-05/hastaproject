@@ -1,10 +1,23 @@
 {{-- resources/views/auth/login.blade.php --}}
+@php
+    // If user is still authenticated, redirect them to their dashboard
+    if (Auth::guard('staff')->check()) {
+        header('Location: ' . route('staff.dashboard'));
+        exit;
+    } elseif (Auth::guard('customer')->check()) {
+        header('Location: ' . route('home'));
+        exit;
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Login - HASTA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -336,6 +349,42 @@
             });
         </script>
     @endif
+
+    <script>
+        // Prevent back button navigation on login page
+        (function() {
+            // Clear all history to prevent back navigation
+            if (window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.href);
+            }
+
+            // Prevent all back navigation attempts
+            window.addEventListener('popstate', function(event) {
+                // Force stay on login page
+                window.history.pushState(null, null, window.location.href);
+            });
+
+            // Additional protection
+            window.history.pushState(null, null, window.location.href);
+            window.addEventListener('popstate', function() {
+                window.history.pushState(null, null, window.location.href);
+            });
+
+            // Disable keyboard shortcuts that might allow back navigation
+            document.addEventListener('keydown', function(e) {
+                // Disable Alt+Left Arrow (back)
+                if (e.altKey && e.keyCode === 37) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Disable Backspace on non-input elements
+                if (e.keyCode === 8 && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        })();
+    </script>
 
 </body>
 </html>
