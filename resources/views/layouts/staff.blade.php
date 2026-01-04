@@ -92,10 +92,37 @@
                         Rewards
                     </a>
 
-                    <a href="{{ route('staff.report') }}" class="sidebar-link {{ request()->routeIs('staff.report') ? 'active' : '' }}">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        Reporting
-                    </a>
+                    <!-- Reporting Dropdown -->
+                    <div>
+                        <button onclick="toggleReportDropdown()" class="sidebar-link w-full text-left flex items-center justify-between {{ request()->routeIs('staff.report.*') ? 'active' : '' }}">
+                            <div class="flex items-center">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <span>Reporting</span>
+                            </div>
+                            <svg id="reportDropdownIcon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        
+                        <div id="reportDropdown" class="ml-8 mt-1 space-y-1 {{ request()->routeIs('staff.report.*') ? '' : 'hidden' }}">
+                            <a href="{{ route('staff.report.daily-income') }}" class="block py-2 px-4 text-sm {{ request()->routeIs('staff.report.daily-income') ? 'text-white font-semibold bg-white/10 rounded' : 'text-red-200 hover:text-white' }}">
+                                Daily Income
+                            </a>
+                            <a href="#" class="block py-2 px-4 text-sm text-red-200 hover:text-white">
+                                Monthly Income
+                            </a>
+                            <a href="#" class="block py-2 px-4 text-sm text-red-200 hover:text-white">
+                                Income & Expenses
+                            </a>
+                            <a href="#" class="block py-2 px-4 text-sm text-red-200 hover:text-white">
+                                Booking Overview
+                            </a>
+                            <a href="#" class="block py-2 px-4 text-sm text-red-200 hover:text-white">
+                                Customer Review
+                            </a>
+                            <a href="#" class="block py-2 px-4 text-sm text-red-200 hover:text-white">
+                                Blacklist Record
+                            </a>
+                        </div>
+                    </div>
 
                     <div class="mt-8 mb-4 px-6 border-t border-white/10 pt-4">
                         <p class="text-[10px] font-bold text-red-200 uppercase tracking-widest opacity-70">Administration</p>
@@ -155,5 +182,17 @@
             </main>
         </div>
     </div>
+
+    <script>
+        function toggleReportDropdown() {
+            const dropdown = document.getElementById('reportDropdown');
+            const icon = document.getElementById('reportDropdownIcon');
+            dropdown.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+    </script>
+</body>
+</html>
+
 </body>
 </html>

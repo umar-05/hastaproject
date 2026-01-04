@@ -9,6 +9,11 @@ use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\StaffController;
+<<<<<<< Updated upstream
+=======
+use Illuminate\Support\Facades\Auth; 
+use App\Http\Controllers\DailyIncomeController;
+>>>>>>> Stashed changes
 
 /*
 |--------------------------------------------------------------------------
@@ -103,6 +108,11 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
         Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
     });
+
+    // Daily Income Report -> /staff/daily-income
+    Route::get('/report/daily-income', [DailyIncomeController::class, 'index'])->name('report.daily-income');
+
+
 });
 
 
