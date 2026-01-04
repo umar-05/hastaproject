@@ -84,13 +84,9 @@ Route::middleware(['auth:staff'])->prefix('staff')->name('staff.')->group(functi
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
     
     // Reward Management for Staff
-    Route::prefix('rewards')->name('reward.')->group(function() {
-        Route::get('/', [RewardController::class, 'index'])->name('index'); // This might conflict if logic is same as customer, ensure controller handles it
-        Route::get('/create', [RewardController::class, 'create'])->name('create');
-        Route::post('/', [RewardController::class, 'store'])->name('store');
-        Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
-        Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
-    });
+    Route::prefix('dashboard/reward')->name('rewards.')->group(function() {
+            Route::get('/staff', [StaffController::class, 'rewards'])->name('staff');
+        });
 });
 
 
