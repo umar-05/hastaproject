@@ -44,4 +44,9 @@ class Customer extends Authenticatable
     {
         return $this->hasMany(Booking::class, 'matricNum', 'matricNum');
     }
+
+    public function getRouteKeyName()
+    {
+        return 'matricNum';
+    }
 }
