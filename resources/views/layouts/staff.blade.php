@@ -168,7 +168,7 @@
                             <a href="#" class="submenu-link">
                                 Income & Expenses
                             </a>
-                            <a href="#" class="submenu-link">
+                            <a href="{{ route('staff.blacklist.index') }}" class="submenu-link {{ request()->routeIs('staff.blacklist.index') ? 'active' : '' }}">
                                 Blacklist Record
                             </a>
                         </div>

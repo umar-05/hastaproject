@@ -319,15 +319,32 @@
     }
 
     // Search Filter Logic
-    document.getElementById('customerSearch').addEventListener('keyup', function() {
-        let filter = this.value.toLowerCase();
-        let rows = document.querySelectorAll('tbody tr');
-        
-        rows.forEach(row => {
-            let text = row.innerText.toLowerCase();
-            row.style.display = text.includes(filter) ? '' : 'none';
+    document.getElementById('add_matric').addEventListener('blur', function() {
+            let matric = this.value;
+            console.log("Searching for Matric:", matric); // Debugging line
+
+            if(matric.length > 3) {
+                fetch(`/staff/customer-search/${matric}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Data received:", data); // Debugging line
+                        if(data) {
+                            // These IDs must match your <input id="..."> exactly
+                            document.getElementById('add_name').value = data.name || '';
+                            document.getElementById('add_ic').value = data.icNum_passport || '';
+                            document.getElementById('add_email').value = data.email || '';
+                        } else {
+                            alert('Customer not found in database!');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('There was an error fetching the customer:', error);
+                    });
+            }
         });
-    });
 </script>
 
     <style>

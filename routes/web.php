@@ -106,10 +106,10 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
 
-    // In routes/web.php inside the Staff Group
-Route::get('/reports/daily-income', function () {
-    return view('staff.reports.dailyincome.index');
-})->name('report.daily-income');
+    // Daily Income Report
+    Route::get('/reports/daily-income', function () {
+        return view('staff.reports.dailyincome.index');
+    })->name('report.daily-income');
 
     // Staff User Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
@@ -142,6 +142,7 @@ Route::get('/reports/daily-income', function () {
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
     // Inside the staff middleware group in routes/web.php
     Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
+
     // Reward Management for Staff
     // Add these inside the 'staff.' named group in web.php
     Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
@@ -158,6 +159,16 @@ Route::get('/reports/daily-income', function () {
         // --- ADDED THIS LINE TO FIX YOUR ERROR ---
         Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy'); 
     });
+
+    //Blacklist Management
+    Route::prefix('reports')->group(function () {
+            // These will automatically become 'staff.blacklist.index', etc.
+            Route::get('/blacklist', [StaffController::class, 'blacklistIndex'])->name('blacklist.index');
+            Route::post('/blacklist', [StaffController::class, 'addToBlacklist'])->name('blacklist.store');
+            Route::delete('/blacklist/{matricNum}', [StaffController::class, 'destroyBlacklist'])->name('blacklist.destroy');
+        });
+    Route::get('/customer-search/{matric}', [StaffController::class, 'searchCustomer']);
+    Route::post('/blacklist/store', [StaffController::class, 'storeBlacklist'])->name('blacklist.store');
 
 });
 

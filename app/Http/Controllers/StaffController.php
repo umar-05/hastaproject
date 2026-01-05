@@ -7,6 +7,7 @@ use App\Models\Staff;
 use App\Models\Reward;
 use App\Models\Booking;
 use App\Models\Fleet;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
@@ -313,5 +314,89 @@ class StaffController extends Controller
         ];
 
         return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
+    }
+
+    /**
+     * Display the blacklist records
+     */
+    public function blacklistIndex() 
+    {
+        $blacklisted = Customer::where('accStatus', 'like', 'blacklisted%')->get();
+            
+            $count = $blacklisted->count();
+
+            // Make sure this path matches your actual file location (staff.blacklist or staff.reports.blacklist)
+            return view('staff.blacklist', compact('blacklisted', 'count'));
+    }
+
+    /**
+     * Update a customer's status to blacklisted
+     */
+    public function addToBlacklist(Request $request) 
+    {
+        $customer = Customer::where('matricNum', $request->matricNum)->first();
+        if ($customer) {
+            $customer->update(['accStatus' => 'blacklisted: ' . $request->reason]);
+            return back()->with('success', 'Customer blacklisted successfully.');
+        }
+        return back()->with('error', 'Customer not found.');
+    }
+
+    public function storeBlacklist(Request $request)
+    {
+        // 1. Validate the input
+        $request->validate([
+            'matricNum' => 'required',
+            'reason' => 'required'
+        ]);
+
+        // 2. Find the customer
+        $customer = Customer::where('matricNum', $request->matricNum)->first();
+
+        if ($customer) {
+            // 3. Update the status with the prefix
+            // This changes NULL to "blacklisted: Your Reason"
+            $customer->accStatus = 'blacklisted: ' . $request->reason;
+            
+            // 4. Save to database
+            $customer->save();
+
+            return redirect()->route('staff.blacklist.index')
+                            ->with('success', 'Customer blacklisted successfully.');
+        }
+
+        return back()->with('error', 'Customer not found in database.');
+    }
+
+    public function searchCustomer($matric)
+    {
+        $customer = \App\Models\Customer::where('matricNum', $matric)->first();
+        
+        if ($customer) {
+            return response()->json([
+                'name' => $customer->name,
+                'icNum_passport' => $customer->icNum_passport, // Matches your Blade ID
+                'email' => $customer->email
+            ]);
+        }
+        return response()->json(null);
+    }
+
+    public function destroyBlacklist($matricNum)
+    {
+        // 1. Find the customer by their matric number
+        $customer = Customer::where('matricNum', $matricNum)->first();
+
+        if ($customer) {
+            // 2. Set the status back to NULL (or 'active')
+            // This removes them from the "blacklisted" query results
+            $customer->accStatus = null; 
+            $customer->save();
+
+            return redirect()->route('staff.blacklist.index')
+                            ->with('success', 'Customer has been removed from the blacklist.');
+        }
+
+        return back()->with('error', 'Customer not found.');
     }
 }
