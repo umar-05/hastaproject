@@ -7,283 +7,122 @@ use App\Models\Fleet;
 
 class VehicleController extends Controller
 {
+    /**
+     * Display a listing of the vehicles.
+     */
     public function index()
     {
-        // Map fleet models into the same array format used by the customer book-now view
-        $vehicles = \App\Models\Fleet::all()->map(function($fleet) {
-            $vehicleInfo = $this->getVehicleInfo($fleet->modelName, $fleet->year);
-            return [
-                'id' => $fleet->plateNumber,
-                'name' => $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : ''),
-                'type' => $vehicleInfo['type'],
-                'price' => $vehicleInfo['price'],
-                'image' => $vehicleInfo['image'],
-                'transmission' => 'Automat',
-                'fuel' => 'RON 95',
-                'ac' => true
-            ];
-        })->toArray();
+        // Fetch all available vehicles from the database
+        // You can change 'available' to whatever status logic you prefer
+        $fleets = Fleet::where('status', 'available')
+                       ->orderBy('modelName')
+                       ->get();
+
+        // Transform the database results into the format expected by the view
+        $vehicles = $fleets->map(function ($fleet) {
+            return $this->formatVehicleData($fleet);
+        });
 
         return view('vehicles.index', compact('vehicles'));
-        $fleet = App\Models\Fleet::orderBy('model_name')->paginate(9);
-
-    // Calculate summary statistics for the dashboard cards
-    $totalVehicles = App\Models\Fleet::count();
-    $availableCount = App\Models\Fleet::where('status', 'available')->count();
-    $rentedCount = App\Models\Fleet::where('status', 'booked')->count();
-    $maintenanceCount = App\Models\Fleet::where('status', 'maintenance')->count();
-
-    return view('staff.fleet.index', [
-        'fleet' => $fleet,
-        'totalVehicles' => $totalVehicles,
-        'availableCount' => $availableCount,
-        'rentedCount' => $rentedCount,
-        'maintenanceCount' => $maintenanceCount,
-    ]);
-    }
-
-    public function bookNow()
-    {
-        // Fetch all vehicles from the database
-        $vehicles = Fleet::where('status', 'available')->get()->map(function($fleet) {
-            $vehicleInfo = $this->getVehicleInfo($fleet->modelName, $fleet->year);
-
-            return [
-                'id' => $fleet->plateNumber,
-                'name' => $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : ''),
-                'type' => $vehicleInfo['type'],
-                'price' => $vehicleInfo['price'],
-                'image' => $vehicleInfo['image'],
-                'transmission' => 'Automat',
-                'fuel' => 'RON 95',
-                'ac' => true
-            ];
-        })->toArray();
-
-        // If database is empty, use fallback hardcoded data
-        if (empty($vehicles)) {
-            $vehicles = $this->getHardcodedVehicles();
-        }
-
-        return view('customer.book-now', compact('vehicles'));
     }
 
     /**
-     * Get vehicle type, price, and image based on model name
+     * Display the specified vehicle.
      */
-    private function getVehicleInfo($modelName, $year = null)
-    {
-        $modelName = strtolower($modelName);
-        $year = $year ?? '';
-
-        // Determine vehicle type
-        $type = 'Sedan'; // default
-        if (strpos($modelName, 'axia') !== false || strpos($modelName, 'myvi') !== false) {
-            $type = 'Hatchback';
-        } elseif (strpos($modelName, 'bezza') !== false || strpos($modelName, 'saga') !== false) {
-            $type = 'Sedan';
-        } elseif (strpos($modelName, 'alza') !== false || strpos($modelName, 'vellfire') !== false) {
-            $type = 'MPV';
-        } elseif (strpos($modelName, 'aruz') !== false) {
-            $type = 'SUV';
-        }
-
-        // Determine image filename
-        $image = 'default-car.png';
-        if (strpos($modelName, 'axia') !== false) {
-            $image = $year == 2024 ? 'axia-2024.png' : 'axia-2018.png';        
-        } elseif (strpos($modelName, 'bezza') !== false) {
-            $image = 'bezza-2018.png';
-        } elseif (strpos($modelName, 'myvi') !== false) {
-            $image = $year >= 2020 ? 'myvi-2020.png' : 'myvi-2015.png';        
-        } elseif (strpos($modelName, 'saga') !== false) {
-            $image = 'saga-2017.png';
-        } elseif (strpos($modelName, 'alza') !== false) {
-            $image = 'alza-2019.png';
-        } elseif (strpos($modelName, 'aruz') !== false) {
-            $image = 'aruz-2020.png';
-        } elseif (strpos($modelName, 'vellfire') !== false) {
-            $image = 'vellfire-2020.png';
-        }
-
-        // Determine price
-        $price = 120; // default
-        if (strpos($modelName, 'bezza') !== false) {
-            $price = 140;
-        } elseif (strpos($modelName, 'myvi') !== false && $year >= 2020) {     
-            $price = 150;
-        } elseif (strpos($modelName, 'axia') !== false && $year == 2024) {     
-            $price = 130;
-        } elseif (strpos($modelName, 'alza') !== false) {
-            $price = 200;
-        } elseif (strpos($modelName, 'aruz') !== false) {
-            $price = 180;
-        } elseif (strpos($modelName, 'vellfire') !== false) {
-            $price = 500;
-        }
-
-        return [
-            'type' => $type,
-            'price' => $price,
-            'image' => $image
-        ];
-    }
-
     public function show($id)
     {
-        // Try to find the fleet in database (fleet primary key is plateNumber)
-        $fleet = Fleet::where('plateNumber', $id)->first();
+        // Find the vehicle by Plate Number (Primary Key) or fail with 404
+        $fleet = Fleet::where('plateNumber', $id)->firstOrFail();
 
-        if ($fleet) {
-            // If found in database, convert to array format for the view      
-            $vehicleInfo = $this->getVehicleInfo($fleet->modelName, $fleet->year);
-            $vehicle = [
-                'id' => $fleet->plateNumber,
-                'name' => $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : ''),
-                'type' => $vehicleInfo['type'],
-                'price' => $vehicleInfo['price'],
-                'image' => $vehicleInfo['image'],
-                'transmission' => 'Automat',
-                'fuel' => 'RON 95',
-                'ac' => true,
-                'description' => 'A reliable vehicle for your travel needs.',  
-                'seats' => 5,
-                'luggage' => 2
-            ];
-        } else {
-            // If not found, check hardcoded data
-            $hardcodedVehicles = $this->getHardcodedVehicles();
-            $vehicle = collect($hardcodedVehicles)->firstWhere('id', $id);     
-
-            if (!$vehicle) {
-                abort(404, 'Vehicle not found');
-            }
-        }
+        // Format data for the view
+        $vehicle = $this->formatVehicleData($fleet);
 
         return view('vehicles.show', compact('vehicle'));
     }
 
-    // Fallback hardcoded data
-    private function getHardcodedVehicles()
+    /**
+     * Handle the "Book Now" logic (Customer facing).
+     */
+    public function bookNow()
     {
+        // Reuse the index logic or apply specific filters for booking
+        return $this->index();
+    }
+
+    /**
+     * Helper: Format Fleet model into a standardized array for views.
+     * This allows us to centralize the logic for Price, Type, and Image.
+     */
+    private function formatVehicleData($fleet)
+    {
+        // Resolve dynamic specs (Price, Type, Image) based on model name
+        $specs = $this->resolveSpecs($fleet->modelName, $fleet->year);
+
         return [
-            [
-                'id' => 1,
-                'name' => 'Perodua Axia 2018',
-                'type' => 'Hatchback',
-                'price' => 120,
-                'image' => 'axia-2018.png',
-                'transmission' => 'Automat',
-                'fuel' => 'RON 95',
-                'ac' => true,
-                'description' => 'Perfect for city driving, the Perodua Axia 2018 offers excellent fuel efficiency and compact design.',
-                'seats' => 5,
-                'luggage' => 2
-            ],
-            [
-                'id' => 2,
-                'name' => 'Perodua Bezza 2018',
-                'type' => 'Sedan',
-                'price' => 140,
-                'image' => 'bezza-2018.png',
-                'transmission' => 'Automat',
-                'fuel' => 'RON 95',
-                'ac' => true,
-                'description' => 'A comfortable sedan with spacious interior and smooth ride.',
-                'seats' => 5,
-                'luggage' => 3
-            ],
-            [
-                'id' => 3,
-                'name' => 'Perodua Myvi 2015',
-                'type' => 'Hatchback',
-                'price' => 120,
-                'image' => 'myvi-2015.png',
-                'transmission' => 'Automat',
-                'fuel' => 'RON 95',
-                'ac' => true,
-                'description' => 'The popular Perodua Myvi 2015 combines style and practicality.',
-                'seats' => 5,
-                'luggage' => 2
-            ],
-            [
-                'id' => 4,
-                'name' => 'Perodua Myvi 2020',
-                'type' => 'Hatchback',
-                'price' => 150,
-                'image' => 'myvi-2020.png',
-                'transmission' => 'Automat',
-                'fuel' => 'RON 95',
-                'ac' => true,
-                'description' => 'The newer generation Myvi 2020 features updated styling and improved features.',
-                'seats' => 5,
-                'luggage' => 2
-            ],
-            [
-                'id' => 5,
-                'name' => 'Perodua Axia 2024',
-                'type' => 'Hatchback',
-                'price' => 130,
-                'image' => 'axia-2024.png',
-                'transmission' => 'Automat',
-                'fuel' => 'RON 95',
-                'ac' => true,
-                'description' => 'The latest Perodua Axia 2024 with modern features and enhanced safety.',
-                'seats' => 5,
-                'luggage' => 2
-            ],
-            [
-                'id' => 6,
-                'name' => 'Proton Saga 2017',
-                'type' => 'Sedan',
-                'price' => 120,
-                'image' => 'saga-2017.png',
-                'transmission' => 'Automat',
-                'fuel' => 'RON 95',
-                'ac' => true,
-                'description' => 'A reliable and affordable sedan, the Proton Saga 2017 offers great value for money.',
-                'seats' => 5,
-                'luggage' => 3
-            ],
-            [
-                'id' => 7,
-                'name' => 'Perodua Alza 2019',
-                'type' => 'MPV',
-                'price' => 200,
-                'image' => 'alza-2019.png',
-                'transmission' => 'Automat',
-                'fuel' => 'RON 95',
-                'ac' => true,
-                'description' => 'Spacious MPV perfect for family trips and group travels.',
-                'seats' => 7,
-                'luggage' => 4
-            ],
-            [
-                'id' => 8,
-                'name' => 'Perodua Aruz 2020',
-                'type' => 'SUV',
-                'price' => 180,
-                'image' => 'aruz-2020.png',
-                'transmission' => 'Automat',
-                'fuel' => 'RON 95',
-                'ac' => true,
-                'description' => 'A robust SUV perfect for adventurous journeys.',
-                'seats' => 7,
-                'luggage' => 5
-            ],
-            [
-                'id' => 9,
-                'name' => 'Toyota Vellfire 2020',
-                'type' => 'MPV',
-                'price' => 500,
-                'image' => 'vellfire-2020.png',
-                'transmission' => 'Automat',
-                'fuel' => 'RON 95',
-                'ac' => true,
-                'description' => 'Luxury MPV with premium features and exceptional comfort.',
-                'seats' => 7,
-                'luggage' => 6
-            ]
+            'id'           => $fleet->plateNumber,
+            'name'         => $fleet->modelName . ' ' . $fleet->year,
+            'plateNumber'  => $fleet->plateNumber,
+            'type'         => $specs['type'],
+            'price'        => $specs['price'],
+            
+            // Use DB photo if exists, otherwise fallback to mapped image
+            'image'        => $fleet->photos ?? $specs['image'],
+            
+            // Default attributes (can be moved to DB columns later)
+            'transmission' => 'Automatic',
+            'fuel'         => 'RON 95',
+            'ac'           => true,
+            'seats'        => $specs['seats'],
+            'luggage'      => $specs['luggage'],
+            'description'  => $fleet->note ?? "Enjoy a smooth ride with our {$fleet->modelName}. Perfect for your journey.",
+        ];
+    }
+
+    /**
+     * Helper: Resolve vehicle specifications based on Model Name.
+     * This acts as a flexible configuration instead of hardcoded if-else chains.
+     */
+    private function resolveSpecs($modelName, $year)
+    {
+        $model = strtolower($modelName);
+
+        // flexible configuration for car models
+        $configs = [
+            'axia'     => ['type' => 'Hatchback', 'price' => 120, 'image' => 'axia-2018.png', 'seats' => 5, 'luggage' => 2],
+            'bezza'    => ['type' => 'Sedan',     'price' => 140, 'image' => 'bezza-2018.png', 'seats' => 5, 'luggage' => 3],
+            'myvi'     => ['type' => 'Hatchback', 'price' => 130, 'image' => 'myvi-2015.png', 'seats' => 5, 'luggage' => 2],
+            'saga'     => ['type' => 'Sedan',     'price' => 120, 'image' => 'saga-2017.png', 'seats' => 5, 'luggage' => 3],
+            'alza'     => ['type' => 'MPV',       'price' => 200, 'image' => 'alza-2019.png', 'seats' => 7, 'luggage' => 4],
+            'aruz'     => ['type' => 'SUV',       'price' => 180, 'image' => 'aruz-2020.png', 'seats' => 7, 'luggage' => 5],
+            'vellfire' => ['type' => 'MPV',       'price' => 500, 'image' => 'vellfire-2020.png','seats' => 7, 'luggage' => 6],
+            'x50'      => ['type' => 'SUV',       'price' => 250, 'image' => 'x50-2024.png', 'seats' => 5, 'luggage' => 4],
+            'y15'      => ['type' => 'Motorcycle','price' => 50,  'image' => 'y15zr-2023.png','seats' => 2, 'luggage' => 0],
+        ];
+
+        // Specific overrides based on Year
+        if (str_contains($model, 'myvi') && $year >= 2020) {
+            $configs['myvi']['price'] = 150;
+            $configs['myvi']['image'] = 'myvi-2020.png';
+        }
+        if (str_contains($model, 'axia') && $year >= 2023) {
+            $configs['axia']['price'] = 130;
+            $configs['axia']['image'] = 'axia-2024.png';
+        }
+
+        // Find matching config
+        foreach ($configs as $key => $config) {
+            if (str_contains($model, $key)) {
+                return $config;
+            }
+        }
+
+        // Default Fallback if model is unrecognized
+        return [
+            'type'    => 'Sedan',
+            'price'   => 150,
+            'image'   => 'default-car.png',
+            'seats'   => 5,
+            'luggage' => 2
         ];
     }
 }

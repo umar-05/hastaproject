@@ -87,14 +87,6 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
         // Additional staff fleet routes (edit/delete) can be added here
     });
 
-    // Fleet Management -> /staff/fleet
-    Route::prefix('fleet')->name('fleet.')->group(function() {
-        Route::get('/', [StaffController::class, 'fleet'])->name('index');           // staff.fleet.index
-        Route::get('/create', [StaffController::class, 'createVehicle'])->name('create'); // staff.fleet.create
-        Route::post('/', [StaffController::class, 'storeVehicle'])->name('store');        // staff.fleet.store
-        Route::delete('/{id}', [StaffController::class, 'destroyVehicle'])->name('destroy'); // staff.fleet.destroy
-    });
-
     // Staff Profile -> /staff/profile
     // Reward Management (This matches your Blade: route('staff.rewards') and route('staff.rewards.store'))
     Route::get('/dashboard/reward', [RewardController::class, 'index'])->name('rewards');
