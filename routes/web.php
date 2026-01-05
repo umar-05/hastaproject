@@ -82,7 +82,9 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
         Route::delete('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'destroy'])->name('destroy');
         // Show a single vehicle (uses plateNumber as the primary key)
         Route::get('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'show'])->name('show');
-        // Additional staff fleet routes (edit/delete) can be added here
+        // Additional staff fleet routes (approve/ cancel) is added here
+        Route::post('/bookings/{id}/approve', [BookingController::class, 'approve'])->name('bookings.approve');
+        Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     });
 
     // Staff-Specific Profile Management
@@ -98,16 +100,16 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
     // Reward Management for Staff
     // Add these inside the 'staff.' named group in web.php
-Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
-Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
-Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
+    Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+    Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
+    Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
     Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
     Route::prefix('rewards')->name('reward.')->group(function() {
-        Route::get('/', [RewardController::class, 'index'])->name('index'); 
-        Route::get('/create', [RewardController::class, 'create'])->name('create');
-        Route::post('/', [RewardController::class, 'store'])->name('store');
-        Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
-        Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
+    Route::get('/', [RewardController::class, 'index'])->name('index'); 
+    Route::get('/create', [RewardController::class, 'create'])->name('create');
+    Route::post('/', [RewardController::class, 'store'])->name('store');
+    Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
+    Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
     });
 });
 

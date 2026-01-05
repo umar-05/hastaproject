@@ -202,8 +202,8 @@ class BookingController extends Controller
             // This handles the access to resources/views/staff/bookingmanagement.blade.php
             if (Auth::guard('staff')->check()) {
                 // Staff sees ALL bookings
-                $bookings = Booking::with('fleet')->orderBy('created_at', 'desc')->paginate(10);
                 
+
                 // This is the file you specifically asked for:
                 return view('staff.bookingmanagement', compact('bookings'));
             }
@@ -252,7 +252,7 @@ class BookingController extends Controller
                 return back()->with('error', 'Cannot cancel.');
             }
             $booking->update(['bookingStat' => 'cancelled']);
-            return back()->with('success', 'Cancelled.');
+            return back()->with('success', 'cancelled.');
         } catch (\Exception $e) {
             return back()->with('error', 'Error cancelling');
         }
@@ -340,4 +340,40 @@ class BookingController extends Controller
 
         return back()->with('success', 'Booking approved!');
     }
+
+    public function filterBookings(Request $request) 
+{
+    // 1. Start a base query (do not use ->get() yet)
+    $query = Booking::with('fleet', 'customer');
+
+    // 2. Apply Search Filter (Search by Booking ID or Plate Number)
+    if ($request->has('search') && $request->search != '') {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('bookingID', 'LIKE', "%{$search}%")
+              ->orWhere('plateNumber', 'LIKE', "%{$search}%");
+        });
+    }
+
+    // 3. Apply Status Filter
+    if ($request->has('status') && $request->status != '') {
+        $query->where('bookingStat', $request->status);
+    }
+
+    // 4. Fetch the filtered results
+    $bookings = $query->orderBy('created_at', 'desc')->paginate(10);
+
+    // 5. Calculate counts (Keep these as they are for your metric cards)
+    $totalBookings = Booking::count();
+    $confirmedCount = Booking::where('bookingStat', 'confirmed')->count();
+    $pendingCount = Booking::where('bookingStat', 'pending')->count();
+    $completedCount = Booking::where('bookingStat', 'completed')->count();
+    $cancelledCount = Booking::where('bookingStat', 'cancelled')->count();
+
+    return view('staff.bookingmanagement', compact(
+        'bookings', 'totalBookings', 'confirmedCount', 
+        'pendingCount', 'completedCount', 'cancelledCount'
+    ));
+}
+
 }

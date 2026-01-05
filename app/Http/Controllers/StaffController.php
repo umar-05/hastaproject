@@ -25,6 +25,8 @@ class StaffController extends Controller
             return redirect()->route('login');
         }
 
+        $bookings = Booking::with('fleet')->orderBy('created_at', 'desc')->paginate(10);
+        
         $bookingsToManage = Booking::where('bookingStat', 'Pending')->count();
         $pickupsToday = Booking::whereDate('pickupDate', now())->where('bookingStat', 'Confirmed')->count();
         $returnsToday = Booking::whereDate('returnDate', now())->where('bookingStat', 'Active')->count();
@@ -32,7 +34,12 @@ class StaffController extends Controller
         return view('staff.dashboard', [
             'bookingsToManage' => $bookingsToManage,
             'pickupsToday' => $pickupsToday,
-            'returnsToday' => $returnsToday,
+            'returnsToday' => $returnsToday, 
+            'totalBookings' => $totalBookings, 
+            'confirmedCount' => $confirmedCount, 
+            'pendingCount' => $pendingCount, 
+            'completedCount' => $completedCount, 
+            'cancelledCount' => $cancelledCount
         ]);
     }
 
@@ -241,17 +248,37 @@ class StaffController extends Controller
     {
         if (!Auth::guard('staff')->check()) {
             return redirect()->route('login');
+        }  
+        // 1. Start the query builder (don't use ->get() yet)
+        $query = Booking::with(['fleet', 'customer']);
+
+        // 2. Filter by Search (Booking ID or Plate Number)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            
+            $query->where(function($q) use ($search) {
+                $q->where('bookingID', 'LIKE', "%{$search}%")
+                ->orWhere('plateNumber', 'LIKE', "%{$search}%")
+                ->orWhere('matricNum', 'LIKE', "%{$search}%")
+                ->orWhereHas('customer', function($subQuery) use ($search) {
+                    $subQuery->where('name', 'LIKE', "%{$search}%");
+                });
+            });
         }
 
-        $bookings = Booking::with(['customer', 'fleet', 'reward'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        if ($request->filled('status')) {
+            $query->where('bookingStat', 'LIKE', $request->status);
+        }
 
-        // Compute dashboard metrics (case-insensitive status checks)
+        // 3. Get the results (paginated)
+        $bookings = $query->orderBy('created_at', 'desc')->paginate(10);
         $totalBookings = Booking::count();
-        $confirmedCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['confirmed'])->count();
-        $pendingCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['pending'])->count();
-        $completedCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['completed'])->count();
+        $confirmedCount = Booking::where('bookingStat', 'confirmed')->count();
+        $pendingCount = Booking::where('bookingStat', 'pending')->count();
+        $completedCount = Booking::where('bookingStat', 'completed')->count();
+        $cancelledCount = Booking::where('bookingStat', 'cancelled')->count();
+
+        
 
         // Pending verification: if the `payment_status` column exists, use it;
         // otherwise fall back to counting pending bookings.
@@ -270,8 +297,8 @@ class StaffController extends Controller
             'totalBookings' => $totalBookings,
             'confirmedCount' => $confirmedCount,
             'pendingCount' => $pendingCount,
-            'pendingVerificationCount' => $pendingVerificationCount,
             'completedCount' => $completedCount,
+            'cancelledCount' => $cancelledCount
         ]);
     }
 }
