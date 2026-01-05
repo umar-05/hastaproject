@@ -38,11 +38,11 @@
                 <div class="bg-red-50 rounded-2xl py-4 px-8 flex justify-between items-center">
                     <span class="text-gray-600 text-xl">Total Amount (rental + deposit):</span>
                     <span class="text-red-500 text-3xl font-bold" id="total_display">
-                        RM {{ number_format(($full_amount + $deposit_amount), 2) }}
+                        RM {{ number_format($full_amount, 2) }}
                     </span>
                 </div>
 
-                <input type="hidden" name="total_amount" id="final_amount_input" value="{{ ($full_amount + $deposit_amount) }}">
+                <input type="hidden" name="total_amount" id="final_amount_input" value="{{ ($full_amount) }}">
                 <input type="hidden" name="deposit_amount" value="{{ $deposit_amount }}">
                 <input type="hidden" name="price_per_day" value="{{ $full_amount / max(1, ( (isset($booking_data['end_date']) && isset($booking_data['start_date'])) ? ( (new \DateTime($booking_data['end_date']))->diff(new \DateTime($booking_data['start_date']))->days ?: 1 ) : 1 )) }}">
 

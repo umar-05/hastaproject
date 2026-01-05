@@ -1,3 +1,6 @@
+
+
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -140,7 +143,7 @@
                     <div class="bg-gray-50 rounded-lg p-6 space-y-4">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Base Price</span>
-                            <span class="font-semibold">RM{{ number_format($booking->totalPrice, 2) }}</span>
+                            <span class="font-semibold">RM{{ number_format($basePrice) }}</span>
                         </div>
                         @if($booking->discount > 0)
                         <div class="flex justify-between text-green-600">
@@ -156,7 +159,7 @@
                         @endif
                         <div class="border-t pt-4 flex justify-between items-center">
                             <span class="text-lg font-bold">Total Amount</span>
-                            <span class="text-2xl font-bold text-hasta-red">RM{{ number_format(((float)($booking->totalPrice ?? 0) + 50), 2) }}</span>
+                            <span class="text-2xl font-bold text-hasta-red">RM{{ number_format(((float)($booking->totalPrice ?? 0)), 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Payment Status</span>
@@ -178,7 +181,7 @@
                 @endif
 
                 <!-- Action Buttons -->
-                <div class="border-t pt-8 mt-8 flex gap-4">
+                <div class="border-t pt-8 mt-8 flex items-start gap-4">
                     <a href="{{ route('bookings.index') }}" 
                        class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-6 py-3 rounded-md transition">
                         Back to Bookings

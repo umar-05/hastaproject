@@ -116,7 +116,7 @@ class BookingController extends Controller
 
             $finalPrice = $basePrice - $discount;
             $depositAmount = $request->input('deposit_amount', $fleet->deposit ?? 50);
-            $totalPrice = $finalPrice + (float)$depositAmount;
+            $totalPrice = $request->total_amount;
 
             // Generate ID before creation
             $bookingID = 'BK' . strtoupper(uniqid());
@@ -161,34 +161,39 @@ class BookingController extends Controller
     }
 
     public function show($bookingId)
-    {
-        try {
-            // --- MODIFIED: ALLOW STAFF ACCESS ---
-            if (Auth::guard('staff')->check()) {
-                // Staff can see ANY booking, no matricNum check needed
-                $booking = Booking::with(['fleet', 'reward'])
-                    ->where('bookingID', $bookingId)
-                    ->firstOrFail();
-                
-                // You can point this to a specific staff view if you have one, 
-                // otherwise it uses the common show view.
-                return view('bookings.show', compact('booking'));
-            }
-            // ------------------------------------
+{
+    try {
+        // 1. Fetch the booking first. This makes $booking and its data available.
+        $booking = Booking::with(['fleet', 'reward'])
+            ->where('bookingID', $bookingId)
+            ->firstOrFail();
 
-            $customerId = auth()->id();
-            if (!$customerId) return redirect()->route('login');
+        // 2. Permission Check
+        $isStaff = Auth::guard('staff')->check();
+        $isOwner = auth()->id() == $booking->matricNum;
 
-            $booking = Booking::with(['fleet', 'reward'])
-                ->where('bookingID', $bookingId)
-                ->where('matricNum', $customerId)
-                ->firstOrFail();
-
-            return view('bookings.show', compact('booking'));
-        } catch (\Exception $e) {
-            return redirect()->route('bookings.index')->with('error', 'Booking not found.');
+        if (!$isStaff && !$isOwner) {
+            return redirect()->route('bookings.index')->with('error', 'Unauthorized access.');
         }
+
+        // 3. Define variables for the pricing breakdown
+        // Use the dates already stored in the $booking object
+        $start = new \DateTime($booking->pickupDate);
+        $end = new \DateTime($booking->returnDate);
+        $days = $end->diff($start)->days ?: 1;
+
+        // 4. Calculate basePrice (Total minus Deposit)
+        // This ensures the numbers match what the user saw during payment
+        $basePrice = (float)$booking->totalPrice - (float)$booking->deposit;
+
+        // 5. Pass these variables to the view
+        return view('bookings.show', compact('booking', 'basePrice'));
+
+    } catch (\Exception $e) {
+        // If anything fails, this will now tell you why (e.g., "Undefined variable")
+        return redirect()->route('bookings.index')->with('error', 'Booking not found: ' . $e->getMessage());
     }
+}
 
     public function index()
     {
@@ -317,5 +322,22 @@ class BookingController extends Controller
             'total_with_deposit' => $total_with_deposit,
             'car' => $car
         ]);
+    }
+
+    public function approve($bookingID)
+    {
+        if (!Auth::guard('staff')->check()) {
+            return back()->with('error', 'Unauthorized access.');
+        }
+
+        $booking = Booking::where('bookingID', $bookingID)->firstOrFail();
+
+        if ($booking->bookingStat != 'pending') {
+            return back()->with('error', 'Invalid booking approval.');
+        }
+
+        $booking->update(['bookingStat' => 'confirmed']);
+
+        return back()->with('success', 'Booking approved!');
     }
 }

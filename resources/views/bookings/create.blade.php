@@ -236,7 +236,18 @@ function calculateTotal() {
     const deposit = depositInput ? parseFloat(depositInput.value) || 50 : 50;
 
     if (startDateInput.value) {
-        endDateInput.min = startDateInput.value;
+        // Create a date object for the day AFTER the start date
+        let nextDay = new Date(startDateInput.value);
+        nextDay.setDate(nextDay.getDate() + 1);
+        
+        // Format to YYYY-MM-DD
+        const minEndDate = nextDay.toISOString().split('T')[0];
+        endDateInput.min = minEndDate;
+
+        // If current end date is now invalid, reset it to the new minimum
+        if (endDateInput.value && endDateInput.value <= startDateInput.value) {
+            endDateInput.value = minEndDate;
+        }
     }
 
     const start = new Date(startDateInput.value);
@@ -249,11 +260,14 @@ function calculateTotal() {
     }
 
     if (startDateInput.value && endDateInput.value) {
-        const diffTime = Math.abs(end - start);
-        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        if (diffDays === 0) diffDays = 1;
-        const totalBase = diffDays * pricePerDay;
+        const diffTime = end - start;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        // Logic: if diffDays is 0 or less due to same day (though min prevents this), 
+        // we force at least 1 day, but the min-date fix above makes this cleaner.
+        const totalBase = (diffDays > 0 ? diffDays : 1) * pricePerDay;
         const totalWithDeposit = (totalBase + deposit).toFixed(2);
+        
         totalDisplay.textContent = totalWithDeposit;
         const totalInput = document.getElementById('total_amount_input');
         if (totalInput) totalInput.value = totalWithDeposit;
