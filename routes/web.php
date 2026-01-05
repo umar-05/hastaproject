@@ -9,7 +9,8 @@ use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\StaffController;
-use Illuminate\Support\Facades\Auth; 
+use App\Http\Controllers\Staff\MissionController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,8 +37,6 @@ Route::post('/register/process-matric-card', [RegisteredUserController::class, '
 Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function () {
     
     Route::get('/home', [CustomerController::class, 'dashboard'])->name('home');
-
-    // Vehicle Booking
     Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
     Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
 
@@ -45,6 +44,7 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     Route::get('/rewards', [RewardController::class, 'index'])->name('reward.index');
     Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('reward.claimed');
     Route::post('/rewards/claim', [RewardController::class, 'claim'])->name('rewards.claim');
+    
     // Booking Management
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
@@ -64,13 +64,14 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
 // ==============================
 // 3. STAFF ROUTES (Guard: staff)
 // ==============================
-// Routes are prefixed with '/staff' and named 'staff.'
 Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.')->group(function () {
     
     // Dashboard -> /staff/dashboard
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
+
+    Route::resource('mission', MissionController::class);
 
     // Fleet management (Staff)
     Route::prefix('fleet')->name('fleet.')->group(function () {
@@ -95,8 +96,20 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     });
 
     // Staff Profile -> /staff/profile
+    // Reward Management (This matches your Blade: route('staff.rewards') and route('staff.rewards.store'))
+    Route::get('/dashboard/reward', [RewardController::class, 'index'])->name('rewards');
+    Route::post('/dashboard/reward', [RewardController::class, 'store'])->name('rewards.store');
+    Route::delete('/dashboard/reward/{id}', [RewardController::class, 'destroy'])->name('rewards.destroy');
+
+
+    // Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
+
+    // In routes/web.php inside the Staff Group
+Route::get('/reports/daily-income', function () {
+    return view('staff.reports.dailyincome.index');
+})->name('report.daily-income');
 
     // Staff User Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
@@ -159,7 +172,6 @@ Route::get('/dashboard', function () {
     return redirect()->route('staff.dashboard');
 })->middleware(['auth:staff', 'prevent-back'])->name('dashboard');
 
-// API Auth Check
 Route::get('/api/auth-check', function () {
     return Auth::guard('staff')->check() || Auth::guard('customer')->check() 
         ? response()->json(['authenticated' => true]) 

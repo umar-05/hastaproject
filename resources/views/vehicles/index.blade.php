@@ -6,170 +6,191 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Vehicles - HASTA Travel & Tours</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        /* Page Load Animation Only */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-up {
+            animation: fadeUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+    </style>
 </head>
-<body class="font-sans antialiased text-gray-900 bg-white">
+<body class="font-sans antialiased text-gray-900 bg-gray-50">
 
     @include('layouts.navigation')
 
     {{-- Error Message Display --}}
     @if(session('error'))
-        <div class="max-w-7xl mx-auto px-8 mt-6">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg">
+        <div class="max-w-7xl mx-auto px-6 mt-6 animate-fade-up">
+            <div class="bg-red-50 border-l-4 border-hasta-red text-red-700 px-6 py-4 rounded-r-lg shadow-sm">
                 <strong>Error:</strong> {{ session('error') }}
             </div>
         </div>
     @endif
 
-    <main class="max-w-7xl mx-auto px-8 py-12">
+    <main class="max-w-7xl mx-auto px-6 py-10">
 
-        <section class="mb-12">
-            <h1 class="text-4xl font-extrabold mb-4">Our Vehicle Fleet</h1>
-            <p class="text-gray-600 text-lg">Choose the perfect vehicle for your journey</p>
+        <section class="relative rounded-3xl overflow-hidden mb-12 bg-gradient-to-r from-hasta-red to-red-800 text-white shadow-xl animate-fade-up">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-yellow-400 opacity-20 rounded-full blur-3xl"></div>
+            
+            <div class="relative z-10 px-8 py-12 md:px-12 md:py-16">
+                <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">
+                    Find Your Perfect Drive
+                </h1>
+                <p class="text-red-100 text-lg md:text-xl max-w-2xl font-light">
+                    Browse our premium fleet. From compact city cars to spacious SUVs, we have the keys to your next journey.
+                </p>
+            </div>
         </section>
 
-        <div class="flex flex-wrap gap-3 mb-8">
-            <button class="filter-btn active bg-hasta-red text-white px-6 py-2 rounded-full hover:bg-red-700 transition font-medium" data-filter="all">
-                All vehicles
-            </button>
-            <button class="filter-btn bg-gray-200 text-gray-700 px-6 py-2 rounded-full hover:bg-gray-300 transition font-medium" data-filter="Sedan">
-                Sedan
-            </button>
-            <button class="filter-btn bg-gray-200 text-gray-700 px-6 py-2 rounded-full hover:bg-gray-300 transition font-medium" data-filter="Hatchback">
-                Hatchback
-            </button>
-            <button class="filter-btn bg-gray-200 text-gray-700 px-6 py-2 rounded-full hover:bg-gray-300 transition font-medium" data-filter="MPV">
-                MPV
-            </button>
-            <button class="filter-btn bg-gray-200 text-gray-700 px-6 py-2 rounded-full hover:bg-gray-300 transition font-medium" data-filter="SUV">
-                SUV
-            </button>
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 animate-fade-up delay-100">
+            <div class="flex flex-wrap gap-2">
+                <button class="filter-btn active px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 shadow-sm bg-gray-900 text-white hover:shadow-lg transform hover:-translate-y-0.5" data-filter="all">
+                    All
+                </button>
+                <button class="filter-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 shadow-sm bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-gray-200" data-filter="Sedan">
+                    Sedan
+                </button>
+                <button class="filter-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 shadow-sm bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-gray-200" data-filter="Hatchback">
+                    Hatchback
+                </button>
+                <button class="filter-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 shadow-sm bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-gray-200" data-filter="MPV">
+                    MPV
+                </button>
+                <button class="filter-btn px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 shadow-sm bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-gray-200" data-filter="SUV">
+                    SUV
+                </button>
+            </div>
+            
+            <div class="text-gray-400 text-sm font-medium">
+                Showing <span id="vehicle-count" class="text-gray-900 font-bold">{{ count($vehicles) }}</span> vehicles
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20 animate-fade-up delay-200" id="vehicle-grid">
             @foreach($vehicles as $vehicle)
-            {{-- NOTICE: Changed back to array syntax since controller returns arrays --}}
-            <div class="vehicle-card bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition" data-type="{{ $vehicle['type'] }}">
-                <div class="mb-4">
-                    <img src="{{ asset('images/'.$vehicle['image']) }}" alt="{{ $vehicle['name'] }}" class="w-full h-40 object-contain">
-                </div>
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <h4 class="text-xl font-bold">{{ $vehicle['name'] }}</h4>
-                        <p class="text-gray-500 text-sm">{{ $vehicle['type'] }}</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-hasta-red text-xl font-bold">RM{{ $vehicle['price'] }}</span>
-                        <p class="text-gray-500 text-xs">per day</p>
-                    </div>
-                </div>
-                <div class="flex space-x-4 text-gray-500 text-sm mb-6">
-                    <span class="flex items-center">
-                        <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                        </svg>
-                        {{ $vehicle['transmission'] }}
-                    </span>
-                    <span class="flex items-center">
-                        <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        {{ $vehicle['fuel'] }}
-                    </span>
-                    @if($vehicle['ac'])
-                    <span class="flex items-center">
-                        <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
-                        Air Cond
-                    </span>
-                    @endif
+            <div class="vehicle-card group bg-white rounded-[2rem] p-4 shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-300 border border-transparent hover:border-gray-100 hover:-translate-y-2 flex flex-col h-full" data-type="{{ $vehicle['type'] }}">
+                
+                <div class="relative bg-gray-50 rounded-[1.5rem] p-6 h-56 flex items-center justify-center mb-5 overflow-hidden">
+                    <div class="absolute w-32 h-32 bg-gray-200/50 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <img src="{{ asset('images/'.$vehicle['image']) }}" 
+                         alt="{{ $vehicle['name'] }}" 
+                         class="relative z-10 w-full h-full object-contain transform transition-transform duration-500 group-hover:scale-110">
                 </div>
 
-                {{-- ========================================== --}}
-                {{-- FIX: PASSED $vehicle['id'] TO THE ROUTE      --}}
-                {{-- ========================================== --}}
-                <a href="{{ route('vehicles.show', $vehicle['id']) }}">
-                    <button class="w-full bg-hasta-red hover:bg-red-700 text-white font-bold py-3 rounded transition">
-                        View Details
-                    </button>
-                </a>
+                <div class="px-2 flex-grow flex flex-col">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="inline-block py-1 px-2 rounded-md bg-gray-100 text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">
+                                {{ $vehicle['type'] }}
+                            </span>
+                            <h4 class="text-xl font-bold text-gray-900 leading-tight">{{ $vehicle['name'] }}</h4>
+                        </div>
+                        <div class="text-right">
+                            <span class="block text-hasta-red text-xl font-extrabold">RM{{ $vehicle['price'] }}</span>
+                            <span class="text-gray-400 text-xs font-medium">/day</span>
+                        </div>
+                    </div>
 
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-50 border border-gray-100 text-xs font-semibold text-gray-600">
+                            <svg class="w-3 h-3 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                            {{ $vehicle['transmission'] }}
+                        </span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-50 border border-gray-100 text-xs font-semibold text-gray-600">
+                            <svg class="w-3 h-3 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                            {{ $vehicle['fuel'] }}
+                        </span>
+                        @if($vehicle['ac'])
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-50 border border-gray-100 text-xs font-semibold text-gray-600">
+                            <svg class="w-3 h-3 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                            A/C
+                        </span>
+                        @endif
+                    </div>
+
+                    <div class="mt-auto">
+                        <a href="{{ route('vehicles.show', $vehicle['id']) }}" class="block w-full">
+                            {{-- 
+                                BUTTON CHANGE: 
+                                - bg-hasta-red (Red default)
+                                - hover:bg-red-700 (Darker red hover, simple)
+                            --}}
+                            <button class="w-full bg-hasta-red text-white font-bold py-3.5 rounded-xl transition-colors duration-200 hover:bg-red-700 hover:shadow-md flex items-center justify-center">
+                                View Details
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </button>
+                        </a>
+                    </div>
+                </div>
             </div>
             @endforeach
         </div>
 
     </main>
 
-    <footer class="bg-hasta-red text-white py-12 px-8">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div class="col-span-1 md:col-span-2">
-                <div class="border-2 border-white px-2 py-1 rounded-sm inline-block mb-8">
-                    <span class="text-2xl font-bold">HASTA</span>
-                </div>
-                <div class="flex items-start mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 mt-1 text-hasta-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    <p class="text-sm leading-relaxed">Address<br>Student Mall UTM<br>Skudai, 81300, Johor Bahru</p>
-                </div>
-                <div class="flex items-center mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-hasta-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                    <p class="text-sm">Email<br>hastatravel@gmail.com</p>
-                </div>
-                <div class="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-hasta-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                    <p class="text-sm">Phone<br>011-1090 0700</p>
-                </div>
+    <footer class="bg-hasta-red text-white py-10 px-8 mt-16">
+        <div class="max-w-7xl mx-auto flex flex-col items-center justify-center text-center">
+            <div class="mb-4">
+                <img src="{{ asset('images/HASTALOGO.svg') }}" 
+                     alt="HASTA Travel & Tours" 
+                     class="h-12 w-auto object-contain">
             </div>
 
-            <div>
-                <h5 class="font-bold mb-6">Useful links</h5>
-                <ul class="space-y-3 text-sm opacity-80">
-                    <li><a href="{{ route('home') }}" class="hover:opacity-100">Home</a></li>
-                    <li><a href="{{ route('contact') }}" class="hover:opacity-100">Contact us</a></li>
-                </ul>
+            <div class="space-y-2">
+                <p class="text-sm font-medium">HASTA Travel & Tours</p>
+                <p class="text-xs opacity-75">
+                    &copy; {{ date('Y') }} All rights reserved.
+                </p>
             </div>
-
-            <div>
-                <h5 class="font-bold mb-6">Vehicles</h5>
-                <ul class="space-y-3 text-sm opacity-80">
-                    <li><a href="{{ route('vehicles.index') }}" class="hover:opacity-100">All Vehicles</a></li>
-                    <li><a href="#" class="hover:opacity-100">Sedan</a></li>
-                    <li><a href="#" class="hover:opacity-100">Hatchback</a></li>
-                    <li><a href="#" class="hover:opacity-100">MPV</a></li>
-                    <li><a href="#" class="hover:opacity-100">SUV</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-red-800 flex space-x-6">
-            <span class="text-xs opacity-50">&copy; 2026 HASTA Travel & Tours. All rights reserved.</span>
         </div>
     </footer>
 
     <script>
-        // Filter functionality
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        const vehicleCards = document.querySelectorAll('.vehicle-card');
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const vehicleCards = document.querySelectorAll('.vehicle-card');
+            const vehicleCount = document.getElementById('vehicle-count');
 
-        filterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const filter = button.dataset.filter;
-                
-                // Update active button
-                filterButtons.forEach(btn => {
-                    btn.classList.remove('active', 'bg-hasta-red', 'text-white');
-                    btn.classList.add('bg-gray-200', 'text-gray-700');
-                });
-                button.classList.add('active', 'bg-hasta-red', 'text-white');
-                button.classList.remove('bg-gray-200', 'text-gray-700');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const filter = button.dataset.filter;
+                    let count = 0;
 
-                // Filter vehicles
-                vehicleCards.forEach(card => {
-                    if (filter === 'all' || card.dataset.type === filter) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
+                    // Update active button styles
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('bg-gray-900', 'text-white');
+                        btn.classList.add('bg-white', 'text-gray-600', 'hover:bg-gray-100');
+                    });
+                    button.classList.remove('bg-white', 'text-gray-600', 'hover:bg-gray-100');
+                    button.classList.add('bg-gray-900', 'text-white');
+
+                    // Simple, instant filter logic (No motions)
+                    vehicleCards.forEach(card => {
+                        const type = card.dataset.type;
+                        
+                        if (filter === 'all' || type === filter) {
+                            card.style.display = 'flex'; // Restore flex layout
+                            count++;
+                        } else {
+                            card.style.display = 'none'; // Hide instantly
+                        }
+                    });
+
+                    // Update count
+                    vehicleCount.innerText = count;
                 });
             });
         });

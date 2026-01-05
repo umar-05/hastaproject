@@ -426,59 +426,22 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-red-600 text-white py-12 mt-16">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <div class="bg-white text-red-600 px-4 py-2 font-bold text-xl inline-block mb-4 rounded">
-                        HASTA
-                    </div>
-                    <div class="flex space-x-4 mt-4">
-                        <a href="#" class="hover:text-gray-200 text-2xl">📘</a>
-                        <a href="#" class="hover:text-gray-200 text-2xl">📷</a>
-                        <a href="#" class="hover:text-gray-200 text-2xl">✖️</a>
-                        <a href="#" class="hover:text-gray-200 text-2xl">▶️</a>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="font-bold mb-4 flex items-center">
-                        <span class="text-2xl mr-2">📍</span> Address
-                    </h4>
-                    <p>Student Mall UTM</p>
-                    <p>Skudai, 81300, Johor Bahru</p>
-                </div>
-
-                <div>
-                    <h4 class="font-bold mb-4">Useful Links</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="hover:text-gray-200">About us</a></li>
-                        <li><a href="#" class="hover:text-gray-200">Contact us</a></li>
-                        <li><a href="#" class="hover:text-gray-200">Gallery</a></li>
-                        <li><a href="#" class="hover:text-gray-200">Blog</a></li>
-                        <li><a href="#" class="hover:text-gray-200">F.A.Q</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-bold mb-4">Vehicles</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="hover:text-gray-200">Sedan</a></li>
-                        <li><a href="#" class="hover:text-gray-200">Hatchback</a></li>
-                        <li><a href="#" class="hover:text-gray-200">MPV</a></li>
-                        <li><a href="#" class="hover:text-gray-200">Minivan</a></li>
-                        <li><a href="#" class="hover:text-gray-200">SUV</a></li>
-                    </ul>
-                    <div class="mt-4 space-y-2">
-                        <p class="flex items-center">
-                            <span class="text-xl mr-2">📧</span> hastatravel@gmail.com
-                        </p>
-                        <p class="flex items-center">
-                            <span class="text-xl mr-2">📞</span> 011-1090 0100
-                        </p>
-                    </div>
-                </div>
+    <footer class="bg-hasta-red text-white py-10 px-8 mt-16">
+        <div class="max-w-7xl mx-auto flex flex-col items-center justify-center text-center">
+            
+            <div class="mb-4">
+                <img src="{{ asset('images/HASTALOGO.svg') }}" 
+                     alt="HASTA Travel & Tours" 
+                     class="h-12 w-auto object-contain">
             </div>
+
+            <div class="space-y-2">
+                <p class="text-sm font-medium">HASTA Travel & Tours</p>
+                <p class="text-xs opacity-75">
+                    &copy; {{ date('Y') }} All rights reserved.
+                </p>
+            </div>
+            
         </div>
     </footer>
 

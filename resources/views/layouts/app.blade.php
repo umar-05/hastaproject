@@ -30,8 +30,13 @@
 
             <!-- Page Content -->
             <main>
-                {{ $slot }}
-            </main>
+    @if (isset($slot) && $slot->isNotEmpty())
+        {{ $slot }}
+    
+    @else
+        @yield('content')
+    @endif
+</main>
         </div>
     </body>
 </html>
