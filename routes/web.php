@@ -132,9 +132,8 @@ require __DIR__.'/auth.php';
 
 // Fallback for default Laravel redirects
 // ADDED: 'prevent-back'
-Route::get('/dashboard', function () {
-    return redirect()->route('staff.dashboard');
-})->middleware(['auth:staff', 'prevent-back'])->name('dashboard');
+Route::get('/dashboard', [StaffController::class, 'index'])
+    ->middleware(['auth:staff', 'prevent-back']);
 
 // API endpoint to check authentication status
 Route::get('/api/auth-check', function () {
