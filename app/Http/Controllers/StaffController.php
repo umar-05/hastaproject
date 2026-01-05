@@ -8,6 +8,7 @@ use App\Models\Reward;
 use App\Models\Booking;
 use App\Models\Fleet;
 use App\Models\Customer;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
@@ -22,18 +23,75 @@ class StaffController extends Controller
     /**
      * Display the Staff Dashboard.
      */
-    public function index(): View
-    {
-        $bookingsToManage = Booking::where('bookingStat', 'Pending')->count();
-        $pickupsToday = Booking::whereDate('pickupDate', now())->where('bookingStat', 'Confirmed')->count();
-        $returnsToday = Booking::whereDate('returnDate', now())->where('bookingStat', 'Active')->count();
+public function index()
+{
+    // 1. Define the Top Metric Variables (Missing in your current error log)
+    $pendingBookings = \App\Models\Booking::where('bookingStat', 'Pending')->count();
+    
+    $pickupsToday = \App\Models\Booking::whereDate('pickupDate', \Carbon\Carbon::today())
+        ->whereIn('bookingStat', ['Confirmed', 'Approved'])
+        ->count();
+        
+    $returnsToday = \App\Models\Booking::whereDate('returnDate', \Carbon\Carbon::today())
+        ->where('bookingStat', 'Active')
+        ->count();
 
-        return view('staff.dashboard', [
-            'bookingsToManage' => $bookingsToManage,
-            'pickupsToday' => $pickupsToday,
-            'returnsToday' => $returnsToday,
-        ]);
+    // 2. Fleet Distribution (Using modelName as per your database)
+    $totalCars = \App\Models\Fleet::count();
+    $fleetDistribution = [
+        'Perodua' => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Perodua%')->count() / $totalCars) * 100) : 0,
+        'Proton'  => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Proton%')->count() / $totalCars) * 100) : 0,
+        'Toyota'  => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Toyota%')->count() / $totalCars) * 100) : 0,
+    ];
+
+    // 3. Chart Data (Last 4 days)
+    $chartData = [];
+    for ($i = 3; $i >= 0; $i--) {
+        $date = \Carbon\Carbon::today()->subDays($i);
+        $count = \App\Models\Booking::whereDate('created_at', $date)->count();
+        $chartData[$date->format('d Jan')] = $count;
     }
+
+    // 4. All cars for the Availability Dropdown
+    $cars = \App\Models\Fleet::all();
+
+    // Now all variables are defined for compact()
+    return view('staff.dashboard', compact(
+        'pendingBookings', 
+        'pickupsToday', 
+        'returnsToday', 
+        'fleetDistribution', 
+        'chartData', 
+        'cars'
+    ));
+}
+    /**
+     * Check car availability for given dates.
+     */
+public function checkAvailability(Request $request)
+{
+    $request->validate([
+        'car_id' => 'required',
+        'pickup' => 'required|date',
+        'return' => 'required|date|after:pickup',
+    ]);
+
+    // This query looks for any booking that conflicts with the user's dates
+    $conflict = \App\Models\Booking::where('carID', $request->car_id)
+        ->whereIn('bookingStat', ['Confirmed', 'Approved', 'Active'])
+        ->where(function ($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $q->where('pickupDate', '<=', $request->return)
+                  ->where('returnDate', '>=', $request->pickup);
+            });
+        })->exists();
+
+    if ($conflict) {
+        return back()->with('error', '❌ This car is unavailable for these dates.');
+    }
+
+    return back()->with('success', '✅ Success! This car is available.');
+}
 
     /**
      * Display the Pickup & Return Inspection page.

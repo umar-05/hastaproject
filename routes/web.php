@@ -72,6 +72,7 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
 
     Route::resource('mission', MissionController::class);
+    Route::get('/fleet/check', [StaffController::class, 'checkAvailability'])->name('fleet.check');
 
     // Fleet management (Staff)
     Route::prefix('fleet')->name('fleet.')->group(function () {
@@ -129,7 +130,6 @@ Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-
         Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy');
     });
 
-// Inside the Route::middleware(['auth:staff'...]) group:
 
 // Blacklist Management
 Route::get('/reports/blacklist', [StaffController::class, 'blacklistIndex'])->name('blacklist.index');
