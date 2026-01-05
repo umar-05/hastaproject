@@ -33,6 +33,9 @@ class Customer extends Authenticatable
         'emerelation',
         'bankName',
         'accountNum',
+        'doc_ic_passport',
+        'doc_license',
+        'doc_matric',
     ];
 
     protected $hidden = [
@@ -43,5 +46,10 @@ class Customer extends Authenticatable
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'matricNum', 'matricNum');
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'matricNum';
     }
 }

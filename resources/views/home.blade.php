@@ -6,249 +6,282 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>HASTA Travel & Tours</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-fade-up { animation: fadeUp 0.8s ease-out forwards; }
+        .animate-slide-in { animation: slideInRight 1s ease-out forwards; }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
 </head>
-<body class="font-sans antialiased text-gray-900 bg-white">
+<body class="font-sans antialiased text-gray-900 bg-gray-50">
 
     @include('layouts.navigation')
 
-    <main class="max-w-7xl mx-auto px-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <section class="relative bg-hasta-red rounded-[40px] p-12 md:p-16 overflow-hidden mb-16 text-white">
-            <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none opacity-30 md:opacity-100 mix-blend-overlay" style="background-image: url('{{ asset('images/herocar.png') }}');"></div>
+        <section class="relative rounded-[3rem] overflow-hidden mb-20 shadow-2xl group">
+            <div class="absolute inset-0 bg-gradient-to-br from-hasta-red via-red-700 to-red-900 transition-transform duration-700 transform group-hover:scale-105"></div>
             
-            <div class="relative z-10 max-w-xl">
-                <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6 drop-shadow-lg">
-                    Experience the road like never before
-                </h1>
-                <p class="text-sm md:text-base opacity-90 mb-8 max-w-md drop-shadow-md">
-                    We believe your rental car should enhance your trip, not just be a part of it. Our fleet delivers a premium driving experience.
-                </p>
-                <a href="{{ route('vehicles.index') }}">
-                    <button class="bg-hasta-yellow hover:bg-amber-500 text-black font-bold py-3 px-8 rounded-md transition shadow-lg">
-                        View all cars
-                    </button>
-                </a>
+            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
+
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between p-8 md:p-16">
+                
+                <div class="w-full md:w-1/2 text-white animate-fade-up z-20">
+                    <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6 drop-shadow-lg tracking-tight">
+                        Drive the <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">Extraordinary</span>
+                    </h1>
+                    <p class="text-lg opacity-90 mb-10 max-w-md font-light leading-relaxed">
+                        Elevate your journey with our curated selection of premium vehicles. Comfort, style, and performance wrapped in one.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="{{ route('vehicles.index') }}" class="group/btn relative overflow-hidden bg-white text-hasta-red font-bold py-4 px-10 rounded-full transition shadow-lg hover:shadow-xl hover:scale-105 transform duration-300">
+                            <span class="relative z-10">Browse Fleet</span>
+                            <div class="absolute inset-0 h-full w-full bg-gray-100 transform scale-x-0 group-hover/btn:scale-x-100 transition-transform origin-left duration-300"></div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="w-full md:w-1/2 mt-12 md:mt-0 relative animate-slide-in">
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-white/10 blur-3xl rounded-full pointer-events-none"></div>
+                    
+                    <img src="{{ asset('images/herocar.png') }}" 
+                         alt="Hero Car" 
+                         class="relative w-full h-auto object-contain animate-float drop-shadow-2xl transform md:scale-125 md:translate-x-10">
+                </div>
             </div>
         </section>
 
         @if(isset($activeBooking) && $activeBooking)
-        <section class="mb-16 bg-gray-50 p-8 rounded-3xl border border-gray-100 shadow-sm">
-            <div class="flex justify-between items-center mb-6">
-                 <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-hasta-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Your Active Trip
-                 </h2>
-                 <span class="bg-green-100 text-green-800 px-4 py-1 rounded-full text-sm font-bold uppercase tracking-wide">
-                    {{ $activeBooking->bookingStat }}
-                 </span>
-            </div>
-            
-            <div class="flex flex-col md:flex-row items-center gap-8 bg-white p-6 rounded-2xl shadow-sm">
-                <div class="w-full md:w-1/3">
-                     {{-- Generic car image or dynamic if available --}}
-                    <img src="{{ asset('images/herocar.png') }}" alt="Current Car" class="w-full h-auto object-contain transform scale-x-[-1]">
-                </div>
-                
-                <div class="w-full md:w-2/3">
-                    <div class="mb-4">
-                        <h3 class="text-3xl font-extrabold text-gray-900">
-                            {{ $activeBooking->fleet->brand ?? 'Car' }} {{ $activeBooking->fleet->model ?? 'Model' }}
-                        </h3>
-                        <p class="text-gray-500 font-mono text-sm tracking-wider uppercase">
-                            {{ $activeBooking->fleet->plateNumber ?? 'Unknown Plate' }}
-                        </p>
+        <section class="mb-24 animate-fade-up delay-100">
+            <div class="glass-panel p-1 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div class="bg-white rounded-[1.3rem] p-8 md:p-10 border border-gray-100">
+                    <div class="flex justify-between items-center mb-8 border-b border-gray-100 pb-4">
+                         <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
+                                <span class="block w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800">Trip in Progress</h2>
+                                <p class="text-xs text-gray-500">Booking ID #{{ $activeBooking->bookingID }}</p>
+                            </div>
+                         </div>
+                         <a href="{{ route('bookings.show', $activeBooking->bookingID) }}" class="text-sm font-semibold text-hasta-red hover:underline">Manage Trip &rarr;</a>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-6 mb-8 border-t border-b border-gray-100 py-4">
-                        <div>
-                            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Pickup</p>
-                            <p class="font-bold text-lg text-gray-800">
-                                {{ \Carbon\Carbon::parse($activeBooking->pickupDate)->format('d M Y') }}
-                            </p>
-                            <p class="text-sm text-gray-500">
-                                {{ \Carbon\Carbon::parse($activeBooking->pickupTime)->format('h:i A') }}
-                            </p>
+                    <div class="flex flex-col lg:flex-row items-center gap-12">
+                        <div class="w-full lg:w-1/3 relative group">
+                            <div class="absolute inset-0 bg-gray-100 rounded-full transform scale-75 group-hover:scale-90 transition-transform duration-500"></div>
+                            <img src="{{ asset('images/herocar.png') }}" alt="Current Car" class="relative z-10 w-full h-auto object-contain transform scale-x-[-1] transition-transform duration-500 group-hover:scale-x-[-1] group-hover:scale-105">
                         </div>
-                         <div>
-                            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Return</p>
-                            <p class="font-bold text-lg text-gray-800">
-                                {{ \Carbon\Carbon::parse($activeBooking->returnDate)->format('d M Y') }}
+                        
+                        <div class="w-full lg:w-2/3">
+                            <h3 class="text-3xl font-extrabold text-gray-900 mb-1">
+                                {{ $activeBooking->fleet->brand ?? 'Car' }} {{ $activeBooking->fleet->model ?? 'Model' }}
+                            </h3>
+                            <p class="text-gray-400 font-mono text-sm tracking-widest uppercase mb-10">
+                                {{ $activeBooking->fleet->plateNumber ?? 'Unknown Plate' }}
                             </p>
-                            <p class="text-sm text-gray-500">
-                                {{ \Carbon\Carbon::parse($activeBooking->returnTime)->format('h:i A') }}
-                            </p>
+                            
+                            <div class="relative flex items-center justify-between w-full mb-8">
+                                <div class="absolute left-0 top-1/2 w-full h-1 bg-gray-100 -z-10 rounded-full"></div>
+                                <div class="absolute left-0 top-1/2 w-1/2 h-1 bg-gradient-to-r from-hasta-red to-red-300 -z-10 rounded-full"></div>
+
+                                <div class="flex flex-col items-start bg-white pr-4">
+                                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Pickup</span>
+                                    <div class="text-lg font-bold text-gray-900">{{ \Carbon\Carbon::parse($activeBooking->pickupDate)->format('d M') }}</div>
+                                    <div class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($activeBooking->pickupTime)->format('h:i A') }}</div>
+                                </div>
+
+                                <div class="w-8 h-8 bg-hasta-red rounded-full flex items-center justify-center text-white shadow-lg shadow-red-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                </div>
+
+                                <div class="flex flex-col items-end bg-white pl-4">
+                                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Return</span>
+                                    <div class="text-lg font-bold text-gray-900">{{ \Carbon\Carbon::parse($activeBooking->returnDate)->format('d M') }}</div>
+                                    <div class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($activeBooking->returnTime)->format('h:i A') }}</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <a href="{{ route('bookings.show', $activeBooking->bookingID) }}" class="inline-flex justify-center items-center w-full md:w-auto bg-black text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-800 transition">
-                        Manage Booking
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                    </a>
                 </div>
             </div>
         </section>
         @endif
 
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center mb-20">
-            <div class="flex flex-col items-center">
-                <div class="mb-4">
-                   <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24 animate-fade-up delay-200">
+            <div class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-2">
+                <div class="w-16 h-16 bg-red-50 text-hasta-red rounded-2xl flex items-center justify-center mb-6 group-hover:bg-hasta-red group-hover:text-white transition-colors duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
-                <h3 class="text-xl font-bold mb-2">Availability</h3>
-                <p class="text-gray-600 text-sm max-w-xs">Browse our extensive fleet and book your ideal car for any date and time.</p>
+                <h3 class="text-xl font-bold mb-3 text-gray-900">Instant Availability</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Real-time booking engine allowing you to secure your ideal ride in seconds, 24/7.</p>
             </div>
-            <div class="flex flex-col items-center">
-                <div class="mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+
+            <div class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-2">
+                <div class="w-16 h-16 bg-red-50 text-hasta-red rounded-2xl flex items-center justify-center mb-6 group-hover:bg-hasta-red group-hover:text-white transition-colors duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
-                <h3 class="text-xl font-bold mb-2">Comfort</h3>
-                <p class="text-gray-600 text-sm max-w-xs">We are committed to providing a clean, safe, and comfortable experience.</p>
+                <h3 class="text-xl font-bold mb-3 text-gray-900">Premium Comfort</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Every vehicle is sanitized and inspected to ensure a safe, pristine driving environment.</p>
             </div>
-             <div class="flex flex-col items-center">
-                <div class="mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+
+            <div class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-2">
+                <div class="w-16 h-16 bg-red-50 text-hasta-red rounded-2xl flex items-center justify-center mb-6 group-hover:bg-hasta-red group-hover:text-white transition-colors duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
-                <h3 class="text-xl font-bold mb-2">Savings</h3>
-                <p class="text-gray-600 text-sm max-w-xs">Travel smartly with our fuel-efficient and budget-friendly rental options.</p>
+                <h3 class="text-xl font-bold mb-3 text-gray-900">Best Value</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Transparent pricing with no hidden fees. Luxury experience at competitive market rates.</p>
             </div>
         </section>
 
-        <section class="mb-20">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-extrabold max-w-xs">Choose the car that suits you</h2>
-                <a href="{{ route('vehicles.index') }}" class="text-gray-900 font-bold flex items-center hover:text-hasta-red transition">
-                    View All <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+        <section class="mb-20 animate-fade-up delay-300">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
+                <div>
+                    <h2 class="text-4xl font-extrabold text-gray-900 tracking-tight mb-2">Choose Your Ride</h2>
+                    <p class="text-gray-500">Find the perfect vehicle for your next adventure.</p>
+                </div>
+                <a href="{{ route('vehicles.index') }}" class="group flex items-center gap-2 text-sm font-bold text-gray-900 hover:text-hasta-red transition-colors">
+                    View Full Fleet 
+                    <span class="bg-gray-100 rounded-full p-1 group-hover:bg-hasta-red group-hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </span>
                 </a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6">
-                    <img src=" {{ asset('/images/axia-2018.png') }}" alt="Perodua Axia" class="w-full h-40 object-contain mb-4">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h4 class="text-xl font-bold">Perodua Axia 2018</h4>
-                            <p class="text-gray-500 text-sm">Hatchback</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-hasta-red text-xl font-bold">RM120</span>
-                            <p class="text-gray-500 text-xs">per day</p>
-                        </div>
+                
+                <div class="group bg-white rounded-3xl p-4 shadow-[0_2px_15px_rgb(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.1)] transition-all duration-300 border border-transparent hover:border-gray-100">
+                    <div class="relative bg-gray-50 rounded-2xl p-6 h-56 flex items-center justify-center mb-4 overflow-hidden">
+                        <div class="absolute w-40 h-40 bg-gray-200/50 rounded-full blur-2xl group-hover:bg-red-100/50 transition-colors duration-300"></div>
+                        <img src="{{ asset('/images/axia-2018.png') }}" alt="Perodua Axia" class="relative z-10 w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500 ease-out">
                     </div>
-                    <div class="flex space-x-4 text-gray-500 text-sm mb-6">
-                        <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg> Auto</span>
-                        <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> RON 95</span>
-                         <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg> A/C</span>
+                    
+                    <div class="px-2">
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Compact</p>
+                                <h4 class="text-lg font-bold text-gray-900">Perodua Axia 2018</h4>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-hasta-red text-xl font-extrabold">RM120</span>
+                                <span class="text-gray-400 text-xs font-medium">/day</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 mb-6">
+                            <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">Auto</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">4 Seats</span>
+                        </div>
+
+                        <a href="{{ route('vehicles.index') }}" class="block w-full py-3.5 rounded-xl bg-hasta-red text-white text-center font-bold text-sm transition-transform active:scale-95 hover:bg-red-700">
+                            Book Now
+                        </a>
                     </div>
-                    <a href="{{ route('vehicles.index') }}">
-                    <button class="w-full bg-hasta-red hover:bg-hasta-redHover text-white font-bold py-3 rounded transition">
-                        View Details
-                    </button>
-                    </a>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6">
-                    <img src="{{ asset('/images/bezza-2018.png') }}" alt="Perodua Bezza" class="w-full h-40 object-contain mb-4">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h4 class="text-xl font-bold">Perodua Bezza 2018</h4>
-                            <p class="text-gray-500 text-sm">Sedan</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-hasta-red text-xl font-bold">RM140</span>
-                            <p class="text-gray-500 text-xs">per day</p>
-                        </div>
+                <div class="group bg-white rounded-3xl p-4 shadow-[0_2px_15px_rgb(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.1)] transition-all duration-300 border border-transparent hover:border-gray-100">
+                    <div class="relative bg-gray-50 rounded-2xl p-6 h-56 flex items-center justify-center mb-4 overflow-hidden">
+                         <div class="absolute w-40 h-40 bg-gray-200/50 rounded-full blur-2xl group-hover:bg-red-100/50 transition-colors duration-300"></div>
+                        <img src="{{ asset('/images/bezza-2018.png') }}" alt="Perodua Bezza" class="relative z-10 w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500 ease-out">
                     </div>
-                     <div class="flex space-x-4 text-gray-500 text-sm mb-6">
-                        <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg> Auto</span>
-                        <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> RON 95</span>
-                         <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg> A/C</span>
+                    
+                    <div class="px-2">
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sedan</p>
+                                <h4 class="text-lg font-bold text-gray-900">Perodua Bezza 2018</h4>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-hasta-red text-xl font-extrabold">RM140</span>
+                                <span class="text-gray-400 text-xs font-medium">/day</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 mb-6">
+                            <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">Auto</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">5 Seats</span>
+                        </div>
+
+                        <a href="{{ route('vehicles.index') }}" class="block w-full py-3.5 rounded-xl bg-hasta-red text-white text-center font-bold text-sm transition-transform active:scale-95 hover:bg-red-700">
+                            Book Now
+                        </a>
                     </div>
-                    <a href="{{ route('vehicles.index') }}">
-                    <button class="w-full bg-hasta-red hover:bg-hasta-redHover text-white font-bold py-3 rounded transition">
-                        View Details
-                    </button>
-                    </a>
                 </div>
 
-                 <div class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6">
-                    <img src="{{ asset('/images/myvi-2015.png') }}" alt="Perodua Myvi" class="w-full h-40 object-contain mb-4">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h4 class="text-xl font-bold">Perodua Myvi 2015</h4>
-                            <p class="text-gray-500 text-sm">Sport</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-hasta-red text-xl font-bold">RM120</span>
-                            <p class="text-gray-500 text-xs">per day</p>
-                        </div>
+                <div class="group bg-white rounded-3xl p-4 shadow-[0_2px_15px_rgb(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.1)] transition-all duration-300 border border-transparent hover:border-gray-100">
+                    <div class="relative bg-gray-50 rounded-2xl p-6 h-56 flex items-center justify-center mb-4 overflow-hidden">
+                         <div class="absolute w-40 h-40 bg-gray-200/50 rounded-full blur-2xl group-hover:bg-red-100/50 transition-colors duration-300"></div>
+                        <img src="{{ asset('/images/myvi-2015.png') }}" alt="Perodua Myvi" class="relative z-10 w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500 ease-out">
                     </div>
-                     <div class="flex space-x-4 text-gray-500 text-sm mb-6">
-                        <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg> Auto</span>
-                        <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> RON 95</span>
-                         <span class="flex items-center"><svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg> A/C</span>
+                    
+                    <div class="px-2">
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sport Hatch</p>
+                                <h4 class="text-lg font-bold text-gray-900">Perodua Myvi 2015</h4>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-hasta-red text-xl font-extrabold">RM120</span>
+                                <span class="text-gray-400 text-xs font-medium">/day</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 mb-6">
+                            <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">Auto</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">5 Seats</span>
+                        </div>
+
+                        <a href="{{ route('vehicles.index') }}" class="block w-full py-3.5 rounded-xl bg-hasta-red text-white text-center font-bold text-sm transition-transform active:scale-95 hover:bg-red-700">
+                            Book Now
+                        </a>
                     </div>
-                    <a href="{{ route('vehicles.index') }}">
-                    <button class="w-full bg-hasta-red hover:bg-hasta-redHover text-white font-bold py-3 rounded transition">
-                        View Details
-                    </button>
-                    </a>
                 </div>
+
             </div>
         </section>
 
     </main>
 
-    <footer class="bg-hasta-red text-white py-12 px-8">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div class="col-span-1 md:col-span-2">
-                <div class="border-2 border-white px-2 py-1 rounded-sm inline-block mb-8">
-                    <span class="text-2xl font-bold">HASTA</span>
-                </div>
-                 <div class="flex items-start mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 mt-1 text-hasta-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    <p class="text-sm leading-relaxed">Address<br>Student Mall UTM<br>Skudai, 81300, Johor Bahru</p>
-                </div>
-                 <div class="flex items-center mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-hasta-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                    <p class="text-sm">Email<br>hastatravel@gmail.com</p>
-                </div>
-                <div class="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-hasta-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                    <p class="text-sm">Phone<br>011-1090 0700</p>
-                </div>
+    <footer class="bg-hasta-red text-white py-10 px-8 mt-16">
+        <div class="max-w-7xl mx-auto flex flex-col items-center justify-center text-center">
+            <div class="mb-4">
+                <img src="{{ asset('images/HASTALOGO.svg') }}" 
+                     alt="HASTA Travel & Tours" 
+                     class="h-12 w-auto object-contain">
             </div>
 
-            <div>
-                <h5 class="font-bold mb-6">Useful links</h5>
-                <ul class="space-y-3 text-sm opacity-80">
-                    <li><a href="#" class="hover:opacity-100">About us</a></li>
-                    <li><a href="#" class="hover:opacity-100">Contact us</a></li>
-                    <li><a href="#" class="hover:opacity-100">Gallery</a></li>
-                    <li><a href="#" class="hover:opacity-100">Blog</a></li>
-                    <li><a href="{{ route('faq') }}" class="hover:opacity-100">F.A.Q</a></li>
-                </ul>
+            <div class="space-y-2">
+                <p class="text-sm font-medium">HASTA Travel & Tours</p>
+                <p class="text-xs opacity-75">
+                    &copy; {{ date('Y') }} All rights reserved.
+                </p>
             </div>
-
-             <div>
-                <h5 class="font-bold mb-6">Vehicles</h5>
-                <ul class="space-y-3 text-sm opacity-80">
-                    <li><a href="#" class="hover:opacity-100">Sedan</a></li>
-                    <li><a href="#" class="hover:opacity-100">Hatchback</a></li>
-                    <li><a href="#" class="hover:opacity-100">MPV</a></li>
-                    <li><a href="#" class="hover:opacity-100">Minivan</a></li>
-                    <li><a href="#" class="hover:opacity-100">SUV</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-red-800 flex space-x-6">
-             <a href="#" class="bg-black rounded-full p-2"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg></a>
-             <a href="#" class="bg-black rounded-full p-2"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.012 3.584-.07 4.85c-.148 3.252-1.667 4.771-4.919 4.919-1.266.058-1.644.069-4.85.069s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.012-3.584.07-4.85c.148-3.252 1.667-4.771 4.919-4.919 1.266-.058 1.645-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
         </div>
     </footer>
 

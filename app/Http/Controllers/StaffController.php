@@ -4,15 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
-use App\Models\Booking; 
+use App\Models\Reward;
+use App\Models\Booking;
+use App\Models\Fleet;
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse; 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Schema;
 
 class StaffController extends Controller
 {
@@ -53,10 +55,6 @@ class StaffController extends Controller
      */
     public function pickupReturn(): View
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
         $todayPickups = Booking::with(['customer', 'fleet'])
             ->whereDate('pickupDate', now())
             ->where('bookingStat', 'Confirmed')
@@ -79,10 +77,6 @@ class StaffController extends Controller
      */
     public function editProfile(Request $request): View
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
         return view('staff.profile.edit', [
             'user' => $request->user('staff'),
         ]);
@@ -239,15 +233,11 @@ class StaffController extends Controller
      */
     public function reports(): View
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
-
         return view('staff.report'); 
     }
 
     /**
-     * Bookings management list for staff
+     * Bookings management list for staff.
      */
     public function bookingManagement(Request $request): View
     {
@@ -306,5 +296,59 @@ class StaffController extends Controller
             'completedCount' => $completedCount,
             'cancelledCount' => $cancelledCount
         ]);
+    }
+
+    /**
+     * Display the Fleet Management page with filtering and search.
+     */
+    public function fleet(Request $request)
+    {
+        // 1. Calculate Stats
+        $stats = [
+            'total'       => Fleet::count(),
+            'available'   => Fleet::where('status', 'available')->count(),
+            'rented'      => Fleet::where('status', 'rented')->count(),
+            'maintenance' => Fleet::where('status', 'maintenance')->count(),
+        ];
+
+        // 2. Setup query
+        $query = Fleet::query();
+
+        // 3. Search Logic
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('make', 'like', "%{$search}%")
+                  ->orWhere('model', 'like', "%{$search}%")
+                  ->orWhere('plate_number', 'like', "%{$search}%");
+            });
+        }
+
+        // 4. Filter Logic
+        if ($filter = $request->input('filter')) {
+            if ($filter !== 'all') {
+                $query->where('status', $filter);
+            }
+        }
+
+        $vehicles = $query->latest()->paginate(9)->withQueryString();
+
+        return view('staff.fleet.index', compact('vehicles', 'stats'));
+    }
+
+    /**
+     * Display Rewards for Staff.
+     */
+    public function rewards()
+    {
+        $activeRewards = Reward::where('rewardStatus', 'Active')->get();
+        $inactiveRewards = Reward::where('rewardStatus', 'Inactive')->get();
+
+        $stats = [
+            'total'  => Reward::count(),
+            'active' => $activeRewards->count(),
+            'slots'  => $activeRewards->sum('totalClaimable'),
+        ];
+
+        return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
     }
 }
