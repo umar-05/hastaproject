@@ -9,6 +9,7 @@ use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\Staff\MissionController;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -70,6 +71,8 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
 
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
 
+    Route::resource('mission', MissionController::class);
+
     // Fleet management (Staff)
     Route::prefix('fleet')->name('fleet.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Staff\FleetController::class, 'index'])->name('index');
@@ -102,6 +105,11 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
+
+    // In routes/web.php inside the Staff Group
+Route::get('/reports/daily-income', function () {
+    return view('staff.reports.dailyincome.index');
+})->name('report.daily-income');
 
     // Staff User Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
