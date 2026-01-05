@@ -399,4 +399,12 @@ class StaffController extends Controller
 
         return back()->with('error', 'Customer not found.');
     }
+
+    public function incomeExpenses()
+    {
+        // For now, we return the view. 
+        // Later, you can fetch actual RM data from your 'bookings' or 'payments' table here.
+        return view('staff.incomeexpenses'); 
+    }
+
 }

@@ -35,7 +35,7 @@ Route::post('/register/process-matric-card', [RegisteredUserController::class, '
 // 2. CUSTOMER ROUTES (Guard: customer)
 // ==============================
 Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function () {
-    
+
     Route::get('/home', [CustomerController::class, 'dashboard'])->name('home');
     Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
     Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
@@ -44,7 +44,7 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     Route::get('/rewards', [RewardController::class, 'index'])->name('reward.index');
     Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('reward.claimed');
     Route::post('/rewards/claim', [RewardController::class, 'claim'])->name('rewards.claim');
-    
+
     // Booking Management
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
@@ -65,7 +65,7 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
 // 3. STAFF ROUTES (Guard: staff)
 // ==============================
 Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.')->group(function () {
-    
+
     // Dashboard -> /staff/dashboard
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
@@ -87,14 +87,6 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
         // Additional staff fleet routes (edit/delete) can be added here
     });
 
-    // Fleet Management -> /staff/fleet
-    Route::prefix('fleet')->name('fleet.')->group(function() {
-        Route::get('/', [StaffController::class, 'fleet'])->name('index');           // staff.fleet.index
-        Route::get('/create', [StaffController::class, 'createVehicle'])->name('create'); // staff.fleet.create
-        Route::post('/', [StaffController::class, 'storeVehicle'])->name('store');        // staff.fleet.store
-        Route::delete('/{id}', [StaffController::class, 'destroyVehicle'])->name('destroy'); // staff.fleet.destroy
-    });
-
     // Staff Profile -> /staff/profile
     // Reward Management (This matches your Blade: route('staff.rewards') and route('staff.rewards.store'))
     Route::get('/dashboard/reward', [RewardController::class, 'index'])->name('rewards');
@@ -106,70 +98,52 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
 
-    // Daily Income Report
-    Route::get('/reports/daily-income', function () {
-        return view('staff.reports.dailyincome.index');
-    })->name('report.daily-income');
+    // In routes/web.php inside the Staff Group
+Route::get('/reports/daily-income', function () {
+    return view('staff.reports.dailyincome.index');
+})->name('report.daily-income');
 
     // Staff User Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
     Route::post('/store', [StaffController::class, 'store'])->name('store');
-
-    //Customer Management
-    Route::resource('customermanagement-crud', CustomerController::class)
-        ->names([
-            'index' => 'customermanagement', // This maps 'index' to 'staff.customermanagement'
-        ])
-        ->parameters(['customermanagement-crud' => 'matricNum']);
-
-    Route::get('/staff/customermanagement-crud', [CustomerController::class, 'index'])
-    ->name('staff.customermanagement-crud.index');
-
-    Route::get('/staff/view-document/{filename}', function ($filename) {
-    // Check if file exists in the private 'public' disk
-    if (!Storage::disk('public')->exists('documents/' . $filename)) {
-        abort(404);
-    }
-
-    $path = Storage::disk('public')->path('documents/' . $filename);
-    
-    // Return the file directly to the browser
-    return Response::file($path);
-})->name('document.stream');
 
     // Operational
     Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
     // Inside the staff middleware group in routes/web.php
     Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
-
     // Reward Management for Staff
     // Add these inside the 'staff.' named group in web.php
-    Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
-    Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
-    Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
+Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
+Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
     Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
     Route::prefix('rewards')->name('reward.')->group(function() {
-        Route::get('/', [StaffController::class, 'rewards'])->name('index'); 
+        Route::get('/', [StaffController::class, 'rewards'])->name('index');
         Route::get('/create', [RewardController::class, 'create'])->name('create');
         Route::post('/', [RewardController::class, 'store'])->name('store');
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
         Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
         
         // --- ADDED THIS LINE TO FIX YOUR ERROR ---
-        Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy'); 
+        Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy');
     });
 
-    //Blacklist Management
-    Route::prefix('reports')->group(function () {
-            // These will automatically become 'staff.blacklist.index', etc.
-            Route::get('/blacklist', [StaffController::class, 'blacklistIndex'])->name('blacklist.index');
-            Route::post('/blacklist', [StaffController::class, 'addToBlacklist'])->name('blacklist.store');
-            Route::delete('/blacklist/{matricNum}', [StaffController::class, 'destroyBlacklist'])->name('blacklist.destroy');
-        });
-    Route::get('/customer-search/{matric}', [StaffController::class, 'searchCustomer']);
-    Route::post('/blacklist/store', [StaffController::class, 'storeBlacklist'])->name('blacklist.store');
+// Inside the Route::middleware(['auth:staff'...]) group:
 
+// Blacklist Management
+Route::get('/reports/blacklist', [StaffController::class, 'blacklistIndex'])->name('blacklist.index');
+Route::post('/reports/blacklist', [StaffController::class, 'addToBlacklist'])->name('blacklist.store');
+// This line below is what was missing or misnamed:
+Route::delete('/reports/blacklist/{matricNum}', [StaffController::class, 'destroyBlacklist'])->name('blacklist.destroy');
+
+// Income & Expenses
+Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses'])->name('reports.incomeExpenses');
+
+    // Customer Management
+    Route::get('/dashboard/customermanagement', [CustomerController::class, 'index'])->name('customermanagement');
+    Route::resource('customermanagement-crud', CustomerController::class)
+            ->parameters(['customermanagement-crud' => 'matricNum']);
 });
 
 
@@ -184,7 +158,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth:staff', 'prevent-back'])->name('dashboard');
 
 Route::get('/api/auth-check', function () {
-    return Auth::guard('staff')->check() || Auth::guard('customer')->check() 
-        ? response()->json(['authenticated' => true]) 
+    return Auth::guard('staff')->check() || Auth::guard('customer')->check()
+        ? response()->json(['authenticated' => true])
         : response()->json(['authenticated' => false], 401);
 })->name('auth.check');
