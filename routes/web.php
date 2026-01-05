@@ -101,7 +101,29 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // Staff User Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
     Route::post('/store', [StaffController::class, 'store'])->name('store');
+
+    //Customer Management
+    Route::resource('customermanagement-crud', CustomerController::class)
+        ->names([
+            'index' => 'customermanagement', // This maps 'index' to 'staff.customermanagement'
+        ])
+        ->parameters(['customermanagement-crud' => 'matricNum']);
+
+    Route::get('/staff/customermanagement-crud', [CustomerController::class, 'index'])
+    ->name('staff.customermanagement-crud.index');
+
+    Route::get('/staff/view-document/{filename}', function ($filename) {
+    // Check if file exists in the private 'public' disk
+    if (!Storage::disk('public')->exists('documents/' . $filename)) {
+        abort(404);
+    }
+
+    $path = Storage::disk('public')->path('documents/' . $filename);
     
+    // Return the file directly to the browser
+    return Response::file($path);
+})->name('document.stream');
+
     // Operational
     Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
@@ -109,9 +131,9 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
     // Reward Management for Staff
     // Add these inside the 'staff.' named group in web.php
-Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
-Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
-Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
+    Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+    Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
+    Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
     Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
     Route::prefix('rewards')->name('reward.')->group(function() {
         Route::get('/', [StaffController::class, 'rewards'])->name('index'); 
