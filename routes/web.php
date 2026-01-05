@@ -9,8 +9,13 @@ use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\StaffController;
+<<<<<<< Updated upstream
 use App\Http\Controllers\Staff\MissionController;
 use Illuminate\Support\Facades\Auth;
+=======
+use Illuminate\Support\Facades\Auth; 
+use App\Http\Controllers\DailyIncomeController;
+>>>>>>> Stashed changes
 
 /*
 |--------------------------------------------------------------------------
@@ -142,6 +147,13 @@ Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-
     Route::get('/dashboard/customermanagement', [CustomerController::class, 'index'])->name('customermanagement');
     Route::resource('customermanagement-crud', CustomerController::class)
             ->parameters(['customermanagement-crud' => 'matricNum']);
+<<<<<<< Updated upstream
+=======
+    // Daily Income Report -> /staff/daily-income
+    Route::get('/report/daily-income', [DailyIncomeController::class, 'index'])->name('report.daily-income');
+
+
+>>>>>>> Stashed changes
 });
 
 
