@@ -342,38 +342,70 @@ class BookingController extends Controller
     }
 
     public function filterBookings(Request $request) 
-{
-    // 1. Start a base query (do not use ->get() yet)
-    $query = Booking::with('fleet', 'customer');
+    {
+        // 1. Start a base query (do not use ->get() yet)
+        $query = Booking::with('fleet', 'customer');
 
-    // 2. Apply Search Filter (Search by Booking ID or Plate Number)
-    if ($request->has('search') && $request->search != '') {
-        $search = $request->search;
-        $query->where(function($q) use ($search) {
-            $q->where('bookingID', 'LIKE', "%{$search}%")
-              ->orWhere('plateNumber', 'LIKE', "%{$search}%");
-        });
+        // 2. Apply Search Filter (Search by Booking ID or Plate Number)
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('bookingID', 'LIKE', "%{$search}%")
+                ->orWhere('plateNumber', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // 3. Apply Status Filter
+        if ($request->has('status') && $request->status != '') {
+            $query->where('bookingStat', $request->status);
+        }
+
+        // 4. Fetch the filtered results
+        $bookings = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        // 5. Calculate counts (Keep these as they are for your metric cards)
+        $totalBookings = Booking::count();
+        $confirmedCount = Booking::where('bookingStat', 'confirmed')->count();
+        $pendingCount = Booking::where('bookingStat', 'pending')->count();
+        $completedCount = Booking::where('bookingStat', 'completed')->count();
+        $cancelledCount = Booking::where('bookingStat', 'cancelled')->count();
+
+        return view('staff.bookingmanagement', compact(
+            'bookings', 'totalBookings', 'confirmedCount', 
+            'pendingCount', 'completedCount', 'cancelledCount'
+        ));
     }
 
-    // 3. Apply Status Filter
-    if ($request->has('status') && $request->status != '') {
-        $query->where('bookingStat', $request->status);
+    public function uploadForms(Request $request, $bookingID)
+    {
+        // 1. Validate inputs
+        $request->validate([
+            'pickupForm' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // Increased limit to 5MB
+            'returnForm' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+        ]);
+
+        $booking = Booking::where('bookingID', $bookingID)->firstOrFail();
+
+        // 2. Handle Pickup Upload
+        if ($request->hasFile('pickupForm')) {
+            // Delete old image if exists (optional cleanup)
+            // if ($booking->pickupForm) Storage::disk('public')->delete($booking->pickupForm);
+
+            // Store new file
+            $path = $request->file('pickupForm')->store('inspections', 'public');
+            $booking->pickupForm = $path;
+        }
+
+        // 3. Handle Return Upload
+        if ($request->hasFile('returnForm')) {
+            $path = $request->file('returnForm')->store('inspections', 'public');
+            $booking->returnForm = $path;
+        }
+
+        // 4. Force save (Bypasses $fillable issues)
+        $booking->save();
+
+        return back()->with('success', 'Inspection images saved successfully!');
     }
-
-    // 4. Fetch the filtered results
-    $bookings = $query->orderBy('created_at', 'desc')->paginate(10);
-
-    // 5. Calculate counts (Keep these as they are for your metric cards)
-    $totalBookings = Booking::count();
-    $confirmedCount = Booking::where('bookingStat', 'confirmed')->count();
-    $pendingCount = Booking::where('bookingStat', 'pending')->count();
-    $completedCount = Booking::where('bookingStat', 'completed')->count();
-    $cancelledCount = Booking::where('bookingStat', 'cancelled')->count();
-
-    return view('staff.bookingmanagement', compact(
-        'bookings', 'totalBookings', 'confirmedCount', 
-        'pendingCount', 'completedCount', 'cancelledCount'
-    ));
-}
 
 }

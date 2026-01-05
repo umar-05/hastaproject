@@ -53,7 +53,8 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
-
+    Route::post('/bookings/{booking}/forms', [BookingController::class, 'uploadForms'])->name('bookings.upload-forms');
+    
     // Profile Management
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -150,7 +151,7 @@ Route::get('/reports/daily-income', function () {
     Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
     Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
     });
-});
+
 
 
 // ==============================

@@ -108,8 +108,8 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex flex-col">
-                                <span class="font-bold text-gray-800">{{ $booking->fleet->model_name }}</span>
-                                <span class="text-xs text-gray-500">{{ $booking->fleet->plate_number }}</span>
+                                <span class="font-bold text-gray-800">{{ $booking->fleet->modelName }}</span>
+                                <span class="text-xs text-gray-500">{{ $booking->fleet->plateNumber }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4">
