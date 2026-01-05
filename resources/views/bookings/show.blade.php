@@ -186,7 +186,7 @@
                        class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-6 py-3 rounded-md transition">
                         Back to Bookings
                     </a>
-                    @if($booking->booking_stat !== 'completed' && $booking->booking_stat !== 'cancelled')
+                    @if($booking->bookingStat !== 'completed' && $booking->bookingStat !== 'cancelled')
                         <form action="{{ route('bookings.cancel', $booking->bookingID) }}" 
                               method="POST" 
                               onsubmit="return confirm('Are you sure you want to cancel this booking?');"
