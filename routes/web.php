@@ -9,13 +9,10 @@ use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\StaffController;
-<<<<<<< Updated upstream
 use App\Http\Controllers\Staff\MissionController;
 use Illuminate\Support\Facades\Auth;
-=======
-use Illuminate\Support\Facades\Auth; 
 use App\Http\Controllers\DailyIncomeController;
->>>>>>> Stashed changes
+use App\Http\Controllers\MonthlyIncomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -111,10 +108,6 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
 
-    // In routes/web.php inside the Staff Group
-Route::get('/reports/daily-income', function () {
-    return view('staff.reports.dailyincome.index');
-})->name('report.daily-income');
 
     // Staff User Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
@@ -137,23 +130,23 @@ Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-
         Route::post('/', [RewardController::class, 'store'])->name('store');
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
         Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
-        
+
         // --- ADDED THIS LINE TO FIX YOUR ERROR ---
         Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy'); 
-    });
 
+    });
 
     // Customer Management
     Route::get('/dashboard/customermanagement', [CustomerController::class, 'index'])->name('customermanagement');
     Route::resource('customermanagement-crud', CustomerController::class)
             ->parameters(['customermanagement-crud' => 'matricNum']);
-<<<<<<< Updated upstream
-=======
+    
     // Daily Income Report -> /staff/daily-income
     Route::get('/report/daily-income', [DailyIncomeController::class, 'index'])->name('report.daily-income');
-
-
->>>>>>> Stashed changes
+    
+    // Monthly Income Report -> /staff/monthly-income
+    Route::get('/report/monthly-income', [MonthlyIncomeController::class, 'index'])->name('report.monthly-income');
+    
 });
 
 

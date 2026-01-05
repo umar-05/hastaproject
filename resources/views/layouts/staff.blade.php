@@ -162,17 +162,13 @@
                             <a href="{{ route('staff.report.daily-income') }}" class="submenu-link {{ request()->routeIs('staff.report.daily-income') ? 'active' : '' }}">
                                 Daily Income
                             </a>
-                            <a href="#" class="submenu-link">
+                            <a href="{{ route('staff.report.monthly-income') }}" class="submenu-link {{ request()->routeIs('staff.report.monthly-income') ? 'active' : '' }}">
                                 Monthly Income
                             </a>
                             <a href="#" class="submenu-link">
                                 Income & Expenses
                             </a>
-<<<<<<< Updated upstream
                             <a href="#" class="submenu-link">
-=======
-                            <a href="#" class="block py-2 px-4 text-sm text-red-200 hover:text-white">
->>>>>>> Stashed changes
                                 Blacklist Record
                             </a>
                         </div>
@@ -225,11 +221,9 @@
             </header>
 
             <main class="flex-1 overflow-y-auto bg-gray-50/50 p-8">
-<<<<<<< Updated upstream
-                {{ $slot }}
-=======
-
->>>>>>> Stashed changes
+            @if (isset($slot))
+            {{ $slot ? $slot : '' }}
+            @endif
                 @yield('content')
             </main>
         </div>

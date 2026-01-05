@@ -55,6 +55,10 @@ class Booking extends Model
     {
         return $this->belongsTo(Reward::class, 'rewardID', 'rewardID');
     }
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'bookingID', 'bookingID');
+    }
 
     /**
      * Accessors & Scopes
