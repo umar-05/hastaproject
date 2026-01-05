@@ -30,7 +30,12 @@ class StaffController extends Controller
         $bookingsToManage = Booking::where('bookingStat', 'Pending')->count();
         $pickupsToday = Booking::whereDate('pickupDate', now())->where('bookingStat', 'Confirmed')->count();
         $returnsToday = Booking::whereDate('returnDate', now())->where('bookingStat', 'Active')->count();
-
+        $totalBookings = Booking::count();
+        $confirmedCount = Booking::where('bookingStat', 'confirmed')->count();
+        $pendingCount = Booking::where('bookingStat', 'pending')->count();
+        $completedCount = Booking::where('bookingStat', 'completed')->count();
+        $cancelledCount = Booking::where('bookingStat', 'cancelled')->count();
+        
         return view('staff.dashboard', [
             'bookingsToManage' => $bookingsToManage,
             'pickupsToday' => $pickupsToday,
@@ -271,6 +276,7 @@ class StaffController extends Controller
         }
 
         // 3. Get the results (paginated)
+        
         $bookings = $query->orderBy('created_at', 'desc')->paginate(10);
         $totalBookings = Booking::count();
         $confirmedCount = Booking::where('bookingStat', 'confirmed')->count();
