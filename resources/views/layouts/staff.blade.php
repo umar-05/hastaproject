@@ -165,8 +165,7 @@
                             <a href="#" class="submenu-link">
                                 Monthly Income
                             </a>
-                            <a href="{{ route('staff.reports.incomeExpenses') }}" 
-                            class="{{ request()->routeIs('staff.reports.incomeExpenses') ? 'bg-white/10' : '' }} ...">
+                            <a href="{{ route('staff.reports.incomeExpenses') }}" class="submenu-link {{ request()->routeIs('staff.reports.incomeExpenses') ? 'active' : '' }}">
                                 Income & Expenses
                             </a>
                             <a href="{{ route('staff.blacklist.index') }}" class="submenu-link {{ request()->routeIs('staff.blacklist.index') ? 'active' : '' }}">

@@ -138,7 +138,8 @@ Route::post('/reports/blacklist', [StaffController::class, 'addToBlacklist'])->n
 Route::delete('/reports/blacklist/{matricNum}', [StaffController::class, 'destroyBlacklist'])->name('blacklist.destroy');
 
 // Income & Expenses
-Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses'])->name('reports.incomeExpenses');
+Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses'])
+    ->name('reports.incomeExpenses');
 
     // Customer Management
     Route::get('/dashboard/customermanagement', [CustomerController::class, 'index'])->name('customermanagement');
