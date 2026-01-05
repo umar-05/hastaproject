@@ -25,9 +25,7 @@ class StaffController extends Controller
      */
 public function index()
 {
-    // 1. Define the Top Metric Variables (Missing in your current error log)
-    $pendingBookings = \App\Models\Booking::where('bookingStat', 'Pending')->count();
-    
+    // 1. Top Metric Counts
     $pickupsToday = \App\Models\Booking::whereDate('pickupDate', \Carbon\Carbon::today())
         ->whereIn('bookingStat', ['Confirmed', 'Approved'])
         ->count();
@@ -36,7 +34,15 @@ public function index()
         ->where('bookingStat', 'Active')
         ->count();
 
-    // 2. Fleet Distribution (Using modelName as per your database)
+    // 2. Recent Bookings (Database Join Fix)
+    // NOTE: Change 'car_id' to whatever your actual column is in the booking table
+    $recentBookings = Booking::join('fleet', 'booking.plateNumber', '=', 'fleet.plateNumber') // Change carID to plateNumber
+        ->select('booking.*', 'fleet.modelName', 'fleet.plateNumber')
+        ->orderBy('booking.created_at', 'desc')
+        ->limit(3)
+        ->get();
+
+    // 3. Fleet Distribution (Using modelName)
     $totalCars = \App\Models\Fleet::count();
     $fleetDistribution = [
         'Perodua' => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Perodua%')->count() / $totalCars) * 100) : 0,
@@ -44,24 +50,13 @@ public function index()
         'Toyota'  => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Toyota%')->count() / $totalCars) * 100) : 0,
     ];
 
-    // 3. Chart Data (Last 4 days)
-    $chartData = [];
-    for ($i = 3; $i >= 0; $i--) {
-        $date = \Carbon\Carbon::today()->subDays($i);
-        $count = \App\Models\Booking::whereDate('created_at', $date)->count();
-        $chartData[$date->format('d Jan')] = $count;
-    }
-
-    // 4. All cars for the Availability Dropdown
     $cars = \App\Models\Fleet::all();
 
-    // Now all variables are defined for compact()
     return view('staff.dashboard', compact(
-        'pendingBookings', 
         'pickupsToday', 
         'returnsToday', 
+        'recentBookings',
         'fleetDistribution', 
-        'chartData', 
         'cars'
     ));
 }

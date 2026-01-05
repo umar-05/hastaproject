@@ -73,6 +73,15 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
 
     Route::resource('mission', MissionController::class);
     Route::get('/fleet/check', [StaffController::class, 'checkAvailability'])->name('fleet.check');
+    // 1 & 2. Pickup & Return (both go to the same blade)
+    Route::get('/pickup-return', function () {
+        return view('staff.pickup-return');
+    })->name('pickup-return');
+
+    // 3. View All (goes to Booking Management)
+    Route::get('/booking-management', function () {
+        return view('staff.bookingmanagement');
+    })->name('bookingmanagement');
 
     // Fleet management (Staff)
     Route::prefix('fleet')->name('fleet.')->group(function () {
