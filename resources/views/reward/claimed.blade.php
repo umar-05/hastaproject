@@ -132,7 +132,7 @@
                             <h3 class="text-xl font-bold text-slate-800 mb-2">Your wallet is empty</h3>
                             <p class="text-slate-500 max-w-sm mx-auto mb-8">You haven't claimed any rewards yet. Collect stamps and head to the store!</p>
                             
-                            <a href="{{ route('reward.index') }}" class="inline-flex items-center gap-2 bg-red-600 text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 hover:-translate-y-1 transition-all">
+                            <a href="{{ route('vehicles.index') }}" class="inline-flex items-center gap-2 bg-red-600 text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 hover:-translate-y-1 transition-all">
                                 <span>Go Earn Stamps</span>
                                 <i class="fas fa-arrow-right"></i>
                             </a>
@@ -142,6 +142,25 @@
             </div>
         </div>
     </div>
+
+    <footer class="bg-hasta-red text-white py-10 px-8 mt-16">
+        <div class="max-w-7xl mx-auto flex flex-col items-center justify-center text-center">
+            
+            <div class="mb-4">
+                <img src="{{ asset('images/HASTALOGO.svg') }}" 
+                     alt="HASTA Travel & Tours" 
+                     class="h-12 w-auto object-contain">
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-sm font-medium">HASTA Travel & Tours</p>
+                <p class="text-xs opacity-75">
+                    &copy; {{ date('Y') }} All rights reserved.
+                </p>
+            </div>
+            
+        </div>
+    </footer>
 
     {{-- Script for Copy Functionality --}}
     <script>
