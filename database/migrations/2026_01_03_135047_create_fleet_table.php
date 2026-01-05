@@ -34,9 +34,6 @@ return new class extends Migration
             $table->string('inspectionID')->nullable();
             $table->foreign('inspectionID')->references('inspectionID')->on('inspection');
 
-            $table->string('maintenanceID')->nullable();
-            $table->foreign('maintenanceID')->references('maintenanceID')->on('maintenance');
-
             $table->string('ownerIC')->nullable();
             $table->foreign('ownerIC')->references('ownerIC')->on('owner');
 

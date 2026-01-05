@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Auth;
 // ==============================
 // 1. PUBLIC ROUTES
 // ==============================
-Route::get('/', fn() => view('home'))->name('root');
+Route::get('/', [\App\Http\Controllers\VehicleController::class, 'welcome'])->name('root');
 Route::get('/faq', fn() => view('customer.faq'))->name('faq');
 Route::get('/contact', fn() => view('contact'))->name('contact');
 
