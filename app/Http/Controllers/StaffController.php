@@ -35,15 +35,14 @@ public function index()
         ->where('bookingStat', 'Active')
         ->count();
 
-    // 2. Recent Bookings (Database Join Fix)
-    // NOTE: Change 'car_id' to whatever your actual column is in the booking table
-    $recentBookings = Booking::join('fleet', 'booking.plateNumber', '=', 'fleet.plateNumber') // Change carID to plateNumber
+    // 2. Recent Bookings (Join Fix)
+    $recentBookings = \App\Models\Booking::join('fleet', 'booking.plateNumber', '=', 'fleet.plateNumber')
         ->select('booking.*', 'fleet.modelName', 'fleet.plateNumber')
         ->orderBy('booking.created_at', 'desc')
         ->limit(3)
         ->get();
 
-    // 3. Fleet Distribution (Using modelName)
+    // 3. Fleet Distribution
     $totalCars = \App\Models\Fleet::count();
     $fleetDistribution = [
         'Perodua' => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Perodua%')->count() / $totalCars) * 100) : 0,
@@ -51,16 +50,39 @@ public function index()
         'Toyota'  => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Toyota%')->count() / $totalCars) * 100) : 0,
     ];
 
+    // 4. College Trends (The 10 UTM Colleges)
+    $totalCustomers = \App\Models\Customer::count();
+    $utmColleges = [
+        'KOLEJ RAHMAN PUTRA', 'KOLEJ TUN FATIMAH', 'KOLEJ TUN RAZAK', 
+        'KOLEJ TUN HUSSEIN ONN', 'KOLEJ TUN DR ISMAIL', 'KOLEJ DATO SERI ENDON', 
+        'KOLEJ DATO ONN JAAFAR', 'KOLEJ TUNKU CANSELOR', 'KOLEJ 9', 'KOLEJ 10'
+    ];
+
+    $actualData = \App\Models\Customer::select('collegeAddress', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+        ->whereNotNull('collegeAddress')
+        ->groupBy('collegeAddress')
+        ->pluck('count', 'collegeAddress')
+        ->toArray();
+
+    $collegeDistribution = [];
+    foreach ($utmColleges as $college) {
+        $count = $actualData[$college] ?? 0;
+        $collegeDistribution[$college] = $totalCustomers > 0 ? round(($count / $totalCustomers) * 100) : 0;
+    }
+
     $cars = \App\Models\Fleet::all();
 
+    // 5. Return the view with ALL variables
     return view('staff.dashboard', compact(
         'pickupsToday', 
         'returnsToday', 
         'recentBookings',
         'fleetDistribution', 
+        'collegeDistribution', 
         'cars'
     ));
 }
+
     /**
      * Check car availability for given dates.
      */

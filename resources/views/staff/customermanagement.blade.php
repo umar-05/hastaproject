@@ -22,10 +22,9 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                             <i class="fas fa-search"></i>
                         </div>
-                        <input type="text" id="customerSearch" class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl bg-white focus:ring-red-500 focus:border-red-500 sm:text-sm" placeholder="Search customers by name or matric number...">
+                        <input type="text" id="customerSearch" class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl bg-white focus:ring-red-500 focus:border-red-500 sm:text-sm" placeholder="Search by name, matric, faculty or college...">
                     </div>
                 </div>
-                {{-- Add Customer button removed as per request --}}
             </div>
 
             {{-- Table --}}
@@ -38,6 +37,10 @@
                             <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">IC Number</th>
                             <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email</th>
                             <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Phone</th>
+                            {{-- NEW COLUMNS --}}
+                            <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Faculty</th>
+                            <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">College Address</th>
+                            
                             <th class="px-6 py-4 text-center text-[10px] font-bold text-gray-400 uppercase tracking-wider">Details</th>
                             <th class="px-6 py-4 text-right text-[10px] font-bold text-gray-400 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -51,7 +54,10 @@
                                 <td class="px-6 py-5 text-sm text-gray-500">{{ $customer->email }}</td>
                                 <td class="px-6 py-5 text-sm text-gray-600">{{ $customer->phoneNum ?? 'N/A' }}</td>
                                 
-                                {{-- View Details Column --}}
+                                {{-- NEW DATA CELLS --}}
+                                <td class="px-6 py-5 text-sm text-gray-600 italic uppercase">{{ $customer->faculty ?? 'N/A' }}</td>
+                                <td class="px-6 py-5 text-sm text-gray-600 truncate max-w-[150px]">{{ $customer->college_address ?? 'N/A' }}</td>
+                                
                                 <td class="px-6 py-5 text-center">
                                     <button onclick="openDetailsModal('{{ $customer->matricNum }}')" class="text-red-600 hover:text-red-800 transition-all group">
                                         <i class="far fa-eye text-lg group-hover:scale-110"></i>
@@ -64,7 +70,6 @@
                                         <a href="{{ route('staff.customermanagement-crud.edit', $customer->matricNum) }}" class="text-green-600 hover:text-green-800 transition">
                                             <i class="far fa-edit text-lg"></i>
                                         </a>
-                                        
                                         <form action="{{ route('staff.customermanagement-crud.destroy', $customer->matricNum) }}" method="POST" onsubmit="return confirm('Delete this customer?');" class="inline">
                                             @csrf 
                                             @method('DELETE')
@@ -77,7 +82,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-10 text-center text-gray-400 italic">
+                                <td colspan="9" class="px-6 py-10 text-center text-gray-400 italic">
                                     No customer records found.
                                 </td>
                             </tr>
@@ -100,11 +105,30 @@
             </div>
             
             <div class="p-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
-                {{-- 1. Personal & Address Information --}}
+                
+                {{-- NEW SECTION: Academic & Residence Information --}}
+                <div class="mb-10">
+                    <h4 class="text-gray-400 font-bold uppercase text-xs tracking-[0.2em] mb-6 flex items-center">
+                        <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg mr-2"><i class="fas fa-university"></i></span>
+                        Academic & Residence Information
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1">
+                            <p class="text-[11px] text-gray-400 font-bold uppercase">Faculty</p>
+                            <p id="det-faculty" class="text-sm font-semibold text-gray-800 italic uppercase"></p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-[11px] text-gray-400 font-bold uppercase">College Address</p>
+                            <p id="det-college" class="text-sm font-semibold text-gray-800"></p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- 1. Personal & Address Information (Permanent) --}}
                 <div class="mb-10">
                     <h4 class="text-gray-400 font-bold uppercase text-xs tracking-[0.2em] mb-6 flex items-center">
                         <span class="bg-red-100 text-red-600 p-1.5 rounded-lg mr-2"><i class="fas fa-map-marker-alt"></i></span>
-                        Personal & Address Information
+                        Permanent Address Information
                     </h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div class="space-y-1">
@@ -224,27 +248,32 @@
                 <button onclick="closeDocPreview()" class="text-gray-400 hover:text-gray-900 text-2xl">&times;</button>
             </div>
             <div class="flex-1 bg-gray-200 relative overflow-hidden">
-                {{-- If it's a real file, we use an iframe or object tag --}}
                 <iframe id="docFrame" class="w-full h-full" src=""></iframe>
-                
-                {{-- Mock content fallback if no file found --}}
-                <div id="docFallback" class="hidden absolute inset-0 flex items-center justify-center bg-white p-10 text-center">
-                    <div class="max-w-md">
-                        <i class="fas fa-file-invoice text-6xl text-gray-200 mb-4"></i>
-                        <h2 class="text-xl font-bold mb-2">Document Content Preview</h2>
-                        <p class="text-gray-500 mb-4" id="fallbackText"></p>
-                        <div class="border-t pt-4 text-left font-mono text-xs text-gray-400">
-                            [System: Encrypted Document Stream Loaded Successfully]
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
     <script>
-    // Global variable to store current customer data for previews
     let currentCustomer = null;
+
+    // Search Logic (Updated to filter by index 5 and 6 for Faculty/College)
+    document.getElementById('customerSearch').addEventListener('keyup', function() {
+        let filter = this.value.toUpperCase();
+        let rows = document.querySelector("tbody").rows;
+
+        for (let i = 0; i < rows.length; i++) {
+            let matric = rows[i].cells[0].textContent.toUpperCase();
+            let name = rows[i].cells[1].textContent.toUpperCase();
+            let faculty = rows[i].cells[5].textContent.toUpperCase();
+            let college = rows[i].cells[6].textContent.toUpperCase();
+
+            if (matric.indexOf(filter) > -1 || name.indexOf(filter) > -1 || faculty.indexOf(filter) > -1 || college.indexOf(filter) > -1) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    });
 
     function openDetailsModal(matricNum) {
         fetch(`/staff/customermanagement-crud/${matricNum}`)
@@ -252,24 +281,29 @@
             .then(data => {
                 currentCustomer = data;
                 
-                // Populate Header
                 document.getElementById('modalName').innerText = data.name;
                 document.getElementById('modalMatric').innerText = data.matricNum;
 
-                // Populate Fields
+                // Academic & College
+                document.getElementById('det-faculty').innerText = data.faculty || 'N/A';
+                document.getElementById('det-college').innerText = data.college_address || 'N/A';
+
+                // Address
                 document.getElementById('det-address').innerText = data.address || 'Not Provided';
                 document.getElementById('det-city').innerText = data.city || '-';
                 document.getElementById('det-postcode').innerText = data.postcode || '-';
                 document.getElementById('det-state').innerText = data.state || '-';
                 
+                // Emergency
                 document.getElementById('det-eme-name').innerText = data.eme_name || 'N/A';
                 document.getElementById('det-eme-phone').innerText = data.emephoneNum || 'N/A';
                 document.getElementById('det-eme-rel').innerText = data.emerelation || 'N/A';
                 
+                // Bank
                 document.getElementById('det-bank').innerText = data.bankName || 'N/A';
                 document.getElementById('det-acc').innerText = data.accountNum || 'N/A';
 
-                // --- UPDATED VISUAL FILE NAMES ---
+                // Files
                 document.getElementById('file-ic-name').innerText = data.doc_ic_passport ? 'Document_IC.pdf' : 'No file';
                 document.getElementById('file-matric-name').innerText = data.doc_matric ? 'Matric_Card.pdf' : 'No file';
                 document.getElementById('file-license-name').innerText = data.doc_license ? 'License_Final.pdf' : 'No file';
@@ -284,28 +318,14 @@
         document.body.style.overflow = 'auto';
     }
 
-    // --- KEY FIX FOR 404 ERROR ---
     function openDocPreview(type) {
-        // Updated to match your actual database column names
-        const columnMap = {
-            'ic': 'doc_ic_passport', 
-            'matric': 'doc_matric', 
-            'license': 'doc_license'
-        };
-
+        const columnMap = { 'ic': 'doc_ic_passport', 'matric': 'doc_matric', 'license': 'doc_license' };
         const filePath = currentCustomer[columnMap[type]];
         
         if (filePath) {
-            // Correct the path: /storage/ is the default public link to storage/app/public/
-            // window.location.origin ensures we have the correct base URL (http://127.0.0.1:8000)
             const fileUrl = window.location.origin + '/storage/' + filePath;
-            
-            const docFrame = document.getElementById('docFrame');
-            docFrame.src = fileUrl;
-            
+            document.getElementById('docFrame').src = fileUrl;
             document.getElementById('previewTitle').innerText = type.toUpperCase();
-            document.getElementById('docFrame').classList.remove('hidden');
-            document.getElementById('docFallback').classList.add('hidden');
             document.getElementById('docPreviewModal').classList.remove('hidden');
         } else {
             alert("No document file record found for this customer.");
@@ -314,38 +334,9 @@
 
     function closeDocPreview() {
         document.getElementById('docPreviewModal').classList.add('hidden');
-        // Clear the src so the document doesn't keep playing/loading in the background
         document.getElementById('docFrame').src = "";
     }
-
-    // Search Filter Logic
-    document.getElementById('add_matric').addEventListener('blur', function() {
-            let matric = this.value;
-            console.log("Searching for Matric:", matric); // Debugging line
-
-            if(matric.length > 3) {
-                fetch(`/staff/customer-search/${matric}`)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log("Data received:", data); // Debugging line
-                        if(data) {
-                            // These IDs must match your <input id="..."> exactly
-                            document.getElementById('add_name').value = data.name || '';
-                            document.getElementById('add_ic').value = data.icNum_passport || '';
-                            document.getElementById('add_email').value = data.email || '';
-                        } else {
-                            alert('Customer not found in database!');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('There was an error fetching the customer:', error);
-                    });
-            }
-        });
-</script>
+    </script>
 
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
