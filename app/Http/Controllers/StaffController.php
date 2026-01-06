@@ -36,31 +36,53 @@ class StaffController extends Controller
             ->where('bookingStat', 'Active')
             ->count();
 
-        // 2. Recent Bookings
-        $recentBookings = Booking::join('fleet', 'booking.plateNumber', '=', 'fleet.plateNumber')
-            ->select('booking.*', 'fleet.modelName', 'fleet.plateNumber')
-            ->orderBy('booking.created_at', 'desc')
-            ->limit(3)
-            ->get();
+    // 2. Recent Bookings (Join Fix)
+    $recentBookings = \App\Models\Booking::join('fleet', 'booking.plateNumber', '=', 'fleet.plateNumber')
+        ->select('booking.*', 'fleet.modelName', 'fleet.plateNumber')
+        ->orderBy('booking.created_at', 'desc')
+        ->limit(3)
+        ->get();
 
-        // 3. Fleet Distribution
-        $totalCars = Fleet::count();
-        $fleetDistribution = [
-            'Perodua' => $totalCars > 0 ? round((Fleet::where('modelName', 'like', 'Perodua%')->count() / $totalCars) * 100) : 0,
-            'Proton'  => $totalCars > 0 ? round((Fleet::where('modelName', 'like', 'Proton%')->count() / $totalCars) * 100) : 0,
-            'Toyota'  => $totalCars > 0 ? round((Fleet::where('modelName', 'like', 'Toyota%')->count() / $totalCars) * 100) : 0,
-        ];
+    // 3. Fleet Distribution
+    $totalCars = \App\Models\Fleet::count();
+    $fleetDistribution = [
+        'Perodua' => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Perodua%')->count() / $totalCars) * 100) : 0,
+        'Proton'  => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Proton%')->count() / $totalCars) * 100) : 0,
+        'Toyota'  => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Toyota%')->count() / $totalCars) * 100) : 0,
+    ];
 
-        $cars = Fleet::all();
+    // 4. College Trends (The 10 UTM Colleges)
+    $totalCustomers = \App\Models\Customer::count();
+    $utmColleges = [
+        'KOLEJ RAHMAN PUTRA', 'KOLEJ TUN FATIMAH', 'KOLEJ TUN RAZAK', 
+        'KOLEJ TUN HUSSEIN ONN', 'KOLEJ TUN DR ISMAIL', 'KOLEJ DATO SERI ENDON', 
+        'KOLEJ DATO ONN JAAFAR', 'KOLEJ TUNKU CANSELOR', 'KOLEJ 9', 'KOLEJ 10'
+    ];
 
-        return view('staff.dashboard', compact(
-            'pickupsToday', 
-            'returnsToday', 
-            'recentBookings',
-            'fleetDistribution', 
-            'cars'
-        ));
+    $actualData = \App\Models\Customer::select('collegeAddress', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+        ->whereNotNull('collegeAddress')
+        ->groupBy('collegeAddress')
+        ->pluck('count', 'collegeAddress')
+        ->toArray();
+
+    $collegeDistribution = [];
+    foreach ($utmColleges as $college) {
+        $count = $actualData[$college] ?? 0;
+        $collegeDistribution[$college] = $totalCustomers > 0 ? round(($count / $totalCustomers) * 100) : 0;
     }
+
+    $cars = \App\Models\Fleet::all();
+
+    // 5. Return the view with ALL variables
+    return view('staff.dashboard', compact(
+        'pickupsToday', 
+        'returnsToday', 
+        'recentBookings',
+        'fleetDistribution', 
+        'collegeDistribution', 
+        'cars'
+    ));
+}
 
     /**
      * Check car availability for given dates.
@@ -473,6 +495,7 @@ class StaffController extends Controller
 
         $query = Mission::query();
 
+        // Filtering logic
         if ($status === 'available') {
             $query->where('status', 'Available');
         } elseif ($status === 'ongoing') {
@@ -484,7 +507,7 @@ class StaffController extends Controller
         $missions = $query->latest()->get();
 
         return view('staff.missions', compact('missions'));
-    }
+}
 
     public function missionStore(Request $request) 
     {

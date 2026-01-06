@@ -67,11 +67,31 @@
                 </div>
             </div>
 
+            {{-- COLLEGE TRENDS SECTION (THE 10 UTM COLLEGES) --}}
+            <div class="mb-10">
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                    <h3 class="font-black text-xl text-gray-800 mb-8 uppercase tracking-tight">Customer Distribution by College</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                        @foreach($collegeDistribution as $college => $percent)
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-500 font-bold text-xs uppercase tracking-widest truncate mr-4">{{ $college }}</span>
+                                <span class="font-black text-gray-900">{{ $percent }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="bg-indigo-500 h-2 rounded-full transition-all duration-700" style="width: {{ $percent }}%"></div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
             {{-- FOOTER SECTION: AVAILABILITY & DISTRIBUTION --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {{-- Car Availability Form --}}
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                    <h3 class="font-bold text-lg text-gray-800 mb-6">Check Availability</h3>
+                    <h3 class="font-bold text-lg text-gray-800 mb-6 uppercase tracking-tight">Check Availability</h3>
                     <form action="{{ route('staff.fleet.check') }}" method="GET" class="space-y-4">
                         <select name="car_id" required class="w-full border-none bg-gray-50 rounded-xl p-4 text-sm font-bold text-gray-500 focus:ring-2 focus:ring-gray-100">
                             <option value="">Select Car</option>
@@ -87,7 +107,7 @@
 
                 {{-- Fleet Distribution --}}
                 <div class="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                    <h3 class="font-bold text-lg text-gray-800 mb-8 tracking-tight">Fleet Distribution</h3>
+                    <h3 class="font-bold text-lg text-gray-800 mb-8 uppercase tracking-tight">Fleet Distribution</h3>
                     <div class="space-y-8">
                         @foreach($fleetDistribution as $brand => $percent)
                         <div>
