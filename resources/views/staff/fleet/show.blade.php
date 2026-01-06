@@ -139,10 +139,10 @@
                         <div class="flex justify-between items-center mb-3">
                             <div>
                                 <p class="text-sm font-medium text-gray-900">Road Tax</p>
-                                <p class="text-xs text-gray-500">Exp: {{ $fleet->taxExpirydate ? Carbon::parse($fleet->taxExpirydate)->format('d M Y') : 'N/A' }}</p>
+                                <p class="text-xs text-gray-500">Exp: {{ $fleet->roadtaxExpiryDate ? Carbon::parse($fleet->roadtaxExpiryDate)->format('d M Y') : 'N/A' }}</p>
                             </div>
-                            <span class="px-2 py-1 text-[10px] font-bold rounded {{ ($fleet->taxExpirydate && Carbon::parse($fleet->taxExpirydate)->isFuture()) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
-                                {{ ($fleet->taxExpirydate && Carbon::parse($fleet->taxExpirydate)->isFuture()) ? 'ACTIVE' : 'EXPIRED' }}
+                            <span class="px-2 py-1 text-[10px] font-bold rounded {{ ($fleet->roadtaxExpiryDate && Carbon::parse($fleet->roadtaxExpiryDate)->isFuture()) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                {{ ($fleet->roadtaxExpiryDate && Carbon::parse($fleet->roadtaxExpiryDate)->isFuture()) ? 'ACTIVE' : 'EXPIRED' }}
                             </span>
                         </div>
 
@@ -150,10 +150,10 @@
                         <div class="flex justify-between items-center">
                             <div>
                                 <p class="text-sm font-medium text-gray-900">Insurance</p>
-                                <p class="text-xs text-gray-500">Exp: {{ $fleet->insuranceExpirydate ? Carbon::parse($fleet->insuranceExpirydate)->format('d M Y') : 'N/A' }}</p>
+                                <p class="text-xs text-gray-500">Exp: {{ $fleet->insuranceExpiryDate ? Carbon::parse($fleet->insuranceExpiryDate)->format('d M Y') : 'N/A' }}</p>
                             </div>
-                            <span class="px-2 py-1 text-[10px] font-bold rounded {{ ($fleet->insuranceExpirydate && Carbon::parse($fleet->insuranceExpirydate)->isFuture()) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
-                                {{ ($fleet->insuranceExpirydate && Carbon::parse($fleet->insuranceExpirydate)->isFuture()) ? 'ACTIVE' : 'EXPIRED' }}
+                            <span class="px-2 py-1 text-[10px] font-bold rounded {{ ($fleet->insuranceExpiryDate && Carbon::parse($fleet->insuranceExpiryDate)->isFuture()) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                {{ ($fleet->insuranceExpiryDate && Carbon::parse($fleet->insuranceExpiryDate)->isFuture()) ? 'ACTIVE' : 'EXPIRED' }}
                             </span>
                         </div>
                     </div>

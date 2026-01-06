@@ -12,15 +12,22 @@ return new class extends Migration
             $table->string('plateNumber')->primary(); 
             $table->string('modelName');
             $table->integer('year');
-            $table->string('photos')->nullable();
-            $table->string('color')->nullable(); // UI: Silver
+            $table->string('photo1')->nullable();
+            $table->string('photo2')->nullable();
+            $table->string('photo3')->nullable();
+            $table->string('color')->nullable();
             
             $table->string('roadtaxStat')->nullable();
-            $table->date('taxActivedate')->nullable();
-            $table->date('taxExpirydate')->nullable();
+            $table->string('roadtaxFile')->nullable();
+            $table->date('roadtaxActiveDate')->nullable();
+            $table->date('roadtaxExpirydate')->nullable();
+
             $table->string('insuranceStat')->nullable();
-            $table->date('insuranceActivedate')->nullable();
-            $table->date('insuranceExpirydate')->nullable();
+            $table->string('insuranceFile')->nullable();
+            $table->date('insuranceActiveDate')->nullable();
+            $table->date('insuranceExpiryDate')->nullable();
+
+            $table->string('grantFile')->nullable();
             
             $table->string('status')->default('available');
             $table->text('note')->nullable();
