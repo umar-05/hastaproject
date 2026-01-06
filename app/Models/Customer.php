@@ -37,6 +37,7 @@ class Customer extends Authenticatable
         'doc_license',
         'doc_matric',
         'accStatus',
+        'blacklistReason',
         'rewardPoints',
     ];
 

@@ -27,7 +27,6 @@ class Booking extends Model
         'deposit',
         'totalPrice',
         'bookingStat',
-        'blacklistReason',
         'feedback',
         'paymentReceipt',
         'pickupForm',

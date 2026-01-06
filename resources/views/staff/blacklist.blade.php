@@ -50,10 +50,8 @@
                         <tr>
                             <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Matric Number</th>
                             <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Customer Name</th>
-                            {{-- NEW COLUMNS --}}
                             <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Faculty</th>
                             <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">College</th>
-                            {{-- END NEW COLUMNS --}}
                             <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">IC Number</th>
                             <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email</th>
                             <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">Reason</th>
@@ -72,19 +70,19 @@
                                         <span class="text-sm font-bold text-gray-900">{{ $customer->name }}</span>
                                     </div>
                                 </td>
-                                {{-- NEW DATA CELLS --}}
                                 <td class="px-6 py-5 text-sm text-gray-600">{{ $customer->faculty ?? 'N/A' }}</td>
                                 <td class="px-6 py-5 text-sm text-gray-600">{{ $customer->collegeAddress ?? 'N/A' }}</td>
-                                {{-- END NEW DATA CELLS --}}
                                 <td class="px-6 py-5 text-sm text-gray-600">{{ $customer->icNum_passport ?? 'N/A' }}</td>
                                 <td class="px-6 py-5 text-sm text-gray-500">{{ $customer->email }}</td>
                                 <td class="px-6 py-5 text-sm text-gray-700 italic">
-                                    {{ str_replace('blacklisted: ', '', $customer->accStatus) }}
+                                    {{-- FIX: Display blacklistReason directly --}}
+                                    {{ $customer->blacklistReason }}
                                 </td>
                                 <td class="px-6 py-5 text-right">
                                     <div class="flex justify-end gap-3">
                                         {{-- Edit Button (Green) --}}
-                                        <button onclick="openEditModal('{{ $customer->matricNum }}', '{{ $customer->name }}', '{{ str_replace('blacklisted: ', '', $customer->blacklistReason) }}')" 
+                                        {{-- FIX: Pass blacklistReason directly --}}
+                                        <button onclick="openEditModal('{{ $customer->matricNum }}', '{{ $customer->name }}', '{{ $customer->blacklistReason }}')" 
                                                 title="Edit Reason"
                                                 class="text-green-500 hover:text-green-700 transition-colors p-2 hover:bg-green-50 rounded-lg">
                                             <i class="fas fa-edit text-lg"></i>

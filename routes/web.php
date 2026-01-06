@@ -154,6 +154,7 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::post('/reports/blacklist', [StaffController::class, 'addToBlacklist'])->name('blacklist.store');
     Route::delete('/reports/blacklist/{matricNum}', [StaffController::class, 'destroyBlacklist'])->name('blacklist.destroy');
     Route::get('/reports/customer-search/{matric}', [StaffController::class, 'searchCustomer'])->name('customer.search');
+    Route::post('/staff/blacklist/store', [StaffController::class, 'storeBlacklist'])->name('staff.blacklist.store');
 
     // Income & Expenses
     Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses'])
