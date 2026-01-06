@@ -9,12 +9,12 @@ use App\Models\Booking;
 use App\Models\Fleet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
-use Illuminate\View\View;
 
 class StaffController extends Controller
 {
@@ -53,24 +53,22 @@ class StaffController extends Controller
     /**
      * Display the Pickup & Return Inspection page.
      */
-    public function pickupReturn(): View
-    {
-        $todayPickups = Booking::with(['customer', 'fleet'])
-            ->whereDate('pickupDate', now())
-            ->where('bookingStat', 'Confirmed')
-            ->orderBy('pickupDate')
-            ->get();
+    public function pickupReturn()
+{
+    $today = now()->format('Y-m-d');
 
-        $pendingReturns = Booking::with(['customer', 'fleet'])
-            ->where('bookingStat', 'Active') 
-            ->orderBy('returnDate')
-            ->get();
+    $todayPickups = Booking::with(['fleet', 'customer'])
+        ->whereDate('pickupDate', $today)
+        ->whereIn('bookingStat', ['confirmed', 'pending']) // Adjust based on your flow
+        ->get();
 
-        return view('staff.pickup-return', [
-            'todayPickups' => $todayPickups,
-            'pendingReturns' => $pendingReturns,
-        ]);
-    }
+    $todayReturns = Booking::with(['fleet', 'customer'])
+        ->whereDate('returnDate', $today)
+        ->where('bookingStat', 'active') // Assuming 'active' means car is currently out
+        ->get();
+
+    return view('staff.pickup-return', compact('todayPickups', 'todayReturns'));
+}
 
     /**
      * Show the profile edit form.
