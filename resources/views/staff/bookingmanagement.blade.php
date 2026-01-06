@@ -174,26 +174,29 @@
 
     {{-- --- ADDED SECTION: Modal HTML --- --}}
     <div id="bookingModal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm"></div> {{-- Added backdrop-blur for modern feel --}}
 
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl">
+                {{-- CHANGED: sm:max-w-3xl TO sm:max-w-6xl (Wider Window) --}}
+                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-6xl border border-gray-200">
                     
-                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 flex justify-between items-center">
-                        <button type="button" onclick="closeBookingModal()" class="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:w-auto">
-                            Close
+                    {{-- Header with Close Button --}}
+                    <div class="bg-white px-6 py-4 border-b border-gray-100 flex justify-between items-center sticky top-0 z-20">
+                        <h3 class="text-lg font-bold text-gray-800">Booking Details</h3>
+                        <button type="button" onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600 transition bg-gray-100 hover:bg-gray-200 rounded-full p-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
-                        <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Booking Details</h3>
                     </div>
 
-                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 min-h-[200px]" id="modalContent">
-                        <div class="flex justify-center items-center h-full text-gray-500">
-                            <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-8 min-h-[400px]" id="modalContent">
+                        {{-- Loading State --}}
+                        <div class="flex flex-col justify-center items-center h-64 text-gray-400">
+                            <svg class="animate-spin mb-4 h-10 w-10 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            Loading details...
+                            <p class="font-medium animate-pulse">Loading...</p>
                         </div>
                     </div>
                 </div>
