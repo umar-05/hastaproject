@@ -408,7 +408,7 @@ public function checkAvailability(Request $request)
     {
         $customer = Customer::where('matricNum', $request->matricNum)->first();
         if ($customer) {
-            $customer->update(['accStatus' => 'blacklisted: ' . $request->reason]);
+            $customer->update(['blacklistReason' => 'blacklisted: ' . $request->reason]);
             return back()->with('success', 'Customer blacklisted successfully.');
         }
         return back()->with('error', 'Customer not found.');
@@ -428,7 +428,7 @@ public function checkAvailability(Request $request)
         if ($customer) {
             // 3. Update the status with the prefix
             // This changes NULL to "blacklisted: Your Reason"
-            $customer->accStatus = 'blacklisted: ' . $request->reason;
+            $customer->blacklistReason = 'blacklisted: ' . $request->reason;
             
             // 4. Save to database
             $customer->save();
@@ -492,7 +492,7 @@ public function checkAvailability(Request $request)
 
         if ($customer) {
             // Update status
-            $customer->accStatus = 'blacklisted: ' . $request->reason;
+            $customer->blacklistReason = 'blacklisted: ' . $request->reason;
             $customer->save();
             return back()->with('success', 'Customer has been blacklisted successfully.');
         }

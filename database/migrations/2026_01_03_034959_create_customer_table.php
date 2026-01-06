@@ -33,6 +33,7 @@ return new class extends Migration
             $table->tinyText('bankName')->nullable();
             $table->bigInteger('accountNum')->nullable();
             $table->tinyText('accStatus')->default('active');
+            $table->text('blacklistReason')->nullable();
             $table->integer('rewardPoints')->default(0);
             $table->string('doc_ic_passport')->nullable(); 
             $table->string('doc_license')->nullable();

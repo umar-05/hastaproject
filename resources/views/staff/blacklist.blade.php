@@ -84,7 +84,7 @@
                                 <td class="px-6 py-5 text-right">
                                     <div class="flex justify-end gap-3">
                                         {{-- Edit Button (Green) --}}
-                                        <button onclick="openEditModal('{{ $customer->matricNum }}', '{{ $customer->name }}', '{{ str_replace('blacklisted: ', '', $customer->accStatus) }}')" 
+                                        <button onclick="openEditModal('{{ $customer->matricNum }}', '{{ $customer->name }}', '{{ str_replace('blacklisted: ', '', $customer->blacklistReason) }}')" 
                                                 title="Edit Reason"
                                                 class="text-green-500 hover:text-green-700 transition-colors p-2 hover:bg-green-50 rounded-lg">
                                             <i class="fas fa-edit text-lg"></i>
