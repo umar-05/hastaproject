@@ -56,7 +56,8 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
-
+    Route::post('/bookings/{booking}/forms', [BookingController::class, 'uploadForms'])->name('bookings.upload-forms');
+    
     // Profile Management
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -87,7 +88,9 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
         Route::delete('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'destroy'])->name('destroy');
         // Show a single vehicle (uses plateNumber as the primary key)
         Route::get('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'show'])->name('show');
-        // Additional staff fleet routes (edit/delete) can be added here
+        // Additional staff fleet routes (approve/ cancel) is added here
+        Route::post('/bookings/{id}/approve', [BookingController::class, 'approve'])->name('bookings.approve');
+        Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     });
 
     // Staff Profile -> /staff/profile
@@ -117,9 +120,9 @@ Route::get('/reports/daily-income', function () {
     Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
     // Reward Management for Staff
     // Add these inside the 'staff.' named group in web.php
-Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
-Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
-Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
+    Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+    Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
+    Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
     Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
     Route::prefix('rewards')->name('reward.')->group(function() {
         Route::get('/', [StaffController::class, 'rewards'])->name('index'); 
@@ -137,6 +140,23 @@ Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-
     Route::get('/dashboard/customermanagement', [CustomerController::class, 'index'])->name('customermanagement');
     Route::resource('customermanagement-crud', CustomerController::class)
             ->parameters(['customermanagement-crud' => 'matricNum']);
+    Route::get('/', [RewardController::class, 'index'])->name('index'); 
+    Route::get('/create', [RewardController::class, 'create'])->name('create');
+    Route::post('/', [RewardController::class, 'store'])->name('store');
+    Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
+    Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
+    });
+
+
+
+// ==============================
+// 4. SHARED ROUTES (Profile)
+// ==============================
+// ADDED: 'prevent-back'
+Route::middleware(['auth:customer', 'prevent-back'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 
@@ -145,6 +165,10 @@ Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-
 // ==============================
 require __DIR__.'/auth.php';
 
+// Fallback for default Laravel redirects
+// ADDED: 'prevent-back'
+Route::get('/dashboard', [StaffController::class, 'index'])
+    ->middleware(['auth:staff', 'prevent-back']);
 // Fallback Redirect
 Route::get('/dashboard', function () {
     return redirect()->route('staff.dashboard');

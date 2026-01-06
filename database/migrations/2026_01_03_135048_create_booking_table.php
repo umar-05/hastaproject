@@ -24,6 +24,8 @@ return new class extends Migration
             $table->string('bookingStat')->nullable();
             $table->string('feedback')->nullable();
             $table->string('paymentReceipt')->nullable();
+            $table->string('pickupForm')->nullable();
+            $table->string('returnForm')->nullable();
             
             
             // FK

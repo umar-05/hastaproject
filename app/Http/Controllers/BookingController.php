@@ -180,7 +180,7 @@ class BookingController extends Controller
 
             $finalPrice = max(0, $basePrice - $discount);
             $depositAmount = $request->input('deposit_amount', $fleet->deposit ?? 50);
-            $totalPrice = $finalPrice + (float)$depositAmount;
+            $totalPrice = $request->total_amount;
 
             $bookingID = 'BK' . strtoupper(uniqid());
 
@@ -241,28 +241,39 @@ class BookingController extends Controller
     }
 
     public function show($bookingId)
-    {
-        try {
-            if (Auth::guard('staff')->check()) {
-                $booking = Booking::with(['fleet', 'reward'])
-                    ->where('bookingID', $bookingId)
-                    ->firstOrFail();
-                return view('bookings.show', compact('booking'));
-            }
+{
+    try {
+        // 1. Fetch the booking first. This makes $booking and its data available.
+        $booking = Booking::with(['fleet', 'reward'])
+            ->where('bookingID', $bookingId)
+            ->firstOrFail();
 
-            $customerId = auth()->id();
-            if (!$customerId) return redirect()->route('login');
+        // 2. Permission Check
+        $isStaff = Auth::guard('staff')->check();
+        $isOwner = auth()->id() == $booking->matricNum;
 
-            $booking = Booking::with(['fleet', 'reward'])
-                ->where('bookingID', $bookingId)
-                ->where('matricNum', $customerId)
-                ->firstOrFail();
-
-            return view('bookings.show', compact('booking'));
-        } catch (\Exception $e) {
-            return redirect()->route('bookings.index')->with('error', 'Booking not found.');
+        if (!$isStaff && !$isOwner) {
+            return redirect()->route('bookings.index')->with('error', 'Unauthorized access.');
         }
+
+        // 3. Define variables for the pricing breakdown
+        // Use the dates already stored in the $booking object
+        $start = new \DateTime($booking->pickupDate);
+        $end = new \DateTime($booking->returnDate);
+        $days = $end->diff($start)->days ?: 1;
+
+        // 4. Calculate basePrice (Total minus Deposit)
+        // This ensures the numbers match what the user saw during payment
+        $basePrice = (float)$booking->totalPrice - (float)$booking->deposit;
+
+        // 5. Pass these variables to the view
+        return view('bookings.show', compact('booking', 'basePrice'));
+
+    } catch (\Exception $e) {
+        // If anything fails, this will now tell you why (e.g., "Undefined variable")
+        return redirect()->route('bookings.index')->with('error', 'Booking not found: ' . $e->getMessage());
     }
+}
 
     public function index()
     {
@@ -311,7 +322,7 @@ class BookingController extends Controller
                 return back()->with('error', 'Cannot cancel.');
             }
             $booking->update(['bookingStat' => 'cancelled']);
-            return back()->with('success', 'Cancelled.');
+            return back()->with('success', 'cancelled.');
         } catch (\Exception $e) {
             return back()->with('error', 'Error cancelling');
         }
@@ -384,4 +395,89 @@ class BookingController extends Controller
             'customer' => $customer // <--- REQUIRED for verify identity section
         ]);
     }
+
+    public function approve($bookingID)
+    {
+        if (!Auth::guard('staff')->check()) {
+            return back()->with('error', 'Unauthorized access.');
+        }
+
+        $booking = Booking::where('bookingID', $bookingID)->firstOrFail();
+
+        if ($booking->bookingStat != 'pending') {
+            return back()->with('error', 'Invalid booking approval.');
+        }
+
+        $booking->update(['bookingStat' => 'confirmed']);
+
+        return back()->with('success', 'Booking approved!');
+    }
+
+    public function filterBookings(Request $request) 
+    {
+        // 1. Start a base query (do not use ->get() yet)
+        $query = Booking::with('fleet', 'customer');
+
+        // 2. Apply Search Filter (Search by Booking ID or Plate Number)
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('bookingID', 'LIKE', "%{$search}%")
+                ->orWhere('plateNumber', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // 3. Apply Status Filter
+        if ($request->has('status') && $request->status != '') {
+            $query->where('bookingStat', $request->status);
+        }
+
+        // 4. Fetch the filtered results
+        $bookings = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        // 5. Calculate counts (Keep these as they are for your metric cards)
+        $totalBookings = Booking::count();
+        $confirmedCount = Booking::where('bookingStat', 'confirmed')->count();
+        $pendingCount = Booking::where('bookingStat', 'pending')->count();
+        $completedCount = Booking::where('bookingStat', 'completed')->count();
+        $cancelledCount = Booking::where('bookingStat', 'cancelled')->count();
+
+        return view('staff.bookingmanagement', compact(
+            'bookings', 'totalBookings', 'confirmedCount', 
+            'pendingCount', 'completedCount', 'cancelledCount'
+        ));
+    }
+
+    public function uploadForms(Request $request, $bookingID)
+    {
+        // 1. Validate inputs
+        $request->validate([
+            'pickupForm' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // Increased limit to 5MB
+            'returnForm' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+        ]);
+
+        $booking = Booking::where('bookingID', $bookingID)->firstOrFail();
+
+        // 2. Handle Pickup Upload
+        if ($request->hasFile('pickupForm')) {
+            // Delete old image if exists (optional cleanup)
+            // if ($booking->pickupForm) Storage::disk('public')->delete($booking->pickupForm);
+
+            // Store new file
+            $path = $request->file('pickupForm')->store('inspections', 'public');
+            $booking->pickupForm = $path;
+        }
+
+        // 3. Handle Return Upload
+        if ($request->hasFile('returnForm')) {
+            $path = $request->file('returnForm')->store('inspections', 'public');
+            $booking->returnForm = $path;
+        }
+
+        // 4. Force save (Bypasses $fillable issues)
+        $booking->save();
+
+        return back()->with('success', 'Inspection images saved successfully!');
+    }
+
 }

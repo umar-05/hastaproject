@@ -29,6 +29,8 @@ class Booking extends Model
         'bookingStat',
         'feedback',
         'paymentReceipt',
+        'pickupForm',
+        'returnForm'
     ];
 
     protected $casts = [
