@@ -181,7 +181,7 @@ class StaffController extends Controller
     }
 
     /**
-     * Show form to add new staff.
+     * Show form to add new staff (and list existing staff).
      */
     public function create(): View
     {
@@ -250,7 +250,8 @@ class StaffController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('staff.add-stafffunctioning')
+        // Redirects to the staff list (add-staff) instead of the form (add-stafffunctioning)
+        return redirect()->route('staff.add-staff')
             ->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
     }
 
