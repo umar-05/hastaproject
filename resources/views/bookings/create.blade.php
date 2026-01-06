@@ -140,7 +140,6 @@
                             {{-- Corrected ID here: total_amount_display --}}
                             <span class="text-3xl font-bold text-red-600">RM <span id="total_amount_display">{{ $pricePerDay }}</span></span>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">*Final price calculated at next step</p>
                     </div>
 
                     <div class="flex gap-4">

@@ -243,8 +243,8 @@ class BookingController extends Controller
     public function show($bookingId)
 {
     try {
-        // 1. Fetch the booking first. This makes $booking and its data available.
-        $booking = Booking::with(['fleet', 'reward'])
+        // 1. Fetch the booking
+        $booking = Booking::with(['fleet', 'reward', 'customer']) 
             ->where('bookingID', $bookingId)
             ->firstOrFail();
 
@@ -253,25 +253,35 @@ class BookingController extends Controller
         $isOwner = auth()->id() == $booking->matricNum;
 
         if (!$isStaff && !$isOwner) {
+            // STOP REDIRECTS for Modal: Return a simple error message instead
+            if (request()->ajax()) {
+                return response('<div class="p-4 text-red-600">Unauthorized access.</div>', 403);
+            }
             return redirect()->route('bookings.index')->with('error', 'Unauthorized access.');
         }
 
-        // 3. Define variables for the pricing breakdown
-        // Use the dates already stored in the $booking object
+        // 3. Define variables
         $start = new \DateTime($booking->pickupDate);
         $end = new \DateTime($booking->returnDate);
         $days = $end->diff($start)->days ?: 1;
-
-        // 4. Calculate basePrice (Total minus Deposit)
-        // This ensures the numbers match what the user saw during payment
         $basePrice = (float)$booking->totalPrice - (float)$booking->deposit;
 
-        // 5. Pass these variables to the view
+        // --- CRITICAL FIX IS HERE ---
+        // If the modal (AJAX) is asking, return the PARTIAL view.
+        if (request()->ajax()) {
+            return view('bookings.partials.show_modal', compact('booking', 'basePrice', 'days'));
+        }
+        // -----------------------------
+
+        // Normal page load (if opened in a new tab)
         return view('bookings.show', compact('booking', 'basePrice'));
 
     } catch (\Exception $e) {
-        // If anything fails, this will now tell you why (e.g., "Undefined variable")
-        return redirect()->route('bookings.index')->with('error', 'Booking not found: ' . $e->getMessage());
+        // STOP REDIRECTS for Modal: Return a simple error message
+        if (request()->ajax()) {
+            return response('<div class="p-6 text-center text-red-500">Error: ' . $e->getMessage() . '</div>', 500);
+        }
+        return redirect()->route('bookings.index')->with('error', 'Booking not found.');
     }
 }
 

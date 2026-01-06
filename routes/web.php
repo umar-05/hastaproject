@@ -73,19 +73,18 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // Dashboard -> /staff/dashboard
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
+    // --- FIX IS HERE: Keep this controller route, removed the duplicate closure route below ---
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
 
     Route::resource('mission', MissionController::class);
     Route::get('/fleet/check', [StaffController::class, 'checkAvailability'])->name('fleet.check');
+    
     // 1 & 2. Pickup & Return (both go to the same blade)
     Route::get('/pickup-return', function () {
         return view('staff.pickup-return');
     })->name('pickup-return');
 
-    // 3. View All (goes to Booking Management)
-    Route::get('/booking-management', function () {
-        return view('staff.bookingmanagement');
-    })->name('bookingmanagement');
+    // --- REMOVED DUPLICATE ROUTE HERE THAT WAS CAUSING THE EMPTY TABLE ---
 
     // Fleet management (Staff)
     Route::prefix('fleet')->name('fleet.')->group(function () {
@@ -124,7 +123,7 @@ Route::get('/reports/daily-income', function () {
     Route::post('/store', [StaffController::class, 'store'])->name('store');
 
     // Operational
-    Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
+    // Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return'); // Commented out to avoid conflict with the one above if necessary, but check your logic
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
     // Inside the staff middleware group in routes/web.php
     Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
@@ -140,8 +139,6 @@ Route::get('/reports/daily-income', function () {
         Route::post('/', [RewardController::class, 'store'])->name('store');
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
         Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
-        
-        // --- ADDED THIS LINE TO FIX YOUR ERROR ---
         Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy');
     });
 
@@ -149,7 +146,6 @@ Route::get('/reports/daily-income', function () {
 // Blacklist Management
 Route::get('/reports/blacklist', [StaffController::class, 'blacklistIndex'])->name('blacklist.index');
 Route::post('/reports/blacklist', [StaffController::class, 'addToBlacklist'])->name('blacklist.store');
-// This line below is what was missing or misnamed:
 Route::delete('/reports/blacklist/{matricNum}', [StaffController::class, 'destroyBlacklist'])->name('blacklist.destroy');
 
 // Income & Expenses
@@ -175,7 +171,6 @@ Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses']
 require __DIR__.'/auth.php';
 
 // Fallback for default Laravel redirects
-// ADDED: 'prevent-back'
 Route::get('/dashboard', [StaffController::class, 'index'])
     ->middleware(['auth:staff', 'prevent-back']);
 // Fallback Redirect
