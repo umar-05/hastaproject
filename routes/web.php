@@ -154,6 +154,12 @@ Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses']
     Route::get('/dashboard/customermanagement', [CustomerController::class, 'index'])->name('customermanagement');
     Route::resource('customermanagement-crud', CustomerController::class)
             ->parameters(['customermanagement-crud' => 'matricNum']);
+
+    // Mission Management
+    Route::get('/mission', [StaffController::class, 'missionsIndex'])->name('missions.index');
+    Route::post('/mission/store', [StaffController::class, 'missionStore'])->name('missions.store');
+    Route::post('/mission/{id}/accept', [StaffController::class, 'missionAccept'])->name('missions.accept');
+    Route::post('/mission/{id}/complete', [StaffController::class, 'missionComplete'])->name('missions.complete');
 });
 
 

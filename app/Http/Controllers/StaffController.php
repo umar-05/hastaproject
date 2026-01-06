@@ -8,6 +8,7 @@ use App\Models\Reward;
 use App\Models\Booking;
 use App\Models\Fleet;
 use App\Models\Customer;
+use App\Models\Mission;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -455,9 +456,70 @@ public function checkAvailability(Request $request)
 
     public function incomeExpenses()
     {
-        // For now, we return the view. 
-        // Later, you can fetch actual RM data from your 'bookings' or 'payments' table here.
         return view('staff.incomeexpenses'); 
     }
 
+    public function missionsIndex(Request $request)
+    {
+        $status = $request->query('status');
+        $staffID = auth()->user()->staffID;
+
+        // Start with all missions
+        $query = Mission::query();
+
+        // Apply filtering logic
+        if ($status === 'ongoing') {
+            $query->where('status', 'Ongoing')->where('assigned_to', $staffID);
+        } elseif ($status === 'completed') {
+            $query->where('status', 'Completed')->where('assigned_to', $staffID);
+        }
+
+        $missions = $query->latest()->get();
+
+        return view('staff.missions', compact('missions'));
+    }
+
+    public function missionStore(Request $request) 
+    {
+    Mission::create([
+        'title' => $request->title,
+        'requirements' => $request->req,
+        'description' => $request->desc,
+        'commission' => $request->commission,
+        'remarks' => $request->remarks,
+        'status' => 'Available'
+    ]);
+    return back()->with('success', 'Task published successfully!');
+    }
+
+    public function missionAccept($id) 
+    {
+        $mission = Mission::findOrFail($id);
+        $mission->update([
+            'status' => 'Ongoing',
+            'assigned_to' => auth()->user()->staffID // Assuming staff is logged in
+        ]);
+        return back()->with('success', 'Task accepted! Check your ongoing records.');
+    }
+
+    public function missionShow($id) 
+    {
+        return Mission::findOrFail($id);
+    }
+
+    public function missionComplete($id)
+    {
+        $mission = Mission::findOrFail($id);
+
+        // Security check: only the assigned staff can complete it
+        if ($mission->assigned_to !== auth()->user()->staffID) {
+            return back()->with('error', 'You are not authorized to complete this task.');
+        }
+
+        $mission->update([
+            'status' => 'Completed'
+        ]);
+
+        return back()->with('success', 'Task marked as completed! Commission earned.');
+    }
 }
