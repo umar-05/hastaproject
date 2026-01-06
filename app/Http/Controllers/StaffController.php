@@ -464,11 +464,12 @@ public function checkAvailability(Request $request)
         $status = $request->query('status');
         $staffID = auth()->user()->staffID;
 
-        // Start with all missions
         $query = Mission::query();
 
-        // Apply filtering logic
-        if ($status === 'ongoing') {
+        // Filtering logic
+        if ($status === 'available') {
+            $query->where('status', 'Available');
+        } elseif ($status === 'ongoing') {
             $query->where('status', 'Ongoing')->where('assigned_to', $staffID);
         } elseif ($status === 'completed') {
             $query->where('status', 'Completed')->where('assigned_to', $staffID);
@@ -477,7 +478,7 @@ public function checkAvailability(Request $request)
         $missions = $query->latest()->get();
 
         return view('staff.missions', compact('missions'));
-    }
+}
 
     public function missionStore(Request $request) 
     {
