@@ -19,8 +19,8 @@
         elseif (str_contains($model, 'alza')) { $vehicleImage = 'alza-2019.png'; }
         elseif (str_contains($model, 'aruz')) { $vehicleImage = 'aruz-2020.png'; }
         elseif (str_contains($model, 'vellfire')) { $vehicleImage = 'vellfire-2020.png'; }
-        elseif (str_contains($model, 'x50')) { $vehicleImage = 'default-suv.png'; }
-        elseif (str_contains($model, 'y15')) { $vehicleImage = 'default-bike.png'; }
+        elseif (str_contains($model, 'x50')) { $vehicleImage = 'x50-2024.png'; }
+        elseif (str_contains($model, 'y15')) { $vehicleImage = 'y15zr-2023.png'; }
     }
 
     // --- 2. Status Colors ---
@@ -265,7 +265,7 @@
                                 if (str_contains($m, 'axia')) $otherImage = 'axia-2024.png';
                                 elseif (str_contains($m, 'bezza')) $otherImage = 'bezza-2018.png';
                                 elseif (str_contains($m, 'myvi')) $otherImage = 'myvi-2020.png';
-                                // ... simplifed fallback
+                                
                             }
                         @endphp
                         <a href="{{ route('staff.fleet.show', $other->plateNumber) }}" class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors group">

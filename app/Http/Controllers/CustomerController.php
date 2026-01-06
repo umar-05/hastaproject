@@ -83,6 +83,8 @@ class CustomerController extends Controller
                                      elseif (str_contains($model, 'myvi')) $price = 130;
                                      elseif (str_contains($model, 'alza')) $price = 200;
                                      elseif (str_contains($model, 'vellfire')) $price = 500;
+                                     elseif (str_contains($model, 'aruz')) $price = 180;
+                                     elseif (str_contains($model, 'x50')) $price = 250;
                                      elseif (str_contains($model, 'y15')) $price = 50;
 
                                      // --- Type Logic ---

@@ -28,6 +28,7 @@ class Booking extends Model
         'totalPrice',
         'bookingStat',
         'feedback',
+        'paymentReceipt',
     ];
 
     protected $casts = [

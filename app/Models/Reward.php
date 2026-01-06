@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Reward extends Model
 {
@@ -16,13 +17,14 @@ class Reward extends Model
     
     protected $fillable = [
         'rewardID',
-        'voucherCode',
         'rewardPoints',
+        'voucherCode',
         'rewardType',
         'rewardAmount',
         'totalClaimable',
+        'claimedCount',
         'expiryDate',
-        'rewardStatus',
+        'rewardStatus'
     ];
 
     protected $casts = [
@@ -58,5 +60,35 @@ class Reward extends Model
     {
         return $query->where('rewardStatus', 'Active')
                      ->where('expiryDate', '>=', now());
+    }
+
+    /**
+     * Validation Logic using YOUR attributes
+     */
+    public function isValidCode()
+    {
+        // 1. Check Status
+        if (strtolower($this->rewardStatus) !== 'active') {
+            return false;
+        }
+
+        // 2. Check Expiry
+        if ($this->expiryDate && Carbon::now()->gt($this->expiryDate)) {
+            return false;
+        }
+
+        // 3. Check Limit
+        // If totalClaimable is 0, we assume it's unlimited. 
+        // If > 0, we check if claimedCount has reached the limit.
+        if ($this->totalClaimable > 0 && $this->claimedCount >= $this->totalClaimable) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function incrementUsage()
+    {
+        $this->increment('claimedCount');
     }
 }

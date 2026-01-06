@@ -30,6 +30,9 @@ Route::post('/register/process-matric-card', [RegisteredUserController::class, '
     ->name('register.process-matric-card')
     ->middleware('guest');
 
+    Route::post('/bookings/validate-voucher', [BookingController::class, 'validateVoucher'])
+    ->name('bookings.validateVoucher');
+
 
 // ==============================
 // 2. CUSTOMER ROUTES (Guard: customer)

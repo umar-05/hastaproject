@@ -119,6 +119,12 @@
                                 } elseif (strpos($modelName, 'vellfire') !== false) {
                                     $vehicleImage = 'vellfire-2020.png';
                                     $vehicleType = 'MPV';
+                                } elseif (strpos($modelName, 'x50') !== false) {
+                                    $vehicleImage = 'x50-2024.png';
+                                    $vehicleType = 'SUV';
+                                } elseif (strpos($modelName, 'y15') !== false) {
+                                    $vehicleImage = 'y15zr-2023.png';
+                                    $vehicleType = 'Motorcycle';
                                 }
                             }
                             
