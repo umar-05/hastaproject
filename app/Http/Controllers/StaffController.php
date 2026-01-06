@@ -185,23 +185,23 @@ public function checkAvailability(Request $request)
     }
 
     public function update(Request $request, $staffID): \Illuminate\Http\RedirectResponse
-{
-    // Find the staff by their custom staffID
-    $staff = Staff::where('staffID', $staffID)->firstOrFail();
+    {
+        // Find the staff by their custom staffID
+        $staff = Staff::where('staffID', $staffID)->firstOrFail();
 
-    // Validate the data
-    $validated = $request->validate([
-        'name' => ['required', 'string', 'max:255'],
-        'position' => ['required', 'string', 'max:50'],
-        'email' => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique('staff')->ignore($staff->staffID, 'staffID')],
-    ]);
+        // Validate the data
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'position' => ['required', 'string', 'max:50'],
+            'email' => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique('staff')->ignore($staff->staffID, 'staffID')],
+        ]);
 
-    // Save changes
-    $staff->update($validated);
+        // Save changes
+        $staff->update($validated);
 
-    // Redirect back to the staff record list
-    return redirect()->route('staff.add-staff')->with('status', "Staff member $staffID updated successfully!");
-}
+        // Redirect back to the staff record list
+        return redirect()->route('staff.add-staff')->with('status', "Staff member $staffID updated successfully!");
+    }
 
     /**
      * Show form to add new staff.
@@ -231,18 +231,18 @@ public function checkAvailability(Request $request)
      * Store a new staff member.
      */
     public function createFunctioning() 
-{
-    // Check if staff is logged in
-    if (!auth()->guard('staff')->check()) {
-        return redirect()->route('login');
+    {
+        // Check if staff is logged in
+        if (!auth()->guard('staff')->check()) {
+            return redirect()->route('login');
+        }
+
+        // This looks for the file: resources/views/staff/add-stafffunctioning.blade.php
+        return view('staff.add-stafffunctioning');
     }
 
-    // This looks for the file: resources/views/staff/add-stafffunctioning.blade.php
-    return view('staff.add-stafffunctioning');
-}
-
     public function store(Request $request): RedirectResponse
-{
+    {
     // 1. Ensure user is authenticated
     if (!Auth::guard('staff')->check()) {
         return redirect()->route('login');
@@ -287,7 +287,7 @@ public function checkAvailability(Request $request)
 
     return redirect()->route('staff.add-stafffunctioning')
     ->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
-}
+    }
 
     /**
      * Show reports page.
