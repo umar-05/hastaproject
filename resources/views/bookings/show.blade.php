@@ -182,10 +182,10 @@
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Payment Status</span>
                             <span class="px-3 py-1 rounded-full text-sm font-semibold
-                                @if(strtolower($booking->payment_status) === 'paid') bg-green-100 text-green-800
+                                @if(strtolower($booking->paymentStatus) === 'paid') bg-green-100 text-green-800
                                 @else bg-yellow-100 text-yellow-800
                                 @endif">
-                                {{ ucfirst($booking->payment_status ?? 'Pending') }}
+                                {{ ucfirst($booking->paymentStatus ?? 'Pending') }}
                             </span>
                         </div>
                     </div>
@@ -194,89 +194,107 @@
                 {{-- --- INSPECTION FORMS SECTION --- --}}
                 <div class="border-t pt-8 mt-8">
                     <h3 class="text-xl font-bold mb-6">Vehicle Inspection Forms</h3>
+                    
+                    @php
+                        $isPickupDone = !empty($booking->pickupForm);
+                        $isReturnDone = !empty($booking->returnForm);
+                    @endphp
 
-                    {{-- 1. DISPLAY VALIDATION ERRORS (Fixes "Just refreshes" issue) --}}
-                    @if ($errors->any())
-                        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4">
+                    {{-- CASE 1: Booking is Pending --}}
+                    @if($booking->bookingStat === 'pending')
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
                             <div class="flex">
                                 <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                                    </svg>
+                                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                                 </div>
                                 <div class="ml-3">
-                                    <h3 class="text-sm leading-5 font-medium text-red-800">
-                                        There were errors with your submission
-                                    </h3>
-                                    <div class="mt-2 text-sm leading-5 text-red-700">
-                                        <ul class="list-disc pl-5">
-                                            @foreach ($errors->all() as $error)
-                                                <li>{{ $error }}</li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
+                                    <p class="text-sm text-yellow-700">
+                                        Inspection forms will be available once the booking is <strong>Confirmed</strong>.
+                                    </p>
                                 </div>
                             </div>
                         </div>
-                    @endif
 
-                    <form action="{{ route('bookings.upload-forms', $booking->bookingID) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
+                    {{-- CASE 2: Booking is Cancelled --}}
+                    @elseif($booking->bookingStat === 'cancelled')
+                        <div class="bg-gray-100 border-l-4 border-gray-400 p-4 rounded-r-lg">
+                            <p class="text-sm text-gray-500 italic">This booking has been cancelled.</p>
+                        </div>
+
+                    {{-- CASE 3: Confirmed or Completed (Show Forms) --}}
+                    @elseif($booking->bookingStat === 'confirmed' || $booking->bookingStat === 'completed')
+                        
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             
-                            {{-- Pickup Section --}}
-                            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center">
-                                <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Pickup Inspection</label>
+                            {{-- Pickup Inspection Card --}}
+                            <div class="bg-gray-50 border border-gray-100 rounded-2xl p-8 flex flex-col justify-between">
+                                <div>
+                                    <h4 class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-4">Pickup Inspection</h4>
+                                    
+                                    <div class="h-32 bg-white border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center mb-6">
+                                        @if($isPickupDone)
+                                            <div class="text-center">
+                                                <svg class="w-10 h-10 text-green-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                <p class="text-green-600 font-bold text-sm">Form Completed</p>
+                                                <p class="text-xs text-gray-400 mt-1">{{ \Carbon\Carbon::parse($booking->pickupForm)->format('d M Y, h:i A')}}</p>
+                                            </div>
+                                        @else
+                                            <div class="text-center">
+                                                <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                <p class="text-gray-400 text-sm">No form submitted</p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
                                 
-                                @if($booking->pickupForm)
-                                    <div class="mb-4 relative group">
-                                        {{-- 2. IMAGE PREVIEW (Shows the saved image) --}}
-                                        <img src="{{ asset('storage/' . $booking->pickupForm) }}" 
-                                            class="w-full h-48 object-cover rounded-xl shadow-sm border border-gray-200">
-                                        <a href="{{ asset('storage/' . $booking->pickupForm) }}" target="_blank" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl text-white font-bold text-sm">
-                                            View Full Size
-                                        </a>
-                                        <p class="text-[10px] text-green-600 font-bold mt-2 uppercase tracking-tighter">✓ Image Saved</p>
-                                    </div>
-                                @else
-                                    <div class="mb-4 h-48 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-200">
-                                        <p class="text-xs text-gray-400">No image uploaded yet</p>
-                                    </div>
-                                @endif
-
-                                <input type="file" name="pickupForm" accept="image/*" class="text-xs text-gray-500 mx-auto w-full">
+                                <a href="{{ route('bookings.pickup-form', $booking->bookingID) }}" 
+                                   class="block w-full border text-center font-bold py-3 rounded-xl transition
+                                   @if($isPickupDone) border-gray-300 bg-white text-gray-700 hover:bg-gray-50 
+                                   @else bg-gray-900 text-white hover:bg-gray-800 shadow-md 
+                                   @endif">
+                                    {{ $isPickupDone ? 'View Pickup Details' : 'Submit Pickup Form' }}
+                                </a>
                             </div>
 
-                            {{-- Return Section --}}
-                            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center">
-                                <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Return Inspection</label>
-                                
-                                @if($booking->returnForm)
-                                    <div class="mb-4 relative group">
-                                        {{-- 2. IMAGE PREVIEW --}}
-                                        <img src="{{ asset('storage/' . $booking->returnForm) }}" 
-                                            class="w-full h-48 object-cover rounded-xl shadow-sm border border-gray-200">
-                                        <a href="{{ asset('storage/' . $booking->returnForm) }}" target="_blank" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl text-white font-bold text-sm">
-                                            View Full Size
-                                        </a>
-                                        <p class="text-[10px] text-green-600 font-bold mt-2 uppercase tracking-tighter">✓ Image Saved</p>
+                            {{-- Return Inspection Card --}}
+                            <div class="bg-gray-50 border border-gray-100 rounded-2xl p-8 flex flex-col justify-between opacity-{{ $isPickupDone ? '100' : '50' }}">
+                                <div>
+                                    <h4 class="text-gray-400 font-bold text-xs uppercase tracking-widest mb-4">Return Inspection</h4>
+                                    
+                                    <div class="h-32 bg-white border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center mb-6">
+                                        @if($isReturnDone)
+                                            <div class="text-center">
+                                                <svg class="w-10 h-10 text-green-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                <p class="text-green-600 font-bold text-sm">Form Completed</p>
+                                                <p class="text-xs text-gray-400 mt-1">{{ \Carbon\Carbon::parse($booking->returnForm)->format('d M Y, h:i A') }}</p>
+                                            </div>
+                                        @else
+                                            <div class="text-center">
+                                                <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                <p class="text-gray-400 text-sm">No form submitted</p>
+                                            </div>
+                                        @endif
                                     </div>
+                                </div>
+
+                                {{-- Logic: Disable Return button if Pickup is not done yet --}}
+                                @if($isPickupDone)
+                                    <a href="{{ route('bookings.return-form', $booking->bookingID) }}" 
+                                       class="block w-full border text-center font-bold py-3 rounded-xl transition
+                                       @if($isReturnDone) border-gray-300 bg-white text-gray-700 hover:bg-gray-50 
+                                       @else bg-hasta-red text-white hover:bg-red-700 shadow-md 
+                                       @endif">
+                                        {{ $isReturnDone ? 'View Return Details' : 'Submit Return Form' }}
+                                    </a>
                                 @else
-                                    <div class="mb-4 h-48 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-200">
-                                        <p class="text-xs text-gray-400">No image uploaded yet</p>
-                                    </div>
+                                    <button disabled class="block w-full border border-gray-200 bg-gray-100 text-gray-400 font-bold py-3 rounded-xl cursor-not-allowed">
+                                        Complete Pickup First
+                                    </button>
                                 @endif
-
-                                <input type="file" name="returnForm" accept="image/*" class="text-xs text-gray-500 mx-auto w-full">
                             </div>
-                        </div>
 
-                        <div class="mt-6 flex justify-end">
-                            <button type="submit" class="bg-gray-900 hover:bg-hasta-red text-white font-bold px-10 py-3 rounded-xl transition shadow-md uppercase text-xs tracking-widest">
-                                Update Inspection Images
-                            </button>
                         </div>
-                    </form>
+                    @endif
                 </div>
                 {{-- -------------------------------- --}}
 

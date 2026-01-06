@@ -21,33 +21,39 @@ class StaffController extends Controller
     /**
      * Display the Staff Dashboard.
      */
-    public function index(): View
+    public function index()
     {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
+        // 1. GET PENDING PICKUPS
+        // Criteria: Status is 'confirmed' AND Pickup Form is empty
+        $todayPickups = Booking::with(['fleet', 'customer'])
+            ->where('bookingStat', 'confirmed') // Only show approved bookings
+            ->where(function ($query) {
+                $query->whereNull('pickupForm')
+                    ->orWhere('pickupForm', '')
+                    ->orWhere('pickupForm', '0'); // Handle different "empty" states
+            })
+            ->orderBy('pickupDate', 'asc') // Show earliest bookings first
+            ->get();
 
-        $bookings = Booking::with('fleet')->orderBy('created_at', 'desc')->paginate(10);
-        
-        $bookingsToManage = Booking::where('bookingStat', 'Pending')->count();
-        $pickupsToday = Booking::whereDate('pickupDate', now())->where('bookingStat', 'Confirmed')->count();
-        $returnsToday = Booking::whereDate('returnDate', now())->where('bookingStat', 'Active')->count();
-        $totalBookings = Booking::count();
-        $confirmedCount = Booking::where('bookingStat', 'confirmed')->count();
-        $pendingCount = Booking::where('bookingStat', 'pending')->count();
-        $completedCount = Booking::where('bookingStat', 'completed')->count();
-        $cancelledCount = Booking::where('bookingStat', 'cancelled')->count();
-        
-        return view('staff.dashboard', [
-            'bookingsToManage' => $bookingsToManage,
-            'pickupsToday' => $pickupsToday,
-            'returnsToday' => $returnsToday, 
-            'totalBookings' => $totalBookings, 
-            'confirmedCount' => $confirmedCount, 
-            'pendingCount' => $pendingCount, 
-            'completedCount' => $completedCount, 
-            'cancelledCount' => $cancelledCount
-        ]);
+        // 2. GET PENDING RETURNS
+        // Criteria: Status is NOT cancelled/completed AND Pickup is DONE AND Return is EMPTY
+        $todayReturns = Booking::with(['fleet', 'customer'])
+            ->whereNotIn('bookingStat', ['cancelled', 'completed', 'pending'])
+            ->where(function ($query) {
+                $query->whereNotNull('pickupForm')
+                    ->where('pickupForm', '!=', '');
+            })
+            ->where(function ($query) {
+                $query->whereNull('returnForm')
+                    ->orWhere('returnForm', '');
+            })
+            ->orderBy('returnDate', 'asc')
+            ->get();
+
+        // Debugging: If still 0, uncomment the line below to see all bookings in browser
+        // dd(Booking::all()->toArray()); 
+
+        return view('staff.dashboard', compact('todayPickups', 'todayReturns'));
     }
 
     /**
@@ -349,4 +355,36 @@ class StaffController extends Controller
 
         return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
     }
+
+    public function pickupReturnSchedule()
+    {
+        // 1. PENDING PICKUPS
+        // Logic: Booking is CONFIRMED + Pickup Form is EMPTY
+        $todayPickups = \App\Models\Booking::with(['fleet', 'customer'])
+            ->where('bookingStat', 'confirmed')
+            ->where(function ($query) {
+                $query->whereNull('pickupForm')
+                      ->orWhere('pickupForm', '');
+            })
+            ->orderBy('pickupDate', 'asc') // Show oldest/most urgent first
+            ->get();
+
+        // 2. PENDING RETURNS
+        // Logic: Booking is CONFIRMED (Active) + Pickup IS done + Return is EMPTY
+        $todayReturns = \App\Models\Booking::with(['fleet', 'customer'])
+            ->where('bookingStat', 'confirmed') // Only confirmed bookings are "active" on the road
+            ->where(function ($query) {
+                $query->whereNotNull('pickupForm')
+                      ->where('pickupForm', '!=', '');
+            })
+            ->where(function ($query) {
+                $query->whereNull('returnForm')
+                      ->orWhere('returnForm', '');
+            })
+            ->orderBy('returnDate', 'asc')
+            ->get();
+
+        return view('staff.pickup-return', compact('todayPickups', 'todayReturns'));
+    }
+
 }

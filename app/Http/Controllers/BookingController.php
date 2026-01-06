@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+use App\Models\Inspection;
 
 class BookingController extends Controller
 {
@@ -479,5 +482,117 @@ class BookingController extends Controller
 
         return back()->with('success', 'Inspection images saved successfully!');
     }
+    
+public function showPickupForm($bookingID)
+    {
+        $booking = Booking::where('bookingID', $bookingID)->firstOrFail();
+        
+        // NEW: Fetch the saved inspection data so the form isn't empty
+        $inspection = Inspection::where('bookingID', $bookingID)
+                                ->where('type', 'pickup')
+                                ->first();
+
+        // Pass BOTH variables to the view
+        return view('bookings.pickup', compact('booking', 'inspection'));
+    }
+
+    // REPLACE your existing showReturnForm with this:
+    public function showReturnForm($bookingID)
+    {
+        $booking = Booking::where('bookingID', $bookingID)->firstOrFail();
+        
+        // NEW: Fetch the saved inspection data
+        $inspection = Inspection::where('bookingID', $bookingID)
+                                ->where('type', 'return')
+                                ->first();
+
+        return view('bookings.return', compact('booking', 'inspection'));
+    }
+
+    public function storeInspection(Request $request, $bookingID)
+    {
+        // 1. Validate inputs
+        $request->validate([
+            'type' => 'required|in:pickup,return',
+            'fuel_image' => 'required|image|max:5120',
+            'fuel_level' => 'required|numeric',
+            'mileage' => 'required|numeric',
+            'notes' => 'nullable|string',
+            'confirm' => 'accepted',
+            'signature' => 'required', // Ensure signature is present
+            'photo_front' => 'nullable|image|max:5120',
+            'photo_back'  => 'nullable|image|max:5120',
+            'photo_left'  => 'nullable|image|max:5120',
+            'photo_right' => 'nullable|image|max:5120',
+        ]);
+
+        $booking = Booking::findOrFail($bookingID);
+
+        // 2. Initialize Inspection Model
+        $inspection = new \App\Models\Inspection(); // Ensure correct model path
+        $inspection->inspectionID = 'INS-' . time() . '-' . Str::random(4);
+        $inspection->bookingID = $booking->bookingID;
+        $inspection->type = $request->type;
+        $inspection->mileage = $request->mileage;
+        $inspection->fuelBar = $request->fuel_level;
+        $inspection->remark = $request->notes;
+        $inspection->dateOut = now();
+        $inspection->time = now();
+
+        // 3. PROCESS SIGNATURE (Base64 -> Image File)
+        if ($request->filled('signature')) {
+            $base64_image = $request->input('signature');
+            
+            // Strip the header "data:image/png;base64," if present
+            if (preg_match('/^data:image\/(\w+);base64,/', $base64_image, $type)) {
+                $base64_image = substr($base64_image, strpos($base64_image, ',') + 1);
+                $type = strtolower($type[1]); // png
+
+                $base64_decode = base64_decode($base64_image);
+
+                if ($base64_decode !== false) {
+                    $filename = 'sig_' . time() . '_' . Str::random(5) . '.' . $type;
+                    $path = 'inspections/signatures/' . $filename;
+                    
+                    // Save to public storage
+                    Storage::disk('public')->put($path, $base64_decode);
+                    
+                    // Save path to DB column
+                    $inspection->signature = $path;
+                }
+            }
+        }
+
+        // 4. Handle Fuel Image
+        if ($request->hasFile('fuel_image')) {
+            $inspection->fuelImage = $request->file('fuel_image')->store('inspections/fuel', 'public');
+        }
+
+        // 5. Handle Car Photos
+        $views = ['front' => 'frontViewImage', 'back' => 'backViewImage', 'left' => 'leftViewImage', 'right' => 'rightViewImage'];
+        foreach ($views as $formName => $dbColumn) {
+            if ($request->hasFile("photo_{$formName}")) {
+                $inspection->$dbColumn = $request->file("photo_{$formName}")->store('inspections/vehicle', 'public');
+            }
+        }
+
+        // 6. Save the Inspection Record
+        $inspection->save();
+
+        // 7. Update Booking Status (Marks the form as "Completed" in the Booking table)
+        // We use the current timestamp so !empty() returns true in your View
+        if ($request->type === 'pickup') {
+            $booking->pickupForm = now(); 
+        } else {
+            $booking->returnForm = now();
+        }
+        $booking->save();
+
+        // 8. REDIRECT BACK TO DETAILS PAGE
+        // This sends the user back to the main details page with a success banner
+        return redirect()->route('bookings.show', $bookingID)
+            ->with('success', ucfirst($request->type) . ' inspection form submitted successfully!');
+    }
+
 
 }

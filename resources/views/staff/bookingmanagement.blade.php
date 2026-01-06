@@ -107,7 +107,7 @@
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Return</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Amount</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Verification</th>
+                                {{-- Removed Verification Column Header --}}
                                 <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -132,10 +132,7 @@
                                                 {{ ucfirst($booking->bookingStat ?? $booking->booking_stat ?? 'unknown') }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-center space-x-2">
-                                            <button class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded text-xs font-bold inline-flex items-center">Pickup</button>
-                                            <button class="bg-gray-100 text-gray-400 px-3 py-1 rounded text-xs font-bold inline-flex items-center">Return</button>
-                                        </td>
+                                        {{-- Removed Verification Column Data --}}
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex justify-end items-center gap-3">
                                                 {{-- 1. VIEW DETAILS --}}
@@ -170,7 +167,8 @@
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="9" class="px-6 py-8 text-center text-gray-500">No bookings found.</td>
+                                    {{-- Reduced colspan from 9 to 8 since verification column is gone --}}
+                                    <td colspan="8" class="px-6 py-8 text-center text-gray-500">No bookings found.</td>
                                 </tr>
                             @endif
                         </tbody>

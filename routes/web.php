@@ -58,6 +58,14 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
     Route::post('/bookings/{booking}/forms', [BookingController::class, 'uploadForms'])->name('bookings.upload-forms');
     
+    // Page to VIEW the pickup form
+    Route::get('/bookings/{booking}/pickup-inspection', [BookingController::class, 'showPickupForm'])->name('bookings.pickup-form');
+    
+    // Page to VIEW the return form
+    
+    // Page for submitting either form
+    Route::post('/bookings/{booking}/inspection', [BookingController::class, 'storeInspection'])->name('bookings.store-inspection');
+    Route::get('/bookings/{booking}/return-inspection', [BookingController::class, 'showReturnForm'])->name('bookings.return-form');
     // Profile Management
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -114,7 +122,7 @@ Route::get('/reports/daily-income', function () {
     Route::post('/store', [StaffController::class, 'store'])->name('store');
     
     // Operational
-    Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
+    Route::get('/pickup-return', [StaffController::class, 'pickupReturnSchedule'])->name('pickup-return');
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
     // Inside the staff middleware group in routes/web.php
     Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
