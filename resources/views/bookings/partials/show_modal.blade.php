@@ -40,107 +40,124 @@
         }
     }
 
-    // Determine Status Colors
-    $statusColor = match($booking->bookingStat) {
-        'confirmed' => 'green',
-        'pending' => 'yellow',
-        'completed' => 'blue',
-        'cancelled' => 'red',
-        default => 'gray',
+    // Status Styling
+    $statusStyles = match($booking->bookingStat) {
+        'confirmed' => ['bg' => 'bg-green-500', 'text' => 'text-green-100', 'label' => 'Confirmed'],
+        'pending'   => ['bg' => 'bg-yellow-500', 'text' => 'text-yellow-100', 'label' => 'Pending Approval'],
+        'completed' => ['bg' => 'bg-blue-600', 'text' => 'text-blue-100', 'label' => 'Completed'],
+        'cancelled' => ['bg' => 'bg-red-500', 'text' => 'text-red-100', 'label' => 'Cancelled'],
+        default     => ['bg' => 'bg-gray-500', 'text' => 'text-white', 'label' => 'Unknown'],
     };
 @endphp
 
-<div class="space-y-8 font-sans text-gray-800 animate-fadeIn">
-
-    {{-- 1. HERO HEADER --}}
-    <div class="flex flex-col md:flex-row justify-between md:items-center bg-gradient-to-r from-gray-50 to-white px-8 py-6 rounded-3xl border border-gray-100 shadow-sm gap-4 transition-all hover:shadow-md">
-        <div>
-            <div class="flex items-center gap-3 mb-1">
-                <span class="h-2 w-2 rounded-full bg-red-600 animate-ping"></span>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Booking ID</p>
-            </div>
-            <h2 class="text-4xl font-black text-gray-900 tracking-tighter font-mono group-hover:text-red-600 transition-colors duration-300">#{{ $booking->bookingID }}</h2>
+<div class="relative bg-white font-sans text-gray-800 overflow-hidden">
+    
+    {{-- 1. HEADER STRIP --}}
+    <div class="bg-gray-900 px-8 py-6 text-white flex justify-between items-center relative overflow-hidden">
+        {{-- Decorative accent --}}
+        <div class="absolute top-0 right-0 w-32 h-32 bg-red-600 rounded-full blur-3xl opacity-20 -mr-10 -mt-10"></div>
+        
+        <div class="relative z-10">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Booking Reference</p>
+            <h2 class="text-3xl font-black tracking-tighter font-mono text-white">#{{ $booking->bookingID }}</h2>
         </div>
-        <div class="flex items-center gap-4">
-             <span class="px-6 py-2.5 rounded-xl text-sm font-bold shadow-sm border flex items-center gap-2 transition-all duration-300 transform hover:scale-105
-                bg-{{ $statusColor }}-50 text-{{ $statusColor }}-700 border-{{ $statusColor }}-200">
-                <span class="w-2 h-2 rounded-full bg-{{ $statusColor }}-500 animate-pulse"></span>
-                {{ ucfirst($booking->bookingStat) }}
-            </span>
+        
+        <div class="relative z-10 flex items-center gap-3">
+            <div class="px-4 py-1.5 rounded-full {{ $statusStyles['bg'] }} bg-opacity-20 border border-white/10 backdrop-blur-sm">
+                <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $statusStyles['bg'] }} animate-pulse"></span>
+                    <span class="text-xs font-bold {{ $statusStyles['text'] }} uppercase tracking-wider">{{ $statusStyles['label'] }}</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        
-        {{-- 2. VEHICLE CARD (Spans 7 columns) --}}
-        <div class="xl:col-span-7 bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-100/50 relative overflow-hidden group flex flex-col justify-between transition-all duration-500 hover:shadow-2xl">
-             <div class="absolute right-0 top-0 w-64 h-64 bg-gradient-to-bl from-red-50 to-transparent rounded-bl-full opacity-50 group-hover:scale-110 transition-transform duration-700 ease-in-out"></div>
+    <div class="p-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
             
-            <div class="relative z-10 flex justify-between items-start mb-6">
+            {{-- 2. LEFT COLUMN: Vehicle Spotlight (7 Cols) --}}
+            <div class="lg:col-span-7 flex flex-col justify-between">
                 <div>
-                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Vehicle Selected</h4>
-                    <h3 class="text-3xl font-black text-gray-900 leading-tight group-hover:text-red-600 transition-colors duration-300">{{ $vehicleName }}</h3>
-                    <p class="text-sm font-semibold text-gray-500">{{ $vehicleType }}</p>
-                </div>
-                <div class="bg-gray-900 text-white px-4 py-2 rounded-lg border border-gray-700 shadow-lg transform group-hover:rotate-1 transition-transform duration-300">
-                    <span class="font-mono text-lg font-bold tracking-widest">{{ $booking->fleet->plateNumber ?? $booking->plateNumber }}</span>
-                </div>
-            </div>
+                    <div class="flex items-baseline justify-between border-b border-gray-100 pb-4 mb-6">
+                        <div>
+                            <p class="text-xs font-bold text-red-600 uppercase tracking-widest mb-1">Vehicle Selected</p>
+                            <h3 class="text-3xl font-black text-gray-900">{{ $vehicleName }}</h3>
+                        </div>
+                        <span class="text-sm font-medium text-gray-400 bg-gray-50 px-3 py-1 rounded-lg border border-gray-100">{{ $vehicleType }}</span>
+                    </div>
 
-            <div class="relative z-10 flex-1 flex items-center justify-center py-4">
-                <img src="{{ asset('images/' . $vehicleImage) }}" 
-                     alt="{{ $vehicleName }}" 
-                     class="w-full max-h-60 object-contain drop-shadow-2xl transform group-hover:scale-110 group-hover:-rotate-2 transition duration-500 ease-out">
-            </div>
-        </div>
+                    {{-- Image Container --}}
+                    <div class="relative group w-full h-64 flex items-center justify-center bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden mb-6">
+                        <div class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-30"></div>
+                        <img src="{{ asset('images/' . $vehicleImage) }}" 
+                             alt="{{ $vehicleName }}" 
+                             class="relative z-10 w-4/5 object-contain transform group-hover:scale-105 transition-transform duration-500 drop-shadow-2xl">
+                    </div>
+                </div>
 
-        {{-- 3. RIGHT COLUMN: Renter & Timeline (Spans 5 columns) --}}
-        <div class="xl:col-span-5 flex flex-col gap-6">
-            
-            {{-- Renter Card --}}
-            <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-lg shadow-gray-100/50 flex flex-col justify-center h-full transition-all duration-300 hover:border-gray-200 hover:-translate-y-1">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    Primary Renter
-                </p>
-                <div class="border-l-4 border-red-500 pl-4 py-1 transition-all duration-300 group-hover:border-red-600">
-                    <p class="text-2xl font-black text-gray-900 leading-none mb-1.5">{{ $booking->customer->name ?? $booking->matricNum }}</p>
-                    <p class="text-sm font-bold text-gray-500 font-mono bg-gray-50 inline-block px-2 py-1 rounded-md border border-gray-200">
-                        ID: {{ $booking->matricNum }}
-                    </p>
+                {{-- Plate Number --}}
+                <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100 w-fit">
+                    <div class="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">License Plate</p>
+                        <p class="text-sm font-black font-mono text-gray-900">{{ $booking->fleet->plateNumber ?? $booking->plateNumber }}</p>
+                    </div>
                 </div>
             </div>
 
-            {{-- Timeline Card --}}
-            <div class="bg-gray-50 rounded-3xl p-6 border border-gray-200 flex-1 flex flex-col justify-center relative overflow-hidden transition-all duration-300 hover:bg-white hover:shadow-md">
-                {{-- Connecting Line --}}
-                <div class="absolute left-1/2 top-10 bottom-10 w-0.5 bg-gray-200 -translate-x-1/2"></div>
-                <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-200 px-3 py-1 rounded-full z-10 text-[10px] font-bold text-gray-400 uppercase shadow-sm">
-                    {{ $days ?? 1 }} Days
+            {{-- 3. RIGHT COLUMN: Details & Timeline (5 Cols) --}}
+            <div class="lg:col-span-5 space-y-8">
+                
+                {{-- Renter Info --}}
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-600 border border-red-100 shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Rented By</p>
+                        <p class="text-lg font-bold text-gray-900 leading-tight">{{ $booking->customer->name ?? $booking->matricNum }}</p>
+                        <p class="text-xs text-gray-500 font-mono mt-0.5">{{ $booking->matricNum }}</p>
+                    </div>
                 </div>
 
-                <div class="relative z-10 flex justify-between gap-4 h-full">
+                <hr class="border-gray-100">
+
+                {{-- Vertical Timeline (BIGGER & BOLDER) --}}
+                <div class="relative pl-4 py-2">
+                    {{-- Vertical Line --}}
+                    <div class="absolute left-[22px] top-6 bottom-10 w-1 bg-gray-200"></div>
+
                     {{-- Pickup --}}
-                    <div class="w-1/2 pr-6 text-right flex flex-col justify-center group/pickup">
-                        <p class="text-xs font-bold text-green-600 uppercase mb-1 transition-colors group-hover/pickup:text-green-700">Pickup</p>
-                        <p class="text-xl font-bold text-gray-900 leading-none group-hover/pickup:scale-105 transition-transform origin-right">{{ \Carbon\Carbon::parse($booking->pickupDate)->format('d M') }}</p>
-                        <p class="text-sm text-gray-500 mb-2">{{ \Carbon\Carbon::parse($booking->pickupDate)->format('h:i A') }}</p>
-                        <div class="inline-flex justify-end">
-                            <span class="text-[10px] font-bold bg-white border border-gray-200 px-2 py-1 rounded text-gray-500 line-clamp-1 group-hover/pickup:border-green-200 transition-colors">
-                                {{ $booking->pickupLoc }}
-                            </span>
+                    <div class="relative flex items-start gap-6 mb-10 group">
+                        <div class="relative z-10 w-12 h-12 rounded-full border-4 border-white bg-gray-900 shadow-lg flex items-center justify-center group-hover:bg-red-600 transition-colors shrink-0">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Pickup</p>
+                            <p class="text-2xl font-black text-gray-900 leading-none">{{ \Carbon\Carbon::parse($booking->pickupDate)->format('D, d M Y') }}</p>
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-2 text-base text-gray-600 mt-2">
+                                <span class="font-mono bg-gray-100 px-2 py-0.5 rounded text-sm font-bold w-fit">{{ \Carbon\Carbon::parse($booking->pickupDate)->format('H:i') }}</span>
+                                <span class="hidden sm:inline text-gray-300">|</span>
+                                <span class="font-medium">{{ $booking->pickupLoc }}</span>
+                            </div>
                         </div>
                     </div>
 
                     {{-- Return --}}
-                    <div class="w-1/2 pl-6 text-left flex flex-col justify-center group/return">
-                        <p class="text-xs font-bold text-red-600 uppercase mb-1 transition-colors group-hover/return:text-red-700">Return</p>
-                        <p class="text-xl font-bold text-gray-900 leading-none group-hover/return:scale-105 transition-transform origin-left">{{ \Carbon\Carbon::parse($booking->returnDate)->format('d M') }}</p>
-                        <p class="text-sm text-gray-500 mb-2">{{ \Carbon\Carbon::parse($booking->returnDate)->format('h:i A') }}</p>
-                        <div class="inline-flex justify-start">
-                            <span class="text-[10px] font-bold bg-white border border-gray-200 px-2 py-1 rounded text-gray-500 line-clamp-1 group-hover/return:border-red-200 transition-colors">
-                                {{ $booking->returnLoc }}
-                            </span>
+                    <div class="relative flex items-start gap-6 group">
+                        <div class="relative z-10 w-12 h-12 rounded-full border-4 border-white bg-gray-200 shadow-lg flex items-center justify-center group-hover:bg-red-600 group-hover:text-white text-gray-500 transition-all shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Return</p>
+                            <p class="text-2xl font-black text-gray-900 leading-none">{{ \Carbon\Carbon::parse($booking->returnDate)->format('D, d M Y') }}</p>
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-2 text-base text-gray-600 mt-2">
+                                <span class="font-mono bg-gray-100 px-2 py-0.5 rounded text-sm font-bold w-fit">{{ \Carbon\Carbon::parse($booking->returnDate)->format('H:i') }}</span>
+                                <span class="hidden sm:inline text-gray-300">|</span>
+                                <span class="font-medium">{{ $booking->returnLoc }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -148,62 +165,63 @@
         </div>
     </div>
 
-    {{-- 4. FINANCIAL FOOTER --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-end">
-        {{-- Breakdown --}}
-        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm transition-all duration-300 hover:shadow-lg">
-            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Payment Summary</h4>
-            <div class="space-y-3">
-                <div class="flex justify-between text-sm group/item hover:bg-gray-50 p-1 rounded transition-colors">
-                    <span class="text-gray-500">Base Price ({{ $days }} days)</span>
-                    <span class="font-bold text-gray-900 font-mono">RM {{ number_format($basePrice ?? 0, 2) }}</span>
-                </div>
-                @if(($booking->deposit ?? 0) > 0)
-                <div class="flex justify-between text-sm group/item hover:bg-gray-50 p-1 rounded transition-colors">
-                    <span class="text-gray-500">Security Deposit</span>
-                    <span class="font-bold text-gray-900 font-mono">RM {{ number_format($booking->deposit, 2) }}</span>
-                </div>
-                @endif
-                @if(($booking->discount ?? 0) > 0)
-                <div class="flex justify-between text-sm text-green-600 group/item hover:bg-green-50 p-1 rounded transition-colors">
-                    <span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg> Discount</span>
-                    <span class="font-bold font-mono">- RM {{ number_format($booking->discount, 2) }}</span>
-                </div>
-                @endif
-                <div class="border-t border-dashed border-gray-200 pt-3 flex justify-between items-center mt-2">
-                    <span class="font-bold text-gray-900">Total Paid</span>
-                    <span class="text-2xl font-black text-red-600 font-mono transform hover:scale-105 transition-transform origin-right">RM {{ number_format($booking->totalPrice, 2) }}</span>
+    {{-- 4. FOOTER: Action Bar --}}
+    <div class="bg-gray-50 border-t border-gray-100 p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        
+        {{-- Price Display --}}
+        <div class="flex flex-col md:flex-row items-center gap-4">
+            <div class="text-center md:text-left">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Total Amount</p>
+                <div class="flex items-baseline gap-1">
+                    <span class="text-sm font-semibold text-gray-500">RM</span>
+                    <span class="text-2xl font-black text-gray-900 tracking-tight">{{ number_format($booking->totalPrice, 2) }}</span>
                 </div>
             </div>
+            
+            @if(($booking->deposit ?? 0) > 0)
+                <div class="hidden md:block w-px h-8 bg-gray-200"></div>
+                <div class="text-center md:text-left">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Deposit Included</p>
+                    <p class="text-sm font-bold text-gray-600 font-mono">RM {{ number_format($booking->deposit, 2) }}</p>
+                </div>
+            @endif
         </div>
 
         {{-- Actions --}}
-        <div class="flex flex-col gap-3">
-             {{-- Approve Logic --}}
-            @if($booking->bookingStat === 'pending')
-                <form action="{{ route('staff.fleet.bookings.approve', $booking->bookingID) }}" method="POST">
+        <div class="flex items-center gap-3 w-full md:w-auto">
+            
+            {{-- VIEW RECEIPT BUTTON --}}
+            @if($booking->paymentReceipt)
+                <a href="{{ asset('storage/' . $booking->paymentReceipt) }}" target="_blank" 
+                   class="flex-1 md:flex-none px-5 py-2.5 text-sm font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:border-gray-400 hover:text-gray-900 transition-all shadow-sm flex items-center justify-center gap-2 group">
+                   <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                   View Receipt
+                </a>
+            @else
+                <button disabled class="flex-1 md:flex-none px-5 py-2.5 text-sm font-bold text-gray-400 bg-gray-50 border border-gray-100 rounded-lg cursor-not-allowed">
+                   No Receipt
+                </button>
+            @endif
+
+            @if($booking->bookingStat !== 'cancelled' && $booking->bookingStat !== 'completed')
+                <form action="{{ route('staff.fleet.bookings.cancel', $booking->bookingID) }}" method="POST" class="flex-1 md:flex-none">
                     @csrf
-                    <button type="submit" onclick="return confirm('Confirm approval?')" class="w-full px-6 py-4 text-base font-bold text-white bg-gradient-to-r from-green-500 to-green-600 rounded-xl hover:from-green-600 hover:to-green-700 shadow-lg shadow-green-200/50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl flex items-center justify-center gap-2 group">
-                        <svg class="w-5 h-5 transition-transform group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        Approve Booking
+                    <button type="submit" onclick="return confirm('Cancel this booking?')" 
+                            class="w-full px-5 py-2.5 text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-all">
+                        Cancel
                     </button>
                 </form>
             @endif
 
-            <div class="flex gap-3">
-                <a href="{{ route('bookings.show', $booking->bookingID) }}" target="_blank" class="flex-1 px-6 py-3.5 text-sm font-bold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 transition-all duration-300 transform hover:-translate-y-0.5 text-center shadow-sm hover:shadow-md">
-                    Full Receipt
-                </a>
-                
-                @if($booking->bookingStat !== 'cancelled' && $booking->bookingStat !== 'completed')
-                    <form action="{{ route('staff.fleet.bookings.cancel', $booking->bookingID) }}" method="POST" class="flex-1">
-                        @csrf
-                        <button type="submit" onclick="return confirm('Cancel this booking?')" class="w-full px-6 py-3.5 text-sm font-bold text-red-600 bg-red-50 border-2 border-transparent rounded-xl hover:bg-red-100 hover:border-red-200 transition-all duration-300 transform hover:-translate-y-0.5 text-center shadow-sm hover:shadow-md">
-                            Cancel
-                        </button>
-                    </form>
-                @endif
-            </div>
+            @if($booking->bookingStat === 'pending')
+                <form action="{{ route('staff.fleet.bookings.approve', $booking->bookingID) }}" method="POST" class="flex-1 md:flex-none">
+                    @csrf
+                    <button type="submit" onclick="return confirm('Confirm approval?')" 
+                            class="w-full px-6 py-2.5 text-sm font-bold text-white bg-gray-900 border border-gray-900 rounded-lg hover:bg-red-600 hover:border-red-600 transition-all shadow-md flex items-center justify-center gap-2">
+                        Approve
+                    </button>
+                </form>
+            @endif
         </div>
     </div>
 </div>

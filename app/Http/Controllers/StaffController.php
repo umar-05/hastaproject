@@ -390,16 +390,15 @@ public function checkAvailability(Request $request)
     }
 
     /**
-     * Display the blacklist records
+     * Display Blacklist Page
      */
-    public function blacklistIndex() 
+    public function blacklistIndex(): View
     {
-        $blacklisted = Customer::where('accStatus', 'like', 'blacklisted%')->get();
-            
-            $count = $blacklisted->count();
+        // Fetch customers who are blacklisted
+        $blacklisted = Customer::where('accStatus', 'LIKE', 'blacklisted%')->get();
+        $count = $blacklisted->count();
 
-            // Make sure this path matches your actual file location (staff.blacklist or staff.reports.blacklist)
-            return view('staff.blacklist', compact('blacklisted', 'count'));
+        return view('staff.blacklist', compact('blacklisted', 'count'));
     }
 
     /**
@@ -441,19 +440,26 @@ public function checkAvailability(Request $request)
         return back()->with('error', 'Customer not found in database.');
     }
 
+    /**
+     * API: Search Customer by Matric No
+     * This is what the Javascript fetches
+     */
     public function searchCustomer($matric)
-    {
-        $customer = \App\Models\Customer::where('matricNum', $matric)->first();
-        
-        if ($customer) {
-            return response()->json([
-                'name' => $customer->name,
-                'icNum_passport' => $customer->icNum_passport, // Matches your Blade ID
-                'email' => $customer->email
-            ]);
-        }
-        return response()->json(null);
+{
+    // Search by matricNum as defined in your Customer model
+    $customer = \App\Models\Customer::where('matricNum', $matric)->first();
+    
+    if ($customer) {
+        return response()->json([
+            'name' => $customer->name,
+            'faculty' => $customer->faculty ?? 'N/A', // Send Faculty
+            'collegeAddress' => $customer->collegeAddress ?? 'N/A', // Send College
+            'icNum_passport' => $customer->icNum_passport,
+            'email' => $customer->email
+        ]);
     }
+    return response()->json(null); // Return null if not found (triggers JS 'else')
+}
 
     public function destroyBlacklist($matricNum)
     {
@@ -468,6 +474,44 @@ public function checkAvailability(Request $request)
 
             return redirect()->route('staff.blacklist.index')
                             ->with('success', 'Customer has been removed from the blacklist.');
+        }
+
+        return back()->with('error', 'Customer not found.');
+    }
+
+    /**
+     * Add to Blacklist
+     */
+    public function blacklistStore(Request $request)
+    {
+        $request->validate([
+            'matricNum' => 'required|string',
+            'reason' => 'required|string|max:255',
+        ]);
+
+        $customer = Customer::where('matricNumber', $request->matricNum)->first();
+
+        if ($customer) {
+            // Update status
+            $customer->accStatus = 'blacklisted: ' . $request->reason;
+            $customer->save();
+            return back()->with('success', 'Customer has been blacklisted successfully.');
+        }
+
+        return back()->with('error', 'Customer not found.');
+    }
+
+    /**
+     * Remove from Blacklist
+     */
+    public function blacklistDestroy($matric)
+    {
+        $customer = Customer::where('matricNumber', $matric)->first();
+
+        if ($customer) {
+            $customer->accStatus = 'active';
+            $customer->save();
+            return back()->with('success', 'Customer removed from blacklist.');
         }
 
         return back()->with('error', 'Customer not found.');
