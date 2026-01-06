@@ -23,7 +23,7 @@ use App\Http\Controllers\MonthlyIncomeController;
 // ==============================
 // 1. PUBLIC ROUTES
 // ==============================
-Route::get('/', fn() => view('home'))->name('root');
+Route::get('/', [\App\Http\Controllers\VehicleController::class, 'welcome'])->name('root');
 Route::get('/faq', fn() => view('customer.faq'))->name('faq');
 Route::get('/contact', fn() => view('contact'))->name('contact');
 
@@ -87,14 +87,6 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
         // Show a single vehicle (uses plateNumber as the primary key)
         Route::get('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'show'])->name('show');
         // Additional staff fleet routes (edit/delete) can be added here
-    });
-
-    // Fleet Management -> /staff/fleet
-    Route::prefix('fleet')->name('fleet.')->group(function() {
-        Route::get('/', [StaffController::class, 'fleet'])->name('index');           // staff.fleet.index
-        Route::get('/create', [StaffController::class, 'createVehicle'])->name('create'); // staff.fleet.create
-        Route::post('/', [StaffController::class, 'storeVehicle'])->name('store');        // staff.fleet.store
-        Route::delete('/{id}', [StaffController::class, 'destroyVehicle'])->name('destroy'); // staff.fleet.destroy
     });
 
     // Staff Profile -> /staff/profile

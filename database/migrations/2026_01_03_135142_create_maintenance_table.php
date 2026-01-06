@@ -19,6 +19,9 @@ return new class extends Migration
             $table->time('mTime')->nullable();
             $table->decimal('cost', 10, 2)->nullable();
 
+            $table->string('plateNumber')->nullable(); 
+            $table->foreign('plateNumber')->references('plateNumber')->on('fleet');
+
             $table->timestamps();
         });
     }
