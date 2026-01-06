@@ -65,7 +65,7 @@
                     @foreach($todayPickups as $booking)
                     <tr class="hover:bg-gray-50 transition group">
                         <td class="px-6 py-4">
-                            <span class="font-mono text-gray-700 font-medium">INS-{{ date('Y') }}-{{ $booking->booking_id }}</span>
+                            <span class="font-mono text-gray-700 font-medium">INS-{{ date('Y') }}-{{ $booking->bookingID }}</span>
                         </td>
                         <td class="px-6 py-4">
                             <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase border border-green-200">
