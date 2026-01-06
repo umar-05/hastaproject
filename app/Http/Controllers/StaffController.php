@@ -445,21 +445,20 @@ public function checkAvailability(Request $request)
      * This is what the Javascript fetches
      */
     public function searchCustomer($matric)
-{
-    // Search by matricNum as defined in your Customer model
-    $customer = \App\Models\Customer::where('matricNum', $matric)->first();
-    
-    if ($customer) {
-        return response()->json([
-            'name' => $customer->name,
-            'faculty' => $customer->faculty ?? 'N/A', // Send Faculty
-            'collegeAddress' => $customer->collegeAddress ?? 'N/A', // Send College
-            'icNum_passport' => $customer->icNum_passport,
-            'email' => $customer->email
-        ]);
+    {
+        $customer = \App\Models\Customer::where('matricNum', $matric)->first();
+        
+        if ($customer) {
+            return response()->json([
+                'name' => $customer->name,
+                'faculty' => $customer->faculty ?? 'N/A',           
+                'collegeAddress' => $customer->collegeAddress ?? 'N/A',
+                'icNum_passport' => $customer->icNum_passport,
+                'email' => $customer->email
+            ]);
+        }
+        return response()->json(null);
     }
-    return response()->json(null); // Return null if not found (triggers JS 'else')
-}
 
     public function destroyBlacklist($matricNum)
     {

@@ -50,24 +50,33 @@ Route::middleware(['auth:customer,staff', 'prevent-back'])->group(function () {
 Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function () {
 
     Route::get('/home', [CustomerController::class, 'dashboard'])->name('home');
-    Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
-    Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
 
-    // Rewards Store
-    Route::get('/rewards', [RewardController::class, 'index'])->name('reward.index');
-    Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('reward.claimed');
-    Route::post('/rewards/claim', [RewardController::class, 'claim'])->name('rewards.claim');
+    // === RESTRICTED ROUTES (Blacklisted users cannot access these) ===
+    Route::middleware(['not.blacklisted'])->group(function () {
+        
+        // 1. Book Now / Vehicles
+        Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
+        Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
 
-    // Booking Management
-    Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
-    Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
-    // Note: bookings.show and uploadForms moved to SHARED group above
-    Route::match(['get','post'],'/bookings/payment', [BookingController::class, 'payment'])->name('bookings.payment');
-    Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
-    Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
-    Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
-    
-    // Profile Management
+        // 2. Rewards Store
+        Route::get('/rewards', [RewardController::class, 'index'])->name('reward.index');
+        Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('reward.claimed');
+        Route::post('/rewards/claim', [RewardController::class, 'claim'])->name('rewards.claim');
+
+        // 3. Booking Management
+        Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+        Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
+        Route::match(['get','post'],'/bookings/payment', [BookingController::class, 'payment'])->name('bookings.payment');
+        Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
+        
+        // Note: You might want to allow them to CANCEL existing bookings even if blacklisted, 
+        // but if not, keep it inside this group.
+        Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+        Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
+    });
+    // =================================================================
+
+    // Profile Management (Usually kept accessible so they can see their status/logout)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/documents', [ProfileController::class, 'storeDocuments'])->name('profile.documents.store');
@@ -109,6 +118,7 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/dashboard/reward', [RewardController::class, 'index'])->name('rewards');
     Route::post('/dashboard/reward', [RewardController::class, 'store'])->name('rewards.store');
     Route::delete('/dashboard/reward/{id}', [RewardController::class, 'destroy'])->name('rewards.destroy');
+    
 
     // Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
@@ -143,7 +153,7 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/reports/blacklist', [StaffController::class, 'blacklistIndex'])->name('blacklist.index');
     Route::post('/reports/blacklist', [StaffController::class, 'addToBlacklist'])->name('blacklist.store');
     Route::delete('/reports/blacklist/{matricNum}', [StaffController::class, 'destroyBlacklist'])->name('blacklist.destroy');
-    Route::get('/customer-search/{matric}', [StaffController::class, 'searchCustomer'])->name('customer.search');
+    Route::get('/reports/customer-search/{matric}', [StaffController::class, 'searchCustomer'])->name('customer.search');
 
     // Income & Expenses
     Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses'])
