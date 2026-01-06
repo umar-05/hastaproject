@@ -38,7 +38,7 @@ Route::post('/register/process-matric-card', [RegisteredUserController::class, '
 // 2. CUSTOMER ROUTES (Guard: customer)
 // ==============================
 Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function () {
-    
+
     Route::get('/home', [CustomerController::class, 'dashboard'])->name('home');
     Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
     Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
@@ -47,7 +47,7 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     Route::get('/rewards', [RewardController::class, 'index'])->name('reward.index');
     Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('reward.claimed');
     Route::post('/rewards/claim', [RewardController::class, 'claim'])->name('rewards.claim');
-    
+
     // Booking Management
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
@@ -69,13 +69,23 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
 // 3. STAFF ROUTES (Guard: staff)
 // ==============================
 Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.')->group(function () {
-    
+
     // Dashboard -> /staff/dashboard
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
 
     Route::resource('mission', MissionController::class);
+    Route::get('/fleet/check', [StaffController::class, 'checkAvailability'])->name('fleet.check');
+    // 1 & 2. Pickup & Return (both go to the same blade)
+    Route::get('/pickup-return', function () {
+        return view('staff.pickup-return');
+    })->name('pickup-return');
+
+    // 3. View All (goes to Booking Management)
+    Route::get('/booking-management', function () {
+        return view('staff.bookingmanagement');
+    })->name('bookingmanagement');
 
     // Fleet management (Staff)
     Route::prefix('fleet')->name('fleet.')->group(function () {
@@ -112,7 +122,7 @@ Route::get('/reports/daily-income', function () {
     // Staff User Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
     Route::post('/store', [StaffController::class, 'store'])->name('store');
-    
+
     // Operational
     Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
@@ -125,38 +135,37 @@ Route::get('/reports/daily-income', function () {
     Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
     Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
     Route::prefix('rewards')->name('reward.')->group(function() {
-        Route::get('/', [StaffController::class, 'rewards'])->name('index'); 
+        Route::get('/', [StaffController::class, 'rewards'])->name('index');
         Route::get('/create', [RewardController::class, 'create'])->name('create');
         Route::post('/', [RewardController::class, 'store'])->name('store');
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
         Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
         
         // --- ADDED THIS LINE TO FIX YOUR ERROR ---
-        Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy'); 
+        Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy');
     });
 
+
+// Blacklist Management
+Route::get('/reports/blacklist', [StaffController::class, 'blacklistIndex'])->name('blacklist.index');
+Route::post('/reports/blacklist', [StaffController::class, 'addToBlacklist'])->name('blacklist.store');
+// This line below is what was missing or misnamed:
+Route::delete('/reports/blacklist/{matricNum}', [StaffController::class, 'destroyBlacklist'])->name('blacklist.destroy');
+
+// Income & Expenses
+Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses'])
+    ->name('reports.incomeExpenses');
 
     // Customer Management
     Route::get('/dashboard/customermanagement', [CustomerController::class, 'index'])->name('customermanagement');
     Route::resource('customermanagement-crud', CustomerController::class)
             ->parameters(['customermanagement-crud' => 'matricNum']);
-    Route::get('/', [RewardController::class, 'index'])->name('index'); 
-    Route::get('/create', [RewardController::class, 'create'])->name('create');
-    Route::post('/', [RewardController::class, 'store'])->name('store');
-    Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
-    Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
-    });
 
-
-
-// ==============================
-// 4. SHARED ROUTES (Profile)
-// ==============================
-// ADDED: 'prevent-back'
-Route::middleware(['auth:customer', 'prevent-back'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // Mission Management
+    Route::get('/mission', [StaffController::class, 'missionsIndex'])->name('missions.index');
+    Route::post('/mission/store', [StaffController::class, 'missionStore'])->name('missions.store');
+    Route::post('/mission/{id}/accept', [StaffController::class, 'missionAccept'])->name('missions.accept');
+    Route::post('/mission/{id}/complete', [StaffController::class, 'missionComplete'])->name('missions.complete');
 });
 
 
@@ -175,7 +184,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth:staff', 'prevent-back'])->name('dashboard');
 
 Route::get('/api/auth-check', function () {
-    return Auth::guard('staff')->check() || Auth::guard('customer')->check() 
-        ? response()->json(['authenticated' => true]) 
+    return Auth::guard('staff')->check() || Auth::guard('customer')->check()
+        ? response()->json(['authenticated' => true])
         : response()->json(['authenticated' => false], 401);
 })->name('auth.check');

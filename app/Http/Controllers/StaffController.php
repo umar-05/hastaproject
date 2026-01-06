@@ -7,6 +7,9 @@ use App\Models\Staff;
 use App\Models\Reward;
 use App\Models\Booking;
 use App\Models\Fleet;
+use App\Models\Customer;
+use App\Models\Mission;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -21,34 +24,70 @@ class StaffController extends Controller
     /**
      * Display the Staff Dashboard.
      */
-    public function index(): View
-    {
-        if (!Auth::guard('staff')->check()) {
-            return redirect()->route('login');
-        }
+public function index()
+{
+    // 1. Top Metric Counts
+    $pickupsToday = \App\Models\Booking::whereDate('pickupDate', \Carbon\Carbon::today())
+        ->whereIn('bookingStat', ['Confirmed', 'Approved'])
+        ->count();
+        
+    $returnsToday = \App\Models\Booking::whereDate('returnDate', \Carbon\Carbon::today())
+        ->where('bookingStat', 'Active')
+        ->count();
 
-        $bookings = Booking::with('fleet')->orderBy('created_at', 'desc')->paginate(10);
-        
-        $bookingsToManage = Booking::where('bookingStat', 'Pending')->count();
-        $pickupsToday = Booking::whereDate('pickupDate', now())->where('bookingStat', 'Confirmed')->count();
-        $returnsToday = Booking::whereDate('returnDate', now())->where('bookingStat', 'Active')->count();
-        $totalBookings = Booking::count();
-        $confirmedCount = Booking::where('bookingStat', 'confirmed')->count();
-        $pendingCount = Booking::where('bookingStat', 'pending')->count();
-        $completedCount = Booking::where('bookingStat', 'completed')->count();
-        $cancelledCount = Booking::where('bookingStat', 'cancelled')->count();
-        
-        return view('staff.dashboard', [
-            'bookingsToManage' => $bookingsToManage,
-            'pickupsToday' => $pickupsToday,
-            'returnsToday' => $returnsToday, 
-            'totalBookings' => $totalBookings, 
-            'confirmedCount' => $confirmedCount, 
-            'pendingCount' => $pendingCount, 
-            'completedCount' => $completedCount, 
-            'cancelledCount' => $cancelledCount
-        ]);
+    // 2. Recent Bookings (Database Join Fix)
+    // NOTE: Change 'car_id' to whatever your actual column is in the booking table
+    $recentBookings = Booking::join('fleet', 'booking.plateNumber', '=', 'fleet.plateNumber') // Change carID to plateNumber
+        ->select('booking.*', 'fleet.modelName', 'fleet.plateNumber')
+        ->orderBy('booking.created_at', 'desc')
+        ->limit(3)
+        ->get();
+
+    // 3. Fleet Distribution (Using modelName)
+    $totalCars = \App\Models\Fleet::count();
+    $fleetDistribution = [
+        'Perodua' => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Perodua%')->count() / $totalCars) * 100) : 0,
+        'Proton'  => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Proton%')->count() / $totalCars) * 100) : 0,
+        'Toyota'  => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Toyota%')->count() / $totalCars) * 100) : 0,
+    ];
+
+    $cars = \App\Models\Fleet::all();
+
+    return view('staff.dashboard', compact(
+        'pickupsToday', 
+        'returnsToday', 
+        'recentBookings',
+        'fleetDistribution', 
+        'cars'
+    ));
+}
+    /**
+     * Check car availability for given dates.
+     */
+public function checkAvailability(Request $request)
+{
+    $request->validate([
+        'car_id' => 'required',
+        'pickup' => 'required|date',
+        'return' => 'required|date|after:pickup',
+    ]);
+
+    // This query looks for any booking that conflicts with the user's dates
+    $conflict = \App\Models\Booking::where('carID', $request->car_id)
+        ->whereIn('bookingStat', ['Confirmed', 'Approved', 'Active'])
+        ->where(function ($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $q->where('pickupDate', '<=', $request->return)
+                  ->where('returnDate', '>=', $request->pickup);
+            });
+        })->exists();
+
+    if ($conflict) {
+        return back()->with('error', '❌ This car is unavailable for these dates.');
     }
+
+    return back()->with('success', '✅ Success! This car is available.');
+}
 
     /**
      * Display the Pickup & Return Inspection page.
@@ -348,5 +387,158 @@ class StaffController extends Controller
         ];
 
         return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
+    }
+
+    /**
+     * Display the blacklist records
+     */
+    public function blacklistIndex() 
+    {
+        $blacklisted = Customer::where('accStatus', 'like', 'blacklisted%')->get();
+            
+            $count = $blacklisted->count();
+
+            // Make sure this path matches your actual file location (staff.blacklist or staff.reports.blacklist)
+            return view('staff.blacklist', compact('blacklisted', 'count'));
+    }
+
+    /**
+     * Update a customer's status to blacklisted
+     */
+    public function addToBlacklist(Request $request) 
+    {
+        $customer = Customer::where('matricNum', $request->matricNum)->first();
+        if ($customer) {
+            $customer->update(['accStatus' => 'blacklisted: ' . $request->reason]);
+            return back()->with('success', 'Customer blacklisted successfully.');
+        }
+        return back()->with('error', 'Customer not found.');
+    }
+
+    public function storeBlacklist(Request $request)
+    {
+        // 1. Validate the input
+        $request->validate([
+            'matricNum' => 'required',
+            'reason' => 'required'
+        ]);
+
+        // 2. Find the customer
+        $customer = Customer::where('matricNum', $request->matricNum)->first();
+
+        if ($customer) {
+            // 3. Update the status with the prefix
+            // This changes NULL to "blacklisted: Your Reason"
+            $customer->accStatus = 'blacklisted: ' . $request->reason;
+            
+            // 4. Save to database
+            $customer->save();
+
+            return redirect()->route('staff.blacklist.index')
+                            ->with('success', 'Customer blacklisted successfully.');
+        }
+
+        return back()->with('error', 'Customer not found in database.');
+    }
+
+    public function searchCustomer($matric)
+    {
+        $customer = \App\Models\Customer::where('matricNum', $matric)->first();
+        
+        if ($customer) {
+            return response()->json([
+                'name' => $customer->name,
+                'icNum_passport' => $customer->icNum_passport, // Matches your Blade ID
+                'email' => $customer->email
+            ]);
+        }
+        return response()->json(null);
+    }
+
+    public function destroyBlacklist($matricNum)
+    {
+        // 1. Find the customer by their matric number
+        $customer = Customer::where('matricNum', $matricNum)->first();
+
+        if ($customer) {
+            // 2. Set the status back to NULL (or 'active')
+            // This removes them from the "blacklisted" query results
+            $customer->accStatus = null; 
+            $customer->save();
+
+            return redirect()->route('staff.blacklist.index')
+                            ->with('success', 'Customer has been removed from the blacklist.');
+        }
+
+        return back()->with('error', 'Customer not found.');
+    }
+
+    public function incomeExpenses()
+    {
+        return view('staff.incomeexpenses'); 
+    }
+
+    public function missionsIndex(Request $request)
+    {
+        $status = $request->query('status');
+        $staffID = auth()->user()->staffID;
+
+        // Start with all missions
+        $query = Mission::query();
+
+        // Apply filtering logic
+        if ($status === 'ongoing') {
+            $query->where('status', 'Ongoing')->where('assigned_to', $staffID);
+        } elseif ($status === 'completed') {
+            $query->where('status', 'Completed')->where('assigned_to', $staffID);
+        }
+
+        $missions = $query->latest()->get();
+
+        return view('staff.missions', compact('missions'));
+    }
+
+    public function missionStore(Request $request) 
+    {
+    Mission::create([
+        'title' => $request->title,
+        'requirements' => $request->req,
+        'description' => $request->desc,
+        'commission' => $request->commission,
+        'remarks' => $request->remarks,
+        'status' => 'Available'
+    ]);
+    return back()->with('success', 'Task published successfully!');
+    }
+
+    public function missionAccept($id) 
+    {
+        $mission = Mission::findOrFail($id);
+        $mission->update([
+            'status' => 'Ongoing',
+            'assigned_to' => auth()->user()->staffID // Assuming staff is logged in
+        ]);
+        return back()->with('success', 'Task accepted! Check your ongoing records.');
+    }
+
+    public function missionShow($id) 
+    {
+        return Mission::findOrFail($id);
+    }
+
+    public function missionComplete($id)
+    {
+        $mission = Mission::findOrFail($id);
+
+        // Security check: only the assigned staff can complete it
+        if ($mission->assigned_to !== auth()->user()->staffID) {
+            return back()->with('error', 'You are not authorized to complete this task.');
+        }
+
+        $mission->update([
+            'status' => 'Completed'
+        ]);
+
+        return back()->with('success', 'Task marked as completed! Commission earned.');
     }
 }

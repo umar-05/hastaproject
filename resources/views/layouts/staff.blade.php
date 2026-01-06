@@ -139,7 +139,7 @@
                         Fleet
                     </a>
 
-                    <a href="{{ route('staff.mission.index') }}" class="sidebar-link {{ request()->routeIs('staff.mission.*') ? 'active' : '' }}">
+                    <a href="{{ route('staff.missions.index') }}" class="sidebar-link {{ request()->routeIs('staff.mission.*') ? 'active' : '' }}">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         Missions
                     </a>
@@ -165,10 +165,10 @@
                             <a href="#" class="submenu-link">
                                 Monthly Income
                             </a>
-                            <a href="#" class="submenu-link">
+                            <a href="{{ route('staff.reports.incomeExpenses') }}" class="submenu-link {{ request()->routeIs('staff.reports.incomeExpenses') ? 'active' : '' }}">
                                 Income & Expenses
                             </a>
-                            <a href="#" class="submenu-link">
+                            <a href="{{ route('staff.blacklist.index') }}" class="submenu-link {{ request()->routeIs('staff.blacklist.index') ? 'active' : '' }}">
                                 Blacklist Record
                             </a>
                         </div>

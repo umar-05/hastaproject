@@ -36,6 +36,8 @@ class Customer extends Authenticatable
         'doc_ic_passport',
         'doc_license',
         'doc_matric',
+        'accStatus',
+        'rewardPoints',
     ];
 
     protected $hidden = [

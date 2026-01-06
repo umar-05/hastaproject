@@ -11,27 +11,65 @@ use App\Models\Fleet;
 
 class CustomerController extends Controller
 {
-    // ... (keep your existing index, create, show, edit, destroy methods) ...
-    public function index() {
-        $customers = Customer::all();
-        return view('staff.customermanagement', compact('customers'));
-    }
+    public function index()
+{
+    $customers = \App\Models\Customer::all();
+    return view('staff.customermanagement', compact('customers'));
+}
 
     public function create() { return view('staff.create'); }
 
-    public function show($matricNum) {
-        $customer = Customer::where('matricNum', $matricNum)->firstOrFail();
-        return view('staff.customers.show', compact('customer'));
+    public function edit($matricNum) 
+    {
+        $customer = \App\Models\Customer::where('matricNum', $matricNum)->firstOrFail();
+        return view('staff.editcustomermanagement', compact('customer'));
     }
 
-    public function edit($matricNum) {
-        $customer = Customer::where('matricNum', $matricNum)->firstOrFail();
-        return view('staff.customers.edit', compact('customer'));
+    public function update(Request $request, $matricNum)
+    {
+    $customer = \App\Models\Customer::where('matricNum', $matricNum)->firstOrFail();
+
+        // 1. Validate using your specific DB attributes
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'icNum_passport' => 'required|string',
+            'email' => 'required|email',
+            'phoneNum' => 'required|string',
+            'collegeAddress' => 'required|string',
+        ]);
+        // 2. Update the record
+        $customer->update($validated);
+        // 3. Redirect back with success message
+        return redirect('/staff/customermanagement-crud')
+            ->with('success', 'Customer record updated successfully!');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+                'matricNum'       => 'required|string|unique:customer,matricNum',
+                'name'            => 'required|string|max:255',
+                'ic_number'       => 'required|string', // Match name="ic_number" in form
+                'email'           => 'required|email|unique:customer,email',
+                'phone'           => 'required|string', // Match name="phone" in form
+                'college_address' => 'required|string',
+            ]);
+
+            \App\Models\Customer::create($validated);
+
+            return redirect()->route('staff.customermanagement-crud.index')
+                            ->with('success', 'Customer added successfully!');
     }
 
     public function destroy($matricNum) {
         Customer::where('matricNum', $matricNum)->delete();
         return redirect()->back()->with('success', 'Customer deleted successfully');
+    }
+
+    public function show($matricNum)
+    {
+    $customer = \App\Models\Customer::where('matricNum', $matricNum)->firstOrFail();
+        return response()->json($customer);
     }
 
     /**
