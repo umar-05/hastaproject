@@ -246,12 +246,8 @@
                             
                             <div class="space-y-3 text-base text-red-50 mb-8">
                                 <div class="flex justify-between">
-                                    <span>Rental Charges</span> 
+                                    <span>Rental Charges + Deposit</span> 
                                     <span class="font-mono text-white tracking-wide">RM <span x-text="formatMoney(fullAmount)"></span></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Security Deposit</span> 
-                                    <span class="font-mono text-white tracking-wide">RM <span x-text="formatMoney(depositAmount)"></span></span>
                                 </div>
                                 
                                 <div x-show="discountAmount > 0" 
@@ -418,7 +414,7 @@
             },
 
             get totalPayable() {
-                return Math.max(0, this.fullAmount + this.depositAmount - this.discountAmount);
+                return Math.max(0, this.fullAmount - this.discountAmount);
             },
 
             formatMoney(value) {
