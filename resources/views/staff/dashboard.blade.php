@@ -16,12 +16,10 @@
                             </div>
                             <div>
                                 <span class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.15em]">Action Required</span>
-                                {{-- Changed from font-black to font-bold --}}
                                 <h3 class="text-gray-900 font-bold text-lg uppercase leading-tight">Pickup today</h3>
                             </div>
                         </div>
                         <div class="text-right">
-                            {{-- Kept count prominent but changed to font-bold --}}
                             <span class="text-4xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{ $pickupsToday }}</span>
                         </div>
                     </div>
@@ -35,7 +33,6 @@
                             </div>
                             <div>
                                 <span class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.15em]">Active Status</span>
-                                {{-- Changed from font-black to font-bold --}}
                                 <h3 class="text-gray-900 font-bold text-lg uppercase leading-tight">Return today</h3>
                             </div>
                         </div>
@@ -49,7 +46,6 @@
             {{-- RECENT BOOKINGS SECTION --}}
             <div class="mb-10">
                 <div class="flex justify-between items-center mb-6">
-                    {{-- Changed from font-black to font-bold --}}
                     <h3 class="font-bold text-xl text-gray-800 uppercase tracking-tight">Recent Bookings</h3>
                     <a href="{{ route('staff.bookingmanagement') }}" class="inline-flex items-center px-5 py-2 bg-red-50 text-red-600 font-bold text-[10px] uppercase tracking-widest rounded-full hover:bg-red-600 hover:text-white shadow-sm transition-all duration-200">
                         View All
@@ -90,7 +86,6 @@
             <div class="mb-10">
                 <div class="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
                     <div class="flex justify-between items-center mb-8">
-                        {{-- Changed from font-black to font-bold --}}
                         <h3 class="font-bold text-xl text-gray-800 uppercase tracking-tight">Customer Distribution by College</h3>
                         <div class="flex items-center space-x-2">
                              <span class="relative flex h-3 w-3">
@@ -114,8 +109,15 @@
         document.addEventListener('DOMContentLoaded', function () {
             Chart.register(ChartDataLabels);
             const ctx = document.getElementById('collegePieChart').getContext('2d');
-            const collegeData = @json($collegeDistribution);
             
+            // Get data from PHP
+            let collegeData = @json($collegeDistribution);
+            
+            // Logic to ensure "OTHERS" exists if not sent by backend
+            if (!Object.keys(collegeData).some(key => key.toUpperCase() === 'OTHERS')) {
+                collegeData['OTHERS'] = 0; // It will show in legend but no slice if 0
+            }
+
             new Chart(ctx, {
                 type: 'pie',
                 data: {
@@ -124,7 +126,8 @@
                         data: Object.values(collegeData),
                         backgroundColor: [
                             '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                            '#FF9F40', '#00D1FF', '#4D5360', '#2ecc71', '#e67e22'
+                            '#FF9F40', '#00D1FF', '#4D5360', '#2ecc71', '#e67e22',
+                            '#95a5a6' // New color (Gray) for OTHERS
                         ],
                         hoverOffset: 30,
                         borderWidth: 4,
@@ -145,8 +148,8 @@
                         },
                         datalabels: {
                             color: '#fff',
+                            // Only show percentage label if value is greater than 3%
                             formatter: (value) => value > 3 ? value + '%' : '',
-                            {{-- Changed datalabels font to font-bold (700) instead of 900 --}}
                             font: { weight: '700', size: 14 },
                             textShadowColor: 'rgba(0,0,0,0.3)',
                             textShadowBlur: 4
