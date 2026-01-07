@@ -16,11 +16,13 @@
                             </div>
                             <div>
                                 <span class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.15em]">Action Required</span>
-                                <h3 class="text-gray-900 font-black text-lg uppercase leading-tight">Pickup today</h3>
+                                {{-- Changed from font-black to font-bold --}}
+                                <h3 class="text-gray-900 font-bold text-lg uppercase leading-tight">Pickup today</h3>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="text-4xl font-black text-gray-900 group-hover:text-blue-600 transition-colors">{{ $pickupsToday }}</span>
+                            {{-- Kept count prominent but changed to font-bold --}}
+                            <span class="text-4xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{ $pickupsToday }}</span>
                         </div>
                     </div>
                 </a>
@@ -33,11 +35,12 @@
                             </div>
                             <div>
                                 <span class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.15em]">Active Status</span>
-                                <h3 class="text-gray-900 font-black text-lg uppercase leading-tight">Return today</h3>
+                                {{-- Changed from font-black to font-bold --}}
+                                <h3 class="text-gray-900 font-bold text-lg uppercase leading-tight">Return today</h3>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="text-4xl font-black text-gray-900 group-hover:text-green-600 transition-colors">{{ $returnsToday }}</span>
+                            <span class="text-4xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">{{ $returnsToday }}</span>
                         </div>
                     </div>
                 </a>
@@ -46,8 +49,9 @@
             {{-- RECENT BOOKINGS SECTION --}}
             <div class="mb-10">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-black text-xl text-gray-800 uppercase tracking-tight">RECENT BOOKINGS</h3>
-                    <a href="{{ route('staff.bookingmanagement') }}" class="inline-flex items-center px-5 py-2 bg-red-50 text-red-600 font-black text-[10px] uppercase tracking-widest rounded-full hover:bg-red-600 hover:text-white shadow-sm transition-all duration-200">
+                    {{-- Changed from font-black to font-bold --}}
+                    <h3 class="font-bold text-xl text-gray-800 uppercase tracking-tight">RECENT BOOKINGS</h3>
+                    <a href="{{ route('staff.bookingmanagement') }}" class="inline-flex items-center px-5 py-2 bg-red-50 text-red-600 font-bold text-[10px] uppercase tracking-widest rounded-full hover:bg-red-600 hover:text-white shadow-sm transition-all duration-200">
                         View All
                         <svg class="ml-2 w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </a>
@@ -60,7 +64,7 @@
                                 <div class="relative z-10">
                                     <h4 class="text-2xl font-bold mb-1 uppercase">{{ $booking->modelName }}</h4>
                                     <p class="text-blue-50 font-medium mb-4 tracking-wider uppercase">{{ $booking->plateNumber }}</p>
-                                    <div class="text-4xl font-black mb-6">MYR {{ number_format($booking->totalPrice, 2) }}</div>
+                                    <div class="text-4xl font-bold mb-6">MYR {{ number_format($booking->totalPrice, 2) }}</div>
                                     <span class="bg-white/20 px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest">{{ $booking->paymentStat ?? 'Paid' }}</span>
                                 </div>
                             </div>
@@ -72,7 +76,7 @@
                                 <div>
                                     <h5 class="font-bold text-gray-800 text-sm leading-tight uppercase">{{ $booking->modelName }}</h5>
                                     <p class="text-gray-400 text-[10px] font-bold mb-1 uppercase">{{ $booking->plateNumber }}</p>
-                                    <span class="text-[9px] font-black text-green-500 bg-green-50 px-2 py-0.5 rounded uppercase">PAID</span>
+                                    <span class="text-[9px] font-bold text-green-500 bg-green-50 px-2 py-0.5 rounded uppercase">PAID</span>
                                 </div>
                             </div>
                         @endif
@@ -86,7 +90,8 @@
             <div class="mb-10">
                 <div class="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
                     <div class="flex justify-between items-center mb-8">
-                        <h3 class="font-black text-xl text-gray-800 uppercase tracking-tight">Customer Distribution by College</h3>
+                        {{-- Changed from font-black to font-bold --}}
+                        <h3 class="font-bold text-xl text-gray-800 uppercase tracking-tight">Customer Distribution by College</h3>
                         <div class="flex items-center space-x-2">
                              <span class="relative flex h-3 w-3">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -141,7 +146,8 @@
                         datalabels: {
                             color: '#fff',
                             formatter: (value) => value > 3 ? value + '%' : '',
-                            font: { weight: '900', size: 14 },
+                            {{-- Changed datalabels font to font-bold (700) instead of 900 --}}
+                            font: { weight: '700', size: 14 },
                             textShadowColor: 'rgba(0,0,0,0.3)',
                             textShadowBlur: 4
                         }
