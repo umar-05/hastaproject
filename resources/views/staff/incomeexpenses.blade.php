@@ -16,6 +16,7 @@
 
             {{-- Summary Stats Cards --}}
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                {{-- Changed font-black to font-bold in the RM values below --}}
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
                     <p class="text-gray-400 text-[11px] font-bold uppercase tracking-widest mb-3">Total Income</p>
                     <div class="flex items-center gap-4">
@@ -23,7 +24,7 @@
                             <i class="fas fa-chart-line text-xl"></i>
                         </div>
                         <div>
-                            <span class="text-2xl font-black text-gray-900">RM 333,600</span>
+                            <span class="text-2xl font-bold text-gray-900">RM 333,600</span>
                             <p class="text-green-500 text-[10px] font-bold mt-1">Last 6 months</p>
                         </div>
                     </div>
@@ -36,7 +37,7 @@
                             <i class="fas fa-chart-area text-xl"></i>
                         </div>
                         <div>
-                            <span class="text-2xl font-black text-gray-900">RM 82,100</span>
+                            <span class="text-2xl font-bold text-gray-900">RM 82,100</span>
                             <p class="text-red-500 text-[10px] font-bold mt-1">Last 6 months</p>
                         </div>
                     </div>
@@ -49,7 +50,7 @@
                             <i class="fas fa-dollar-sign text-xl"></i>
                         </div>
                         <div>
-                            <span class="text-2xl font-black text-gray-900">RM 251,500</span>
+                            <span class="text-2xl font-bold text-gray-900">RM 251,500</span>
                             <p class="text-blue-500 text-[10px] font-bold mt-1">Last 6 months</p>
                         </div>
                     </div>
@@ -62,7 +63,7 @@
                             <i class="fas fa-percentage text-xl"></i>
                         </div>
                         <div>
-                            <span class="text-2xl font-black text-gray-900">75.4%</span>
+                            <span class="text-2xl font-bold text-gray-900">75.4%</span>
                             <p class="text-purple-500 text-[10px] font-bold mt-1 uppercase">Average</p>
                         </div>
                     </div>
@@ -96,7 +97,7 @@
                         @foreach($expenses as $item)
                             <div>
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-sm font-bold text-gray-600">{{ $item['name'] }}</span>
+                                    <span class="text-sm font-semibold text-gray-600">{{ $item['name'] }}</span>
                                     <span class="text-sm font-bold text-gray-900">RM {{ number_format($item['amount']) }} <span class="text-gray-400 font-medium">({{ $item['percent'] }}%)</span></span>
                                 </div>
                                 <div class="w-full bg-gray-100 rounded-full h-2">
@@ -108,7 +109,8 @@
 
                     <div class="mt-10 pt-6 border-t border-gray-100 flex justify-between items-center">
                         <span class="text-md font-bold text-gray-500">Total Expenses</span>
-                        <span class="text-xl font-black text-red-600">RM 15,200</span>
+                        {{-- Changed font-black to font-bold --}}
+                        <span class="text-xl font-bold text-red-600">RM 15,200</span>
                     </div>
                 </div>
 
@@ -130,7 +132,8 @@
                         @foreach($breakdown as $data)
                             <div class="p-5 border border-gray-50 rounded-2xl hover:bg-gray-50 transition-colors group">
                                 <div class="flex justify-between items-center mb-4">
-                                    <span class="text-lg font-black text-gray-800">{{ $data['month'] }}</span>
+                                    {{-- Changed font-black to font-bold --}}
+                                    <span class="text-lg font-bold text-gray-800">{{ $data['month'] }}</span>
                                     <span class="px-3 py-1 rounded-lg font-bold text-[11px] {{ $data['margin'] > 75 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
                                         {{ $data['margin'] }}% margin
                                     </span>
@@ -138,15 +141,16 @@
                                 <div class="grid grid-cols-3 gap-4">
                                     <div>
                                         <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Income</p>
-                                        <p class="text-sm font-black text-green-600">RM {{ number_format($data['income']) }}</p>
+                                        {{-- Changed font-black to font-bold --}}
+                                        <p class="text-sm font-bold text-green-600">RM {{ number_format($data['income']) }}</p>
                                     </div>
                                     <div>
                                         <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Expenses</p>
-                                        <p class="text-sm font-black text-red-600">RM {{ number_format($data['expenses']) }}</p>
+                                        <p class="text-sm font-bold text-red-600">RM {{ number_format($data['expenses']) }}</p>
                                     </div>
                                     <div>
                                         <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Profit</p>
-                                        <p class="text-sm font-black text-blue-600">RM {{ number_format($data['profit']) }}</p>
+                                        <p class="text-sm font-bold text-blue-600">RM {{ number_format($data['profit']) }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -163,7 +167,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('incomeExpensesChart').getContext('2d');
             
-            // Gradient for Income
             const incomeGradient = ctx.createLinearGradient(0, 0, 0, 400);
             incomeGradient.addColorStop(0, 'rgba(16, 185, 129, 0.1)');
             incomeGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
@@ -210,26 +213,19 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false // Matches the clean look in your screenshot
-                        }
+                        legend: { display: false }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: {
-                                color: '#f3f4f6',
-                                drawBorder: false
-                            },
+                            grid: { color: '#f3f4f6', drawBorder: false },
                             ticks: {
                                 color: '#9ca3af',
                                 font: { size: 11, weight: '600' }
                             }
                         },
                         x: {
-                            grid: {
-                                display: false
-                            },
+                            grid: { display: false },
                             ticks: {
                                 color: '#4b5563',
                                 font: { size: 11, weight: '600' }
@@ -242,7 +238,6 @@
     </script>
 
     <style>
-        /* Custom Scrollbar for Monthly Breakdown */
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
