@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\Fleet;
+use Illuminate\Http\Request;
 
 class FleetController extends Controller
 {
     public function index()
     {
+        // Renamed variable to $fleets for clarity, though keeping $fleet is fine if view expects it
         $fleet = Fleet::orderBy('created_at', 'desc')->paginate(12);
         $totalVehicles = Fleet::count();
         $availableCount = Fleet::where('status', 'available')->count();
@@ -24,7 +26,7 @@ class FleetController extends Controller
         return view('staff.fleet.create');
     }
 
-    public function store(\Illuminate\Http\Request $request)
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'plateNumber' => 'required|string|unique:fleet,plateNumber',
@@ -49,7 +51,7 @@ class FleetController extends Controller
         return view('staff.fleet.edit', compact('fleet'));
     }
 
-    public function update(\Illuminate\Http\Request $request, $plateNumber)
+    public function update(Request $request, $plateNumber)
     {
         $fleet = Fleet::where('plateNumber', $plateNumber)->firstOrFail();
 
@@ -65,6 +67,7 @@ class FleetController extends Controller
             'status' => $validated['status'] ?? $fleet->status,
         ]);
 
+        // Redirect back to the show (details) page
         return redirect()->route('staff.fleet.show', $fleet->plateNumber)->with('success', 'Vehicle updated.');
     }
 
@@ -76,15 +79,56 @@ class FleetController extends Controller
         return redirect()->route('staff.fleet.index')->with('success', 'Vehicle deleted.');
     }
 
-    public function show($plateNumber)
-    {
-        // Lookup by the Fleet model's primary key (plateNumber)
-        $fleet = Fleet::where('plateNumber', $plateNumber)->firstOrFail();
+    // In app/Http/Controllers/Staff/FleetController.php
 
-        $otherFleets = Fleet::where('plateNumber', '!=', $plateNumber)
-                            ->limit(3)
-                            ->get();
+public function show($plateNumber)
+{
+    $fleet = Fleet::where('plateNumber', $plateNumber)->firstOrFail();
 
-        return view('staff.fleet.show', compact('fleet', 'otherFleets'));
+    // 1. Fetch Relationships
+    $bookings = $fleet->bookings()->orderBy('pickupDate', 'desc')->get();
+    $maintenances = $fleet->maintenances()->orderBy('mDate', 'desc')->get();
+
+    // 2. Generate Availability Calendar Data
+    $availabilityCalendar = [];
+    $startOfMonth = now()->startOfMonth();
+    $endOfMonth = now()->endOfMonth();
+
+    for ($date = $startOfMonth->copy(); $date->lte($endOfMonth); $date->addDay()) {
+        $dateStr = $date->format('Y-m-d');
+        $status = 'available';
+
+        // Check Bookings
+        foreach ($bookings as $booking) {
+            // Assuming booking has pickupDate/returnDate and status
+            if ($booking->bookingStat !== 'cancelled' && 
+                $date->between($booking->pickupDate, $booking->returnDate)) {
+                $status = 'booked';
+                break;
+            }
+        }
+
+        // Check Maintenance
+        if ($status === 'available') {
+            foreach ($maintenances as $maintenance) {
+                // Assuming maintenance has mDate and maybe an endDate? 
+                // If only single date, check equality.
+                if ($maintenance->mDate && $date->isSameDay($maintenance->mDate)) {
+                    $status = 'maintenance';
+                    break;
+                }
+            }
+        }
+
+        $availabilityCalendar[$dateStr] = ['status' => $status];
     }
-} 
+
+    return view('staff.fleet.showdetails', [
+        'vehicle' => $fleet,
+        'fleet' => $fleet,
+        'bookings' => $bookings,
+        'maintenances' => $maintenances,
+        'availabilityCalendar' => $availabilityCalendar
+    ]);
+}
+}

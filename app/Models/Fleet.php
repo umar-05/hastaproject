@@ -58,6 +58,12 @@ class Fleet extends Model
     {
         return $this->hasMany(Booking::class, 'plateNumber', 'plateNumber');
     }
+
+    public function maintenances()
+    {
+        // Assumes the 'maintenance' table has a 'plateNumber' column
+        return $this->hasMany(Maintenance::class, 'plateNumber', 'plateNumber');
+    }
     
 
 

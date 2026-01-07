@@ -6,6 +6,7 @@ use App\Http\Controllers\OcrController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\RewardController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\Staff\FleetController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\StaffController;
@@ -68,38 +69,28 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
 // ==============================
 Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.')->group(function () {
     
-    // Dashboard -> /staff/dashboard
+    // Dashboard
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
 
     Route::resource('mission', MissionController::class);
 
-    // Fleet management (Staff)
-    Route::prefix('fleet')->name('fleet.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Staff\FleetController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\Staff\FleetController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\Staff\FleetController::class, 'store'])->name('store');
-        // Edit / Update / Destroy (uses plateNumber as the primary key)
-        Route::get('/{plateNumber}/edit', [\App\Http\Controllers\Staff\FleetController::class, 'edit'])->name('edit');
-        Route::match(['put','patch'],'/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'update'])->name('update');
-        Route::delete('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'destroy'])->name('destroy');
-        // Show a single vehicle (uses plateNumber as the primary key)
-        Route::get('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'show'])->name('show');
-        // Additional staff fleet routes (edit/delete) can be added here
-    });
+    // ========================================================
+    // FLEET MANAGEMENT - CLEANED UP
+    // This single line handles index, create, store, show, edit, update, destroy
+    // It creates routes like: staff.fleet.index, staff.fleet.create, staff.fleet.show, etc.
+    // ========================================================
+    Route::resource('fleet', FleetController::class);
 
-    // Staff Profile -> /staff/profile
-    // Reward Management (This matches your Blade: route('staff.rewards') and route('staff.rewards.store'))
+    // Reward Management (Staff)
     Route::get('/dashboard/reward', [RewardController::class, 'index'])->name('rewards');
     Route::post('/dashboard/reward', [RewardController::class, 'store'])->name('rewards.store');
     Route::delete('/dashboard/reward/{id}', [RewardController::class, 'destroy'])->name('rewards.destroy');
 
-
     // Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
-
 
     // Staff User Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
@@ -108,24 +99,22 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // Operational
     Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
-    // Inside the staff middleware group in routes/web.php
+    
     Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
-    // Reward Management for Staff
-    // Add these inside the 'staff.' named group in web.php
-Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
-Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
-Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
-    Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+
+    // Staff Edit/Update/Delete Routes
+    Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+    Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
+    Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
+    
+    // Reward Group
     Route::prefix('rewards')->name('reward.')->group(function() {
         Route::get('/', [StaffController::class, 'rewards'])->name('index'); 
         Route::get('/create', [RewardController::class, 'create'])->name('create');
         Route::post('/', [RewardController::class, 'store'])->name('store');
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
         Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
-
-        // --- ADDED THIS LINE TO FIX YOUR ERROR ---
         Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy'); 
-
     });
 
     // Customer Management
@@ -133,10 +122,10 @@ Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-
     Route::resource('customermanagement-crud', CustomerController::class)
             ->parameters(['customermanagement-crud' => 'matricNum']);
     
-    // Daily Income Report -> /staff/daily-income
+    // Daily Income Report
     Route::get('/report/daily-income', [DailyIncomeController::class, 'index'])->name('report.daily-income');
     
-    // Monthly Income Report -> /staff/monthly-income
+    // Monthly Income Report
     Route::get('/report/monthly-income', [MonthlyIncomeController::class, 'index'])->name('report.monthly-income');
     
 });
