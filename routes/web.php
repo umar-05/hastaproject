@@ -30,7 +30,7 @@ Route::post('/register/process-matric-card', [RegisteredUserController::class, '
     ->name('register.process-matric-card')
     ->middleware('guest');
 
-    Route::post('/bookings/validate-voucher', [BookingController::class, 'validateVoucher'])
+Route::post('/bookings/validate-voucher', [BookingController::class, 'validateVoucher'])
     ->name('bookings.validateVoucher');
 
 
@@ -58,14 +58,11 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
     Route::post('/bookings/{booking}/forms', [BookingController::class, 'uploadForms'])->name('bookings.upload-forms');
     
-    // Page to VIEW the pickup form
+    // Vehicle Inspection Forms
     Route::get('/bookings/{booking}/pickup-inspection', [BookingController::class, 'showPickupForm'])->name('bookings.pickup-form');
-    
-    // Page to VIEW the return form
-    
-    // Page for submitting either form
-    Route::post('/bookings/{booking}/inspection', [BookingController::class, 'storeInspection'])->name('bookings.store-inspection');
     Route::get('/bookings/{booking}/return-inspection', [BookingController::class, 'showReturnForm'])->name('bookings.return-form');
+    Route::post('/bookings/{booking}/inspection', [BookingController::class, 'storeInspection'])->name('bookings.store-inspection');
+
     // Profile Management
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -82,7 +79,7 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
 
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
-
+    Route::get('/booking-details/{bookingID}', [StaffController::class, 'showBooking'])->name('bookings.show');
     Route::resource('mission', MissionController::class);
 
     // Fleet management (Staff)
@@ -101,66 +98,60 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
         Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     });
 
-    // Staff Profile -> /staff/profile
-    // Reward Management (This matches your Blade: route('staff.rewards') and route('staff.rewards.store'))
+    // Reward Management
     Route::get('/dashboard/reward', [RewardController::class, 'index'])->name('rewards');
     Route::post('/dashboard/reward', [RewardController::class, 'store'])->name('rewards.store');
     Route::delete('/dashboard/reward/{id}', [RewardController::class, 'destroy'])->name('rewards.destroy');
-
 
     // Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
 
-    // In routes/web.php inside the Staff Group
-Route::get('/reports/daily-income', function () {
-    return view('staff.reports.dailyincome.index');
-})->name('report.daily-income');
+    // Reports
+    Route::get('/reports/daily-income', function () {
+        return view('staff.reports.dailyincome.index');
+    })->name('report.daily-income');
 
     // Staff User Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
     Route::post('/store', [StaffController::class, 'store'])->name('store');
     
     // Operational
+    // 1. Pickup & Return Schedule Page (RESTORED HERE)
     Route::get('/pickup-return', [StaffController::class, 'pickupReturnSchedule'])->name('pickup-return');
+    
+    // 2. Reports Page
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
-    // Inside the staff middleware group in routes/web.php
+    
+    // 3. Add Functioning Car
     Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
-    // Reward Management for Staff
-    // Add these inside the 'staff.' named group in web.php
-    Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
-    Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
-    Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
-    Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+    
+    // Reward Management Group
     Route::prefix('rewards')->name('reward.')->group(function() {
         Route::get('/', [StaffController::class, 'rewards'])->name('index'); 
         Route::get('/create', [RewardController::class, 'create'])->name('create');
         Route::post('/', [RewardController::class, 'store'])->name('store');
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
         Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
-        
-        // --- ADDED THIS LINE TO FIX YOUR ERROR ---
         Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy'); 
     });
 
+    // Staff Edit/Update Routes
+    Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+    Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
+    Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
+    Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
 
     // Customer Management
     Route::get('/dashboard/customermanagement', [CustomerController::class, 'index'])->name('customermanagement');
     Route::resource('customermanagement-crud', CustomerController::class)
             ->parameters(['customermanagement-crud' => 'matricNum']);
-    Route::get('/', [RewardController::class, 'index'])->name('index'); 
-    Route::get('/create', [RewardController::class, 'create'])->name('create');
-    Route::post('/', [RewardController::class, 'store'])->name('store');
-    Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
-    Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
-    });
-
+}); // End Staff Group
 
 
 // ==============================
 // 4. SHARED ROUTES (Profile)
 // ==============================
-// ADDED: 'prevent-back'
 Route::middleware(['auth:customer', 'prevent-back'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -169,14 +160,10 @@ Route::middleware(['auth:customer', 'prevent-back'])->group(function () {
 
 
 // ==============================
-// 4. AUTH SYSTEM
+// 5. AUTH SYSTEM
 // ==============================
 require __DIR__.'/auth.php';
 
-// Fallback for default Laravel redirects
-// ADDED: 'prevent-back'
-Route::get('/dashboard', [StaffController::class, 'index'])
-    ->middleware(['auth:staff', 'prevent-back']);
 // Fallback Redirect
 Route::get('/dashboard', function () {
     return redirect()->route('staff.dashboard');

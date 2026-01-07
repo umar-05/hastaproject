@@ -98,8 +98,8 @@
                         </div>
                         
                         {{-- UPDATED BUTTON: Links to Details Page --}}
-                        <a href="{{ route('bookings.show', $booking->bookingID) }}" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-1">
-                            Start Pickup
+                        <a href="{{ route('staff.bookings.show', $booking->bookingID) }}" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-1">
+                            View details
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </a>
                     </div>
@@ -158,13 +158,13 @@
                             </div>
                             <div class="text-xs">
                                 <p class="font-bold text-gray-900">{{ $booking->customer->name ?? 'Unknown' }}</p>
-                                <p class="text-gray-500">{{ $booking->customer->phone ?? '-' }}</p>
+                                <p class="text-gray-500">{{ $booking->customer->phoneNum ?? '-' }}</p>
                             </div>
                         </div>
 
                         {{-- UPDATED BUTTON: Links to Details Page --}}
-                        <a href="{{ route('bookings.show', $booking->bookingID) }}" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-1">
-                            Process Return
+                        <a href="{{ route('staff.bookings.show', $booking->bookingID) }}" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-1">
+                            View details
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </a>
                     </div>

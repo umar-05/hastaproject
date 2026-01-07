@@ -32,7 +32,7 @@
                                 class="block w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 sm:text-sm appearance-none bg-white">
                             <option value="">All Statuses</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+                            <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
                             <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
                             <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                         </select>
@@ -74,7 +74,7 @@
                 </div>
                 
                 <div class="bg-white p-5 rounded-xl border-l-4 border-green-500 shadow-sm">
-                    <p class="text-3xl font-bold text-gray-800">{{ $confirmedCount ?? 0 }}</p>
+                    <p class="text-3xl font-bold text-gray-800">{{ $approvedCount ?? 0 }}</p>
                     <p class="text-sm font-medium text-gray-500">Confirmed</p>
                 </div>
                 
@@ -128,7 +128,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">RM {{ number_format($booking->totalPrice ?? $booking->total_price ?? 0, 2) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ ($booking->bookingStat ?? $booking->booking_stat) === 'confirmed' ? 'bg-green-100 text-green-800' : (($booking->bookingStat ?? $booking->booking_stat) === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800') }}">
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ ($booking->bookingStat ?? $booking->booking_stat) === 'approved' ? 'bg-green-100 text-green-800' : (($booking->bookingStat ?? $booking->booking_stat) === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800') }}">
                                                 {{ ucfirst($booking->bookingStat ?? $booking->booking_stat ?? 'unknown') }}
                                             </span>
                                         </td>
@@ -136,7 +136,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex justify-end items-center gap-3">
                                                 {{-- 1. VIEW DETAILS --}}
-                                                <a href="{{ route('bookings.show', $booking->bookingID) }}" class="p-1.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100" title="View Details">
+                                                <a href="{{ route('staff.bookings.show', $booking->bookingID) }}" class="p-1.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100" title="View Details">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
                                                 </a>
 

@@ -49,7 +49,7 @@
                         <p class="text-red-100">Booking ID: #{{ $booking->bookingID }}</p>
                     </div>
                     <span class="px-4 py-2 rounded-full text-sm font-semibold bg-white
-                        @if($booking->bookingStat === 'confirmed') text-green-800
+                        @if($booking->bookingStat === 'approved') text-green-800
                         @elseif($booking->bookingStat === 'pending') text-yellow-800
                         @elseif($booking->bookingStat === 'completed') text-blue-800
                         @else text-red-800
@@ -222,7 +222,7 @@
                         </div>
 
                     {{-- CASE 3: Confirmed or Completed (Show Forms) --}}
-                    @elseif($booking->bookingStat === 'confirmed' || $booking->bookingStat === 'completed')
+                    @elseif($booking->bookingStat === 'approved' || $booking->bookingStat === 'completed')
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             

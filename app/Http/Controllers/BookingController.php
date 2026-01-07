@@ -89,25 +89,26 @@ class BookingController extends Controller
             'voucher_code' => 'nullable|string',
             'notes' => 'nullable|string',
             
-            // Files (PDF supported)
+            // Files
             'identity_document' => "$identityRule|file|mimes:jpeg,png,jpg,pdf|max:5120",
             'driving_license'   => "$licenseRule|file|mimes:jpeg,png,jpg,pdf|max:5120",
             'id_type'           => 'nullable|in:ic,matric',
             'receipt'           => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120',
 
-            // Bank Details
-            'payer_bank'    => 'nullable|string|max:255',
-            'payer_account' => 'nullable|string|max:255',
+            // Payment Data
+            'payment_method' => 'required|string', 
+            'payer_bank'     => 'nullable|string|max:255',
+            'payer_account'  => 'nullable|string|max:255',
         ]);
 
-        if ( (!$customer->bankName || !$customer->accountNum) && (!$request->payer_bank || !$request->payer_account) ) {
+        if ((!$customer->bankName || !$customer->accountNum) && (!$request->payer_bank || !$request->payer_account)) {
             return back()->with('error', 'Refund bank details are required.')->withInput();
         }
 
         DB::beginTransaction();
 
         try {
-            // --- A. UPDATE CUSTOMER PROFILE (Documents) ---
+            // --- A. UPDATE CUSTOMER PROFILE ---
             if ($request->hasFile('identity_document')) {
                 $path = $request->file('identity_document')->store('documents', 'public');
                 if ($request->id_type === 'ic') {
@@ -118,26 +119,18 @@ class BookingController extends Controller
             }
 
             if ($request->hasFile('driving_license')) {
-                $path = $request->file('driving_license')->store('documents', 'public');
-                $customer->doc_license = $path;
+                $customer->doc_license = $request->file('driving_license')->store('documents', 'public');
             }
 
-            // --- B. UPDATE CUSTOMER PROFILE (Bank Details) ---
-            if ($request->filled('payer_bank')) {
-                $customer->bankName = $request->payer_bank;
-            }
+            if ($request->filled('payer_bank')) $customer->bankName = $request->payer_bank;
             if ($request->filled('payer_account')) {
-                // Remove dashes/spaces
-                $sanitizedAccount = preg_replace('/[^0-9]/', '', $request->payer_account);
-                $customer->accountNum = $sanitizedAccount; 
+                $customer->accountNum = preg_replace('/[^0-9]/', '', $request->payer_account); 
             }
             
-            if ($customer->isDirty()) {
-                $customer->save();
-            }
+            if ($customer->isDirty()) $customer->save();
 
-            // --- C. PROCESS BOOKING ---
-            $fleet = Fleet::where('plateNumber', $validated['plateNumber'])->firstOrFail();
+            // --- B. CALCULATE PRICES ---
+            $fleet = \App\Models\Fleet::where('plateNumber', $validated['plateNumber'])->firstOrFail();
             $pickupDateTime = $validated['start_date'] . ' ' . $validated['start_time'];
             $returnDateTime = $validated['end_date'] . ' ' . $validated['end_time'];
 
@@ -145,74 +138,70 @@ class BookingController extends Controller
             $end = new \DateTime($validated['end_date']);
             $days = $end->diff($start)->days ?: 1;
 
-            $pricePerDay = $fleet->price_per_day ?: $this->calculatePriceFromModel($fleet->modelName, $fleet->year);
+            // Price Logic
+            $pricePerDay = $fleet->price_per_day ?: 100; // Fallback or use your calc method
             $basePrice = $pricePerDay * $days;
             $discount = 0;
             $appliedRewardId = null;
 
-            // Handle Rewards/Vouchers using REWARD table
+            // Reward Logic
             if ($request->voucher_code) {
-                // Check using voucherCode column
-                $reward = Reward::where('voucherCode', $request->voucher_code)
-                                  ->where('rewardStatus', 'Active') // Ensure using your status string
-                                  ->first();
-                
+                $reward = \App\Models\Reward::where('voucherCode', $request->voucher_code)->where('rewardStatus', 'Active')->first();
                 if ($reward && $reward->isValidCode()) {
-                    // Calculate Discount based on type
-                    if (isset($reward->rewardType) && strtolower($reward->rewardType) === 'fixed') {
-                        $discount += $reward->rewardAmount;
-                    } else {
-                        // Default to percentage if type is Percentage or undefined
-                        $discount += ($basePrice * $reward->rewardAmount / 100);
-                    }
+                    $discount = (strtolower($reward->rewardType ?? '') === 'fixed') 
+                        ? $reward->rewardAmount 
+                        : ($basePrice * $reward->rewardAmount / 100);
                     $reward->incrementUsage();
                     $appliedRewardId = $reward->rewardID;
                 }
             } elseif ($request->input('reward_id')) {
-                // Fallback for ID selection
-                $reward = Reward::find($request->input('reward_id'));
+                $reward = \App\Models\Reward::find($request->input('reward_id'));
                 if ($reward && $reward->rewardStatus === 'Active') {
-                    if (isset($reward->rewardType) && strtolower($reward->rewardType) === 'fixed') {
-                        $discount += $reward->rewardAmount;
-                    } else {
-                        $discount += ($basePrice * $reward->rewardAmount / 100);
-                    }
+                    $discount = (strtolower($reward->rewardType ?? '') === 'fixed') 
+                        ? $reward->rewardAmount 
+                        : ($basePrice * $reward->rewardAmount / 100);
                     $appliedRewardId = $reward->rewardID;
                 }
             }
 
             $finalPrice = max(0, $basePrice - $discount);
             $depositAmount = $request->input('deposit_amount', $fleet->deposit ?? 50);
-            $totalPrice = $request->total_amount;
+            $totalPrice = $request->total_amount; // This includes deposit from frontend
 
+            // --- C. CREATE BOOKING ---
             $bookingID = 'BK' . strtoupper(uniqid());
+            $receiptPath = $request->hasFile('receipt') ? $request->file('receipt')->store('receipts', 'public') : null;
 
-            // Handle Receipt Upload
-            $receiptPath = null;
-            if ($request->hasFile('receipt')) {
-                $receiptPath = $request->file('receipt')->store('receipts', 'public');
-            }
-
-            $booking = Booking::create([
-                'bookingID'   => $bookingID,
-                'matricNum'   => $customer->matricNum,
-                'plateNumber' => $validated['plateNumber'],
-                'rewardID'    => $appliedRewardId,
-                'pickupDate'  => $pickupDateTime,
-                'returnDate'  => $returnDateTime,
-                'pickupLoc'   => $validated['pickup_location'],
-                'returnLoc'   => $validated['return_location'],
-                'deposit'     => (float)$depositAmount,
-                'totalPrice'  => (float)$totalPrice,
-                'bookingStat' => 'pending',
-                'feedback'    => null,
+            $booking = \App\Models\Booking::create([
+                'bookingID'    => $bookingID,
+                'matricNum'    => $customer->matricNum,
+                'plateNumber'  => $validated['plateNumber'],
+                'rewardID'     => $appliedRewardId,
+                'pickupDate'   => $pickupDateTime,
+                'returnDate'   => $returnDateTime,
+                'pickupLoc'    => $validated['pickup_location'],
+                'returnLoc'    => $validated['return_location'],
+                'deposit'      => (float)$depositAmount,
+                'totalPrice'   => (float)$totalPrice,
+                'bookingStat'  => 'pending',
                 'paymentReceipt' => $receiptPath
+            ]);
+
+            // --- D. CREATE PAYMENT RECORD (NEW) ---
+            \App\Models\Payment::create([
+                'bookingID'       => $bookingID,
+                'paymentStatus'   => 'pending', // Starts as pending
+                'method'          => $request->payment_method,
+                'paymentDate'     => now(),
+                'amount'          => $basePrice, // Original rental cost without discount/deposit
+                'discountedPrice' => $finalPrice, // Rental cost after discount
+                'grandTotal'      => (float)$totalPrice, // Final paid (Rental + Deposit)
             ]);
 
             DB::commit();
 
             return redirect()->route('bookings.index')
-                ->with('success', 'Booking created successfully! ID: #' . $booking->bookingID);
+                ->with('success', 'Booking submitted! Payment status is pending approval.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -401,19 +390,29 @@ class BookingController extends Controller
 
     public function approve($bookingID)
     {
+        // 1. Auth Check
         if (!Auth::guard('staff')->check()) {
             return back()->with('error', 'Unauthorized access.');
         }
 
+        // 2. Find Booking
         $booking = Booking::where('bookingID', $bookingID)->firstOrFail();
 
+        // 3. Validation
         if ($booking->bookingStat != 'pending') {
             return back()->with('error', 'Invalid booking approval.');
         }
 
-        $booking->update(['bookingStat' => 'confirmed']);
+        // 4. Approve the Booking
+        $booking->update(['bookingStat' => 'approved']);
 
-        return back()->with('success', 'Booking approved!');
+        // 5. UPDATE PAYMENT STATUS (This is the new part)
+        // This checks if a payment is linked and updates it to 'paid'
+        if ($booking->payment) {
+            $booking->payment->update(['paymentStatus' => 'paid']);
+        }
+
+        return back()->with('success', 'Booking approved and payment status updated to Paid!');
     }
 
     public function filterBookings(Request $request) 
@@ -440,13 +439,13 @@ class BookingController extends Controller
 
         // 5. Calculate counts (Keep these as they are for your metric cards)
         $totalBookings = Booking::count();
-        $confirmedCount = Booking::where('bookingStat', 'confirmed')->count();
+        $approvedCount = Booking::where('bookingStat', 'approved')->count();
         $pendingCount = Booking::where('bookingStat', 'pending')->count();
         $completedCount = Booking::where('bookingStat', 'completed')->count();
         $cancelledCount = Booking::where('bookingStat', 'cancelled')->count();
 
         return view('staff.bookingmanagement', compact(
-            'bookings', 'totalBookings', 'confirmedCount', 
+            'bookings', 'totalBookings', 'approvedCount', 
             'pendingCount', 'completedCount', 'cancelledCount'
         ));
     }
