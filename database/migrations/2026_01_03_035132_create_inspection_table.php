@@ -14,7 +14,13 @@ return new class extends Migration
         Schema::create('inspection', function (Blueprint $table) {
             $table->string('inspectionID')->primary();
 
-            $table->string('vehiclePhotos')->nullable();
+            $table->string('frontViewImage')->nullable();
+            $table->string('backViewImage')->nullable();
+            $table->string('leftViewImage')->nullable();
+            $table->string('rightViewImage')->nullable();
+            $table->string('interior1Image')->nullable();
+            $table->string('interior2Image')->nullable();
+
             $table->double('mileage')->nullable();
             $table->string('fuelImage')->nullable();
             $table->double('fuelBar')->nullable();

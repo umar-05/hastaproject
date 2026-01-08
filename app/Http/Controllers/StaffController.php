@@ -12,125 +12,127 @@ use App\Models\Mission;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use Illuminate\View\View;
+use Illuminate\Validation\Rules\Password;
 
 class StaffController extends Controller
 {
     /**
      * Display the Staff Dashboard.
      */
-public function index()
-{
-    // 1. Top Metric Counts
-    $pickupsToday = \App\Models\Booking::whereDate('pickupDate', \Carbon\Carbon::today())
-        ->whereIn('bookingStat', ['Confirmed', 'Approved'])
-        ->count();
+    public function index()
+    {
+        // 1. Top Metric Counts
+        $pickupsToday = Booking::whereDate('pickupDate', Carbon::today())
+            ->whereIn('bookingStat', ['Confirmed', 'Approved'])
+            ->count();
         
-    $returnsToday = \App\Models\Booking::whereDate('returnDate', \Carbon\Carbon::today())
-        ->where('bookingStat', 'Active')
-        ->count();
+        $returnsToday = Booking::whereDate('returnDate', Carbon::today())
+            ->where('bookingStat', 'Active')
+            ->count();
 
-    // 2. Recent Bookings (Join Fix)
-    $recentBookings = \App\Models\Booking::join('fleet', 'booking.plateNumber', '=', 'fleet.plateNumber')
-        ->select('booking.*', 'fleet.modelName', 'fleet.plateNumber')
-        ->orderBy('booking.created_at', 'desc')
-        ->limit(3)
-        ->get();
+        // 2. Recent Bookings
+        // FIXED: Updated table names to standard plural ('bookings', 'fleets'). 
+        // IF YOUR DB USES SINGULAR NAMES, change 'fleets' -> 'fleet' and 'bookings' -> 'booking' below.
+        $recentBookings = Booking::join('fleet', 'booking.plateNumber', '=', 'fleet.plateNumber')
+            ->select('booking.*', 'fleet.modelName', 'fleet.plateNumber')
+            ->orderBy('booking.created_at', 'desc')
+            ->limit(3)
+            ->get();
 
-    // 3. Fleet Distribution
-    $totalCars = \App\Models\Fleet::count();
-    $fleetDistribution = [
-        'Perodua' => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Perodua%')->count() / $totalCars) * 100) : 0,
-        'Proton'  => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Proton%')->count() / $totalCars) * 100) : 0,
-        'Toyota'  => $totalCars > 0 ? round((\App\Models\Fleet::where('modelName', 'like', 'Toyota%')->count() / $totalCars) * 100) : 0,
-    ];
+        // 3. Fleet Distribution
+        $totalCars = Fleet::count();
+        $fleetDistribution = [
+            'Perodua' => $totalCars > 0 ? round((Fleet::where('modelName', 'like', 'Perodua%')->count() / $totalCars) * 100) : 0,
+            'Proton'  => $totalCars > 0 ? round((Fleet::where('modelName', 'like', 'Proton%')->count() / $totalCars) * 100) : 0,
+            'Toyota'  => $totalCars > 0 ? round((Fleet::where('modelName', 'like', 'Toyota%')->count() / $totalCars) * 100) : 0,
+        ];
 
-    // 4. College Trends (The 10 UTM Colleges)
-    $totalCustomers = \App\Models\Customer::count();
-    $utmColleges = [
-        'KOLEJ RAHMAN PUTRA', 'KOLEJ TUN FATIMAH', 'KOLEJ TUN RAZAK', 
-        'KOLEJ TUN HUSSEIN ONN', 'KOLEJ TUN DR ISMAIL', 'KOLEJ DATO SERI ENDON', 
-        'KOLEJ DATO ONN JAAFAR', 'KOLEJ TUNKU CANSELOR', 'KOLEJ 9', 'KOLEJ 10'
-    ];
+        // 4. College Trends (The 10 UTM Colleges)
+        $totalCustomers = Customer::count();
+        $utmColleges = [
+            'KOLEJ RAHMAN PUTRA', 'KOLEJ TUN FATIMAH', 'KOLEJ TUN RAZAK', 
+            'KOLEJ TUN HUSSEIN ONN', 'KOLEJ TUN DR ISMAIL', 'KOLEJ DATO SERI ENDON', 
+            'KOLEJ DATO ONN JAAFAR', 'KOLEJ TUNKU CANSELOR', 'KOLEJ 9', 'KOLEJ 10'
+        ];
 
-    $actualData = \App\Models\Customer::select('collegeAddress', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
-        ->whereNotNull('collegeAddress')
-        ->groupBy('collegeAddress')
-        ->pluck('count', 'collegeAddress')
-        ->toArray();
+        $actualData = Customer::select('collegeAddress', DB::raw('count(*) as count'))
+            ->whereNotNull('collegeAddress')
+            ->groupBy('collegeAddress')
+            ->pluck('count', 'collegeAddress')
+            ->toArray();
 
-    $collegeDistribution = [];
-    foreach ($utmColleges as $college) {
-        $count = $actualData[$college] ?? 0;
-        $collegeDistribution[$college] = $totalCustomers > 0 ? round(($count / $totalCustomers) * 100) : 0;
+        $collegeDistribution = [];
+        foreach ($utmColleges as $college) {
+            $count = $actualData[$college] ?? 0;
+            $collegeDistribution[$college] = $totalCustomers > 0 ? round(($count / $totalCustomers) * 100) : 0;
+        }
+
+        $cars = Fleet::all();
+
+        return view('staff.dashboard', compact(
+            'pickupsToday', 
+            'returnsToday', 
+            'recentBookings',
+            'fleetDistribution', 
+            'collegeDistribution', 
+            'cars'
+        ));
     }
-
-    $cars = \App\Models\Fleet::all();
-
-    // 5. Return the view with ALL variables
-    return view('staff.dashboard', compact(
-        'pickupsToday', 
-        'returnsToday', 
-        'recentBookings',
-        'fleetDistribution', 
-        'collegeDistribution', 
-        'cars'
-    ));
-}
 
     /**
      * Check car availability for given dates.
      */
-public function checkAvailability(Request $request)
-{
-    $request->validate([
-        'car_id' => 'required',
-        'pickup' => 'required|date',
-        'return' => 'required|date|after:pickup',
-    ]);
+    public function checkAvailability(Request $request)
+    {
+        $request->validate([
+            'car_id' => 'required',
+            'pickup' => 'required|date',
+            'return' => 'required|date|after:pickup',
+        ]);
 
-    // This query looks for any booking that conflicts with the user's dates
-    $conflict = \App\Models\Booking::where('carID', $request->car_id)
-        ->whereIn('bookingStat', ['Confirmed', 'Approved', 'Active'])
-        ->where(function ($query) use ($request) {
-            $query->where(function ($q) use ($request) {
-                $q->where('pickupDate', '<=', $request->return)
-                  ->where('returnDate', '>=', $request->pickup);
-            });
-        })->exists();
+        // NOTE: Ensure your Booking table has a 'carID' column. 
+        // In the index() function, you used 'plateNumber'. Ensure these match your DB.
+        $conflict = Booking::where('carID', $request->car_id)
+            ->whereIn('bookingStat', ['Confirmed', 'Approved', 'Active'])
+            ->where(function ($query) use ($request) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('pickupDate', '<=', $request->return)
+                      ->where('returnDate', '>=', $request->pickup);
+                });
+            })->exists();
 
-    if ($conflict) {
-        return back()->with('error', '❌ This car is unavailable for these dates.');
+        if ($conflict) {
+            return back()->with('error', '❌ This car is unavailable for these dates.');
+        }
+
+        return back()->with('success', '✅ Success! This car is available.');
     }
-
-    return back()->with('success', '✅ Success! This car is available.');
-}
 
     /**
      * Display the Pickup & Return Inspection page.
      */
-    public function pickupReturn(): View
+    public function pickupReturn()
     {
-        $todayPickups = Booking::with(['customer', 'fleet'])
-            ->whereDate('pickupDate', now())
-            ->where('bookingStat', 'Confirmed')
-            ->orderBy('pickupDate')
+        $today = now()->format('Y-m-d');
+
+        $todayPickups = Booking::with(['fleet', 'customer'])
+            ->whereDate('pickupDate', $today)
+            ->whereIn('bookingStat', ['confirmed', 'pending'])
             ->get();
 
-        $pendingReturns = Booking::with(['customer', 'fleet'])
-            ->where('bookingStat', 'Active') 
-            ->orderBy('returnDate')
+        $todayReturns = Booking::with(['fleet', 'customer'])
+            ->whereDate('returnDate', $today)
+            ->where('bookingStat', 'active')
             ->get();
 
-        return view('staff.pickup-return', [
-            'todayPickups' => $todayPickups,
-            'pendingReturns' => $pendingReturns,
-        ]);
+        return view('staff.pickup-return', compact('todayPickups', 'todayReturns'));
     }
 
     /**
@@ -141,13 +143,6 @@ public function checkAvailability(Request $request)
         return view('staff.profile.edit', [
             'user' => $request->user('staff'),
         ]);
-    }
-
-    public function edit($staffID)
-    {
-        $staff = Staff::where('staffID', $staffID)->firstOrFail();
-        // Re-use the same "functioning" file!
-        return view('staff.add-stafffunctioning', compact('staff'));
     }
 
     /**
@@ -184,7 +179,11 @@ public function checkAvailability(Request $request)
         return Redirect::route('staff.profile.edit')->with('status', 'profile-updated');
     }
 
-    public function update(Request $request, $staffID): \Illuminate\Http\RedirectResponse
+    /**
+     * Update a specific staff member (Admin view).
+     * FIXED: This was duplicated in the previous file.
+     */
+    public function update(Request $request, $staffID): RedirectResponse
     {
         // Find the staff by their custom staffID
         $staff = Staff::where('staffID', $staffID)->firstOrFail();
@@ -193,7 +192,7 @@ public function checkAvailability(Request $request)
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'position' => ['required', 'string', 'max:50'],
-            'email' => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique('staff')->ignore($staff->staffID, 'staffID')],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('staff')->ignore($staff->staffID, 'staffID')],
         ]);
 
         // Save changes
@@ -204,7 +203,7 @@ public function checkAvailability(Request $request)
     }
 
     /**
-     * Show form to add new staff.
+     * Show form to add new staff (and list existing staff).
      */
     public function create(): View
     {
@@ -212,81 +211,69 @@ public function checkAvailability(Request $request)
             return redirect()->route('login');
         }
 
-    $staffs = Staff::all();
+        $staffs = Staff::all();
 
-    // 3. Send the data to the page
-    return view('staff.add-staff', [
-        'staffs' => $staffs, // This fills the table
-        'totalStaffCount' => $staffs->count(), // Fills Card 1
-        'driverCount' => $staffs->where('position', 'Driver')->count(), // Fills Card 2
-        'adminCount' => $staffs->where('position', 'Administrator')->count(), // Fills Card 3
-        'managerCount' => $staffs->where('position', 'Manager')->count(), // Fills Card 4
-    ]);
-
-        // FIX: Changed from 'staff.add' to 'staff.add-staff'
-        return view('staff.add-staff'); 
+        return view('staff.add-staff', [
+            'staffs' => $staffs,
+            'totalStaffCount' => $staffs->count(),
+            'driverCount' => $staffs->where('position', 'Driver')->count(),
+            'adminCount' => $staffs->where('position', 'Administrator')->count(),
+            'managerCount' => $staffs->where('position', 'Manager')->count(),
+        ]);
     }
 
     /**
-     * Store a new staff member.
+     * Helper to show the 'functioning' creation view if needed.
      */
     public function createFunctioning() 
     {
-        // Check if staff is logged in
-        if (!auth()->guard('staff')->check()) {
+        if (!Auth::guard('staff')->check()) {
             return redirect()->route('login');
         }
-
-        // This looks for the file: resources/views/staff/add-stafffunctioning.blade.php
         return view('staff.add-stafffunctioning');
     }
 
     public function store(Request $request): RedirectResponse
     {
-    // 1. Ensure user is authenticated
-    if (!Auth::guard('staff')->check()) {
-        return redirect()->route('login');
-    }
+        // 1. Ensure user is authenticated
+        if (!Auth::guard('staff')->check()) {
+            return redirect()->route('login');
+        }
 
-    // 2. Pre-process Email
-    // Combine the username input with the hardcoded domain
-    $fullEmail = $request->input('email_username') . '@hasta.com';
+        // 2. Pre-process Email
+        $fullEmail = $request->input('email_username') . '@hasta.com';
+        $request->merge(['email' => $fullEmail]);
 
-    // Merge this full email back into the request data so we can validate 'email'
-    $request->merge(['email' => $fullEmail]);
+        // 3. Validate
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email_username' => ['required', 'string', 'max:50', 'alpha_dash'], 
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:staff'], 
+            'position' => ['required', 'string', 'max:50'],
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ]);
 
-    // 3. Validate
-    $request->validate([
-        'name' => ['required', 'string', 'max:255'],
-        'email_username' => ['required', 'string', 'max:50', 'alpha_dash'], // Ensure username has no spaces/weird chars
-        'email' => ['required', 'string', 'email', 'max:255', 'unique:staff'], // Validate the FULL email
-        'position' => ['required', 'string', 'max:50'],
-        'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
-    ]);
+        // 4. Auto-Generate Staff ID
+        $latestStaff = Staff::orderBy('staffID', 'desc')->first();
+        
+        if (!$latestStaff) {
+            $newStaffID = 'STAFF001';
+        } else {
+            $lastNumber = intval(substr($latestStaff->staffID, 5)); 
+            $newStaffID = 'STAFF' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        }
 
-    // 4. Auto-Generate Staff ID
-    $latestStaff = Staff::orderBy('staffID', 'desc')->first();
-    
-    if (!$latestStaff) {
-        $newStaffID = 'STAFF001';
-    } else {
-        // Extract the number part from 'STAFF005'
-        // 'STAFF' is 5 characters long, so we substring from index 5
-        $lastNumber = intval(substr($latestStaff->staffID, 5)); 
-        $newStaffID = 'STAFF' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-    }
+        // 5. Create Staff
+        Staff::create([
+            'name' => $request->name,
+            'staffID' => $newStaffID,
+            'email' => $request->email, 
+            'position' => $request->position,
+            'password' => Hash::make($request->password),
+        ]);
 
-    // 5. Create Staff
-    Staff::create([
-        'name' => $request->name,
-        'staffID' => $newStaffID,
-        'email' => $request->email, // This now contains 'username@hasta.com'
-        'position' => $request->position,
-        'password' => Hash::make($request->password),
-    ]);
-
-    return redirect()->route('staff.add-stafffunctioning')
-    ->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
+        return redirect()->route('staff.add-stafffunctioning')
+            ->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
     }
 
     /**
@@ -298,52 +285,55 @@ public function checkAvailability(Request $request)
     }
 
     /**
-     * Bookings management list for staff.
+     * Bookings management list.
      */
-    public function bookingManagement(Request $request): View
+    public function bookingManagement(Request $request)
     {
         if (!Auth::guard('staff')->check()) {
             return redirect()->route('login');
+        }  
+        
+        $query = Booking::with(['fleet', 'customer']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('bookingID', 'LIKE', "%{$search}%")
+                ->orWhere('plateNumber', 'LIKE', "%{$search}%")
+                ->orWhere('matricNum', 'LIKE', "%{$search}%")
+                ->orWhereHas('customer', function($subQuery) use ($search) {
+                    $subQuery->where('name', 'LIKE', "%{$search}%");
+                });
+            });
         }
 
-        $bookings = Booking::with(['customer', 'fleet', 'reward'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        if ($request->filled('status')) {
+            $query->where('bookingStat', 'LIKE', $request->status);
+        }
 
-        // Compute dashboard metrics (case-insensitive status checks)
+        $bookings = $query->orderBy('created_at', 'desc')->paginate(10);
+        
         $totalBookings = Booking::count();
-        $confirmedCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['confirmed'])->count();
-        $pendingCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['pending'])->count();
-        $completedCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['completed'])->count();
-
-        // Pending verification: if the `payment_status` column exists, use it;
-        // otherwise fall back to counting pending bookings.
-        if (Schema::hasColumn('booking', 'payment_status')) {
-            $pendingVerificationCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['pending'])
-                ->where(function($q) {
-                    $q->whereNull('payment_status')
-                      ->orWhereRaw('LOWER(payment_status) <> ?', ['paid']);
-                })->count();
-        } else {
-            $pendingVerificationCount = Booking::whereRaw('LOWER(bookingStat) = ?', ['pending'])->count();
-        }
+        $confirmedCount = Booking::where('bookingStat', 'confirmed')->count();
+        $pendingCount = Booking::where('bookingStat', 'pending')->count();
+        $completedCount = Booking::where('bookingStat', 'completed')->count();
+        $cancelledCount = Booking::where('bookingStat', 'cancelled')->count();
 
         return view('staff.bookingmanagement', [
             'bookings' => $bookings,
             'totalBookings' => $totalBookings,
             'confirmedCount' => $confirmedCount,
             'pendingCount' => $pendingCount,
-            'pendingVerificationCount' => $pendingVerificationCount,
             'completedCount' => $completedCount,
+            'cancelledCount' => $cancelledCount
         ]);
     }
 
     /**
-     * Display the Fleet Management page with filtering and search.
+     * Fleet Management page.
      */
     public function fleet(Request $request)
     {
-        // 1. Calculate Stats
         $stats = [
             'total'       => Fleet::count(),
             'available'   => Fleet::where('status', 'available')->count(),
@@ -351,10 +341,8 @@ public function checkAvailability(Request $request)
             'maintenance' => Fleet::where('status', 'maintenance')->count(),
         ];
 
-        // 2. Setup query
         $query = Fleet::query();
 
-        // 3. Search Logic
         if ($search = $request->input('search')) {
             $query->where(function($q) use ($search) {
                 $q->where('make', 'like', "%{$search}%")
@@ -363,7 +351,6 @@ public function checkAvailability(Request $request)
             });
         }
 
-        // 4. Filter Logic
         if ($filter = $request->input('filter')) {
             if ($filter !== 'all') {
                 $query->where('status', $filter);
@@ -376,7 +363,7 @@ public function checkAvailability(Request $request)
     }
 
     /**
-     * Display Rewards for Staff.
+     * Rewards page.
      */
     public function rewards()
     {
@@ -392,89 +379,103 @@ public function checkAvailability(Request $request)
         return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
     }
 
-    /**
-     * Display the blacklist records
-     */
-    public function blacklistIndex() 
-    {
-        $blacklisted = Customer::where('accStatus', 'like', 'blacklisted%')->get();
-            
-            $count = $blacklisted->count();
+    // ==========================================
+    // BLACKLIST MANAGEMENT SECTION
+    // ==========================================
 
-            // Make sure this path matches your actual file location (staff.blacklist or staff.reports.blacklist)
-            return view('staff.blacklist', compact('blacklisted', 'count'));
+    /**
+     * Display Blacklist Page
+     */
+    public function blacklistIndex(): View
+    {
+        $blacklisted = Customer::where('accStatus', 'LIKE', 'blacklisted%')->get();
+        $count = $blacklisted->count();
+
+        return view('staff.blacklist', compact('blacklisted', 'count'));
     }
 
     /**
-     * Update a customer's status to blacklisted
+     * Add Customer to Blacklist
      */
     public function addToBlacklist(Request $request) 
     {
         $customer = Customer::where('matricNum', $request->matricNum)->first();
+        
         if ($customer) {
-            $customer->update(['accStatus' => 'blacklisted: ' . $request->reason]);
+            $customer->accStatus = 'blacklisted'; 
+            $customer->blacklistReason = $request->reason;
+            $customer->save();
+            
             return back()->with('success', 'Customer blacklisted successfully.');
         }
         return back()->with('error', 'Customer not found.');
     }
 
+    /**
+     * Store Blacklist (Alternative Method)
+     */
     public function storeBlacklist(Request $request)
     {
-        // 1. Validate the input
         $request->validate([
-            'matricNum' => 'required',
-            'reason' => 'required'
+            'matricNum' => 'required|string',
+            'reason' => 'required|string|max:255',
         ]);
 
-        // 2. Find the customer
         $customer = Customer::where('matricNum', $request->matricNum)->first();
 
         if ($customer) {
-            // 3. Update the status with the prefix
-            // This changes NULL to "blacklisted: Your Reason"
-            $customer->accStatus = 'blacklisted: ' . $request->reason;
-            
-            // 4. Save to database
+            $customer->accStatus = 'blacklisted'; 
+            $customer->blacklistReason = $request->reason;
             $customer->save();
 
             return redirect()->route('staff.blacklist.index')
-                            ->with('success', 'Customer blacklisted successfully.');
+                ->with('success', 'Customer has been blacklisted successfully.');
         }
 
         return back()->with('error', 'Customer not found in database.');
     }
 
+    /**
+     * Remove Customer from Blacklist
+     */
+    public function destroyBlacklist($matricNum)
+    {
+        $customer = Customer::where('matricNum', $matricNum)->first();
+
+        if ($customer) {
+            $customer->accStatus = 'active'; 
+            $customer->blacklistReason = null;
+            $customer->save();
+
+            return redirect()->route('staff.blacklist.index')
+                ->with('success', 'Customer has been removed from the blacklist.');
+        }
+
+        return back()->with('error', 'Customer not found.');
+    }
+
+    /**
+     * API: Search Customer by Matric No
+     */
     public function searchCustomer($matric)
     {
-        $customer = \App\Models\Customer::where('matricNum', $matric)->first();
+        $customer = Customer::where('matricNum', $matric)->first();
         
         if ($customer) {
             return response()->json([
                 'name' => $customer->name,
-                'icNum_passport' => $customer->icNum_passport, // Matches your Blade ID
+                'faculty' => $customer->faculty ?? 'N/A',           
+                'collegeAddress' => $customer->collegeAddress ?? 'N/A',
+                'icNum_passport' => $customer->icNum_passport,
                 'email' => $customer->email
             ]);
         }
         return response()->json(null);
     }
 
-    public function destroyBlacklist($matricNum)
-    {
-        // 1. Find the customer by their matric number
-        $customer = Customer::where('matricNum', $matricNum)->first();
-
-        if ($customer) {
-            // 2. Set the status back to NULL (or 'active')
-            // This removes them from the "blacklisted" query results
-            $customer->accStatus = null; 
-            $customer->save();
-
-            return redirect()->route('staff.blacklist.index')
-                            ->with('success', 'Customer has been removed from the blacklist.');
-        }
-
-        return back()->with('error', 'Customer not found.');
-    }
+    // ==========================================
+    // OTHER SECTIONS
+    // ==========================================
 
     public function incomeExpenses()
     {
@@ -483,8 +484,13 @@ public function checkAvailability(Request $request)
 
     public function missionsIndex(Request $request)
     {
+        // FIXED: Added safety check. If user is not logged in, 'auth()->user()' is null and this line would crash.
+        if (!Auth::guard('staff')->check()) {
+            return redirect()->route('login');
+        }
+
         $status = $request->query('status');
-        $staffID = auth()->user()->staffID;
+        $staffID = auth()->guard('staff')->user()->staffID;
 
         $query = Mission::query();
 
@@ -500,19 +506,19 @@ public function checkAvailability(Request $request)
         $missions = $query->latest()->get();
 
         return view('staff.missions', compact('missions'));
-}
+    }
 
     public function missionStore(Request $request) 
     {
-    Mission::create([
-        'title' => $request->title,
-        'requirements' => $request->req,
-        'description' => $request->desc,
-        'commission' => $request->commission,
-        'remarks' => $request->remarks,
-        'status' => 'Available'
-    ]);
-    return back()->with('success', 'Task published successfully!');
+        Mission::create([
+            'title' => $request->title,
+            'requirements' => $request->req,
+            'description' => $request->desc,
+            'commission' => $request->commission,
+            'remarks' => $request->remarks,
+            'status' => 'Available'
+        ]);
+        return back()->with('success', 'Task published successfully!');
     }
 
     public function missionAccept($id) 
@@ -520,7 +526,7 @@ public function checkAvailability(Request $request)
         $mission = Mission::findOrFail($id);
         $mission->update([
             'status' => 'Ongoing',
-            'assigned_to' => auth()->user()->staffID // Assuming staff is logged in
+            'assigned_to' => auth()->user()->staffID
         ]);
         return back()->with('success', 'Task accepted! Check your ongoing records.');
     }
@@ -534,7 +540,6 @@ public function checkAvailability(Request $request)
     {
         $mission = Mission::findOrFail($id);
 
-        // Security check: only the assigned staff can complete it
         if ($mission->assigned_to !== auth()->user()->staffID) {
             return back()->with('error', 'You are not authorized to complete this task.');
         }

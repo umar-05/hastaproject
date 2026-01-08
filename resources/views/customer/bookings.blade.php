@@ -119,6 +119,12 @@
                                 } elseif (strpos($modelName, 'vellfire') !== false) {
                                     $vehicleImage = 'vellfire-2020.png';
                                     $vehicleType = 'MPV';
+                                } elseif (strpos($modelName, 'x50') !== false) {
+                                    $vehicleImage = 'x50-2024.png';
+                                    $vehicleType = 'SUV';
+                                } elseif (strpos($modelName, 'y15') !== false) {
+                                    $vehicleImage = 'y15zr-2023.png';
+                                    $vehicleType = 'Motorcycle';
                                 }
                             }
                             
@@ -150,6 +156,28 @@
                                         <div>
                                             <h3 class="text-xl font-bold text-gray-900">{{ $vehicleName }}</h3>
                                             <p class="text-sm text-gray-500 mb-2">{{ $vehicleType }}</p>
+
+                                            {{-- --- NEW: INSPECTION FORM STATUS TAGS --- --}}
+                                            <div class="flex flex-wrap gap-2 mt-1">
+                                                @php
+                                                    $hasPickup = !empty($booking->pickupForm);
+                                                    $hasReturn = !empty($booking->returnForm);
+                                                @endphp
+
+                                                @if($hasPickup && $hasReturn)
+                                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-600 border border-blue-100">
+                                                        Forms: Completed
+                                                    </span>
+                                                @elseif($hasPickup || $hasReturn)
+                                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-600 border border-purple-100">
+                                                        Forms: Partial
+                                                    </span>
+                                                @else
+                                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-400 border border-slate-200">
+                                                        Forms: Pending
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </div>
                                         <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border {{ $statusColor }}">
                                             {{ ucfirst($booking->bookingStat ?? 'unknown') }}

@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Auth;
 // ==============================
 // 1. PUBLIC ROUTES
 // ==============================
-Route::get('/', fn() => view('home'))->name('root');
+Route::get('/', [\App\Http\Controllers\VehicleController::class, 'welcome'])->name('root');
 Route::get('/faq', fn() => view('customer.faq'))->name('faq');
 Route::get('/contact', fn() => view('contact'))->name('contact');
 
@@ -30,31 +30,53 @@ Route::post('/register/process-matric-card', [RegisteredUserController::class, '
     ->name('register.process-matric-card')
     ->middleware('guest');
 
+Route::post('/bookings/validate-voucher', [BookingController::class, 'validateVoucher'])
+    ->name('bookings.validateVoucher');
+
 
 // ==============================
-// 2. CUSTOMER ROUTES (Guard: customer)
+// 2. SHARED ROUTES (Customer OR Staff)
+// ==============================
+// These routes need to be accessible by both Staff (for the modal) and Customers.
+Route::middleware(['auth:customer,staff', 'prevent-back'])->group(function () {
+    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::post('/bookings/{booking}/forms', [BookingController::class, 'uploadForms'])->name('bookings.upload-forms');
+});
+
+
+// ==============================
+// 3. CUSTOMER ROUTES (Guard: customer)
 // ==============================
 Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function () {
 
     Route::get('/home', [CustomerController::class, 'dashboard'])->name('home');
-    Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
-    Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
 
-    // Rewards Store
-    Route::get('/rewards', [RewardController::class, 'index'])->name('reward.index');
-    Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('reward.claimed');
-    Route::post('/rewards/claim', [RewardController::class, 'claim'])->name('rewards.claim');
+    // === RESTRICTED ROUTES (Blacklisted users cannot access these) ===
+    Route::middleware(['not.blacklisted'])->group(function () {
+        
+        // 1. Book Now / Vehicles
+        Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
+        Route::get('/vehicles/{id}', [VehicleController::class, 'show'])->name('vehicles.show');
 
-    // Booking Management
-    Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
-    Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
-    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
-    Route::match(['get','post'],'/bookings/payment', [BookingController::class, 'payment'])->name('bookings.payment');
-    Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
-    Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
-    Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
+        // 2. Rewards Store
+        Route::get('/rewards', [RewardController::class, 'index'])->name('reward.index');
+        Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('reward.claimed');
+        Route::post('/rewards/claim', [RewardController::class, 'claim'])->name('rewards.claim');
 
-    // Profile Management
+        // 3. Booking Management
+        Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+        Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
+        Route::match(['get','post'],'/bookings/payment', [BookingController::class, 'payment'])->name('bookings.payment');
+        Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
+        
+        // Note: You might want to allow them to CANCEL existing bookings even if blacklisted, 
+        // but if not, keep it inside this group.
+        Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+        Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
+    });
+    // =================================================================
+
+    // Profile Management (Usually kept accessible so they can see their status/logout)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/documents', [ProfileController::class, 'storeDocuments'])->name('profile.documents.store');
@@ -62,93 +84,81 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
 });
 
 // ==============================
-// 3. STAFF ROUTES (Guard: staff)
+// 4. STAFF ROUTES (Guard: staff)
 // ==============================
 Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.')->group(function () {
 
     // Dashboard -> /staff/dashboard
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
-
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
 
     Route::resource('mission', MissionController::class);
     Route::get('/fleet/check', [StaffController::class, 'checkAvailability'])->name('fleet.check');
-    // 1 & 2. Pickup & Return (both go to the same blade)
+    
     Route::get('/pickup-return', function () {
         return view('staff.pickup-return');
     })->name('pickup-return');
-
-    // 3. View All (goes to Booking Management)
-    Route::get('/booking-management', function () {
-        return view('staff.bookingmanagement');
-    })->name('bookingmanagement');
 
     // Fleet management (Staff)
     Route::prefix('fleet')->name('fleet.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Staff\FleetController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\Staff\FleetController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\Staff\FleetController::class, 'store'])->name('store');
-        // Edit / Update / Destroy (uses plateNumber as the primary key)
         Route::get('/{plateNumber}/edit', [\App\Http\Controllers\Staff\FleetController::class, 'edit'])->name('edit');
         Route::match(['put','patch'],'/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'update'])->name('update');
         Route::delete('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'destroy'])->name('destroy');
-        // Show a single vehicle (uses plateNumber as the primary key)
         Route::get('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'show'])->name('show');
-        // Additional staff fleet routes (edit/delete) can be added here
+        
+        // Approve / Cancel Bookings
+        Route::post('/bookings/{id}/approve', [BookingController::class, 'approve'])->name('bookings.approve');
+        Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     });
 
-    // Staff Profile -> /staff/profile
-    // Reward Management (This matches your Blade: route('staff.rewards') and route('staff.rewards.store'))
+    // Reward Management
     Route::get('/dashboard/reward', [RewardController::class, 'index'])->name('rewards');
     Route::post('/dashboard/reward', [RewardController::class, 'store'])->name('rewards.store');
     Route::delete('/dashboard/reward/{id}', [RewardController::class, 'destroy'])->name('rewards.destroy');
-
+    
 
     // Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
 
-    // In routes/web.php inside the Staff Group
-Route::get('/reports/daily-income', function () {
-    return view('staff.reports.dailyincome.index');
-})->name('report.daily-income');
+    Route::get('/reports/daily-income', function () {
+        return view('staff.reports.dailyincome.index');
+    })->name('report.daily-income');
 
     // Staff User Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
     Route::post('/store', [StaffController::class, 'store'])->name('store');
 
-    // Operational
-    Route::get('/pickup-return', [StaffController::class, 'pickupReturn'])->name('pickup-return');
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
-    // Inside the staff middleware group in routes/web.php
     Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
-    // Reward Management for Staff
-    // Add these inside the 'staff.' named group in web.php
-Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
-Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
-Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
+    
+    Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+    Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
+    Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
     Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+    
     Route::prefix('rewards')->name('reward.')->group(function() {
         Route::get('/', [StaffController::class, 'rewards'])->name('index');
         Route::get('/create', [RewardController::class, 'create'])->name('create');
         Route::post('/', [RewardController::class, 'store'])->name('store');
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
         Route::put('/{reward}', [RewardController::class, 'update'])->name('update');
-        
-        // --- ADDED THIS LINE TO FIX YOUR ERROR ---
         Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy');
     });
 
+    // Blacklist Management
+    Route::get('/reports/blacklist', [StaffController::class, 'blacklistIndex'])->name('blacklist.index');
+    Route::post('/reports/blacklist', [StaffController::class, 'addToBlacklist'])->name('blacklist.store');
+    Route::delete('/reports/blacklist/{matricNum}', [StaffController::class, 'destroyBlacklist'])->name('blacklist.destroy');
+    Route::get('/reports/customer-search/{matric}', [StaffController::class, 'searchCustomer'])->name('customer.search');
+    Route::post('/staff/blacklist/store', [StaffController::class, 'storeBlacklist'])->name('staff.blacklist.store');
 
-// Blacklist Management
-Route::get('/reports/blacklist', [StaffController::class, 'blacklistIndex'])->name('blacklist.index');
-Route::post('/reports/blacklist', [StaffController::class, 'addToBlacklist'])->name('blacklist.store');
-// This line below is what was missing or misnamed:
-Route::delete('/reports/blacklist/{matricNum}', [StaffController::class, 'destroyBlacklist'])->name('blacklist.destroy');
-
-// Income & Expenses
-Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses'])
-    ->name('reports.incomeExpenses');
+    // Income & Expenses
+    Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses'])
+        ->name('reports.incomeExpenses');
 
     // Customer Management
     Route::get('/dashboard/customermanagement', [CustomerController::class, 'index'])->name('customermanagement');
@@ -164,11 +174,11 @@ Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses']
 
 
 // ==============================
-// 4. AUTH SYSTEM
+// 5. AUTH SYSTEM
 // ==============================
 require __DIR__.'/auth.php';
 
-// Fallback Redirect
+// Fallback for default Laravel redirects
 Route::get('/dashboard', function () {
     return redirect()->route('staff.dashboard');
 })->middleware(['auth:staff', 'prevent-back'])->name('dashboard');

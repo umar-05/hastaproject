@@ -23,6 +23,9 @@ return new class extends Migration
             $table->double('totalPrice')->nullable();
             $table->string('bookingStat')->nullable();
             $table->string('feedback')->nullable();
+            $table->string('paymentReceipt')->nullable();
+            $table->string('pickupForm')->nullable();
+            $table->string('returnForm')->nullable();
             
             
             // FK

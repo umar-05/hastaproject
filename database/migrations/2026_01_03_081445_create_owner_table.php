@@ -18,11 +18,11 @@ return new class extends Migration
             $table->string('ownerEmail')->unique()->nullable();
             $table->string('ownerPhoneNum')->unique()->nullable();
             $table->tinyText('roadtaxStat')->nullable();
-            $table->date('taxActivedate')->nullable();
-            $table->date('taxExpirydate')->nullable();
+            $table->date('roadtaxActiveDate')->nullable();
+            $table->date('roadtaxExpiryDate')->nullable();
             $table->tinyText('insuranceStat')->nullable();
             $table->date('insuranceActiveDate')->nullable();
-            $table->date('insuranceExpirydate')->nullable();
+            $table->date('insuranceExpiryDate')->nullable();
             
             $table->timestamps();
         });

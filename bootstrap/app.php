@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
     $middleware->alias([
         'prevent-back' => \App\Http\Middleware\PreventBackHistory::class,
+        'not.blacklisted' => \App\Http\Middleware\CheckBlacklist::class,
     ]);
 })
     ->withExceptions(function (Exceptions $exceptions): void {

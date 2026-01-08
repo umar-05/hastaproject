@@ -43,6 +43,7 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
+        {{-- HERO SECTION --}}
         <section class="relative rounded-[3rem] overflow-hidden mb-20 shadow-2xl group">
             <div class="absolute inset-0 bg-gradient-to-br from-hasta-red via-red-700 to-red-900 transition-transform duration-700 transform group-hover:scale-105"></div>
             
@@ -76,6 +77,7 @@
             </div>
         </section>
 
+        {{-- ACTIVE BOOKING SECTION --}}
         @if(isset($activeBooking) && $activeBooking)
         <section class="mb-24 animate-fade-up delay-100">
             <div class="glass-panel p-1 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
@@ -134,6 +136,7 @@
         </section>
         @endif
 
+        {{-- FEATURES GRID --}}
         <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24 animate-fade-up delay-200">
             <div class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-2">
                 <div class="w-16 h-16 bg-red-50 text-hasta-red rounded-2xl flex items-center justify-center mb-6 group-hover:bg-hasta-red group-hover:text-white transition-colors duration-300">
@@ -160,6 +163,7 @@
             </div>
         </section>
 
+        {{-- FEATURED VEHICLES SECTION (DYNAMIC) --}}
         <section class="mb-20 animate-fade-up delay-300">
             <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
                 <div>
@@ -175,95 +179,51 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    
+    @if(isset($featuredVehicles) && count($featuredVehicles) > 0)
+        @foreach($featuredVehicles as $vehicle)
+        <div class="group bg-white rounded-3xl p-4 shadow-[0_2px_15px_rgb(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.1)] transition-all duration-300 border border-transparent hover:border-gray-100">
+            <div class="relative bg-gray-50 rounded-2xl p-6 h-56 flex items-center justify-center mb-4 overflow-hidden">
+                <div class="absolute w-40 h-40 bg-gray-200/50 rounded-full blur-2xl group-hover:bg-red-100/50 transition-colors duration-300"></div>
                 
-                <div class="group bg-white rounded-3xl p-4 shadow-[0_2px_15px_rgb(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.1)] transition-all duration-300 border border-transparent hover:border-gray-100">
-                    <div class="relative bg-gray-50 rounded-2xl p-6 h-56 flex items-center justify-center mb-4 overflow-hidden">
-                        <div class="absolute w-40 h-40 bg-gray-200/50 rounded-full blur-2xl group-hover:bg-red-100/50 transition-colors duration-300"></div>
-                        <img src="{{ asset('/images/axia-2018.png') }}" alt="Perodua Axia" class="relative z-10 w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500 ease-out">
-                    </div>
-                    
-                    <div class="px-2">
-                        <div class="flex justify-between items-end mb-4">
-                            <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Compact</p>
-                                <h4 class="text-lg font-bold text-gray-900">Perodua Axia 2018</h4>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-hasta-red text-xl font-extrabold">RM120</span>
-                                <span class="text-gray-400 text-xs font-medium">/day</span>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-3 mb-6">
-                            <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">Auto</span>
-                            <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">4 Seats</span>
-                        </div>
-
-                        <a href="{{ route('vehicles.index') }}" class="block w-full py-3.5 rounded-xl bg-hasta-red text-white text-center font-bold text-sm transition-transform active:scale-95 hover:bg-red-700">
-                            Book Now
-                        </a>
-                    </div>
-                </div>
-
-                <div class="group bg-white rounded-3xl p-4 shadow-[0_2px_15px_rgb(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.1)] transition-all duration-300 border border-transparent hover:border-gray-100">
-                    <div class="relative bg-gray-50 rounded-2xl p-6 h-56 flex items-center justify-center mb-4 overflow-hidden">
-                         <div class="absolute w-40 h-40 bg-gray-200/50 rounded-full blur-2xl group-hover:bg-red-100/50 transition-colors duration-300"></div>
-                        <img src="{{ asset('/images/bezza-2018.png') }}" alt="Perodua Bezza" class="relative z-10 w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500 ease-out">
-                    </div>
-                    
-                    <div class="px-2">
-                        <div class="flex justify-between items-end mb-4">
-                            <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sedan</p>
-                                <h4 class="text-lg font-bold text-gray-900">Perodua Bezza 2018</h4>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-hasta-red text-xl font-extrabold">RM140</span>
-                                <span class="text-gray-400 text-xs font-medium">/day</span>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-3 mb-6">
-                            <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">Auto</span>
-                            <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">5 Seats</span>
-                        </div>
-
-                        <a href="{{ route('vehicles.index') }}" class="block w-full py-3.5 rounded-xl bg-hasta-red text-white text-center font-bold text-sm transition-transform active:scale-95 hover:bg-red-700">
-                            Book Now
-                        </a>
-                    </div>
-                </div>
-
-                <div class="group bg-white rounded-3xl p-4 shadow-[0_2px_15px_rgb(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.1)] transition-all duration-300 border border-transparent hover:border-gray-100">
-                    <div class="relative bg-gray-50 rounded-2xl p-6 h-56 flex items-center justify-center mb-4 overflow-hidden">
-                         <div class="absolute w-40 h-40 bg-gray-200/50 rounded-full blur-2xl group-hover:bg-red-100/50 transition-colors duration-300"></div>
-                        <img src="{{ asset('/images/myvi-2015.png') }}" alt="Perodua Myvi" class="relative z-10 w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500 ease-out">
-                    </div>
-                    
-                    <div class="px-2">
-                        <div class="flex justify-between items-end mb-4">
-                            <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sport Hatch</p>
-                                <h4 class="text-lg font-bold text-gray-900">Perodua Myvi 2015</h4>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-hasta-red text-xl font-extrabold">RM120</span>
-                                <span class="text-gray-400 text-xs font-medium">/day</span>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-3 mb-6">
-                            <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">Auto</span>
-                            <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">5 Seats</span>
-                        </div>
-
-                        <a href="{{ route('vehicles.index') }}" class="block w-full py-3.5 rounded-xl bg-hasta-red text-white text-center font-bold text-sm transition-transform active:scale-95 hover:bg-red-700">
-                            Book Now
-                        </a>
-                    </div>
-                </div>
-
+                {{-- FIXED SYNTAX BELOW: $vehicle->image --}}
+                <img src="{{ asset('images/'.$vehicle->image) }}" 
+                        alt="{{ $vehicle->name }}" 
+                        class="relative z-10 w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500 ease-out">
             </div>
+            
+            <div class="px-2">
+                <div class="flex justify-between items-end mb-4">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{{ $vehicle->type }}</p>
+                        <h4 class="text-lg font-bold text-gray-900">{{ $vehicle->name }}</h4>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-hasta-red text-xl font-extrabold">RM{{ $vehicle->price }}</span>
+                        <span class="text-gray-400 text-xs font-medium">/day</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mb-6">
+                    <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">{{ $vehicle->transmission }}</span>
+                    <span class="px-3 py-1 rounded-full bg-gray-50 text-xs font-semibold text-gray-600 border border-gray-100">{{ $vehicle->seats }} Seats</span>
+                </div>
+
+                {{-- Use plateNumber for the route ID --}}
+                <a href="{{ route('vehicles.show', $vehicle->plateNumber) }}" class="block w-full py-3.5 rounded-xl bg-hasta-red text-white text-center font-bold text-sm transition-transform active:scale-95 hover:bg-red-700">
+                    Book Now
+                </a>
+            </div>
+        </div>
+        @endforeach
+    @else
+        <div class="col-span-3 text-center py-10 bg-gray-50 rounded-3xl">
+            <p class="text-gray-500">No featured vehicles available at the moment.</p>
+            <a href="{{ route('vehicles.index') }}" class="text-hasta-red font-bold hover:underline mt-2 inline-block">Go to Fleet</a>
+        </div>
+    @endif
+
+</div>
         </section>
 
     </main>

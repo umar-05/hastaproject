@@ -19,6 +19,7 @@ return new class extends Migration
             $table->mediumText('rewardType');
             $table->integer('rewardAmount');
             $table->tinyInteger('totalClaimable');
+            $table->tinyInteger('claimedCount')->default(0);
             $table->date('expiryDate');
             $table->mediumText('rewardStatus');
 
