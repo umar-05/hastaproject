@@ -15,6 +15,12 @@
         .animate-fade-in { animation: fadeInUp 0.6s ease-out forwards; }
         .delay-100 { animation-delay: 0.1s; }
         .delay-200 { animation-delay: 0.2s; }
+        
+        /* Grayscale class for used items */
+        .used-card {
+            filter: grayscale(100%);
+            opacity: 0.7;
+        }
     </style>
 
     <div class="py-12 bg-[#F8FAFC] min-h-screen font-sans">
@@ -28,7 +34,7 @@
                         <i class="fas fa-store"></i> Rewards Store
                     </a>
                     <a href="{{ route('rewards.claimed') }}" 
-                       class="px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 {{ request()->routeIs('reward.claimed') ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg transform scale-105' : 'text-gray-500 hover:bg-gray-50' }}">
+                       class="px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 {{ request()->routeIs('rewards.claimed') ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg transform scale-105' : 'text-gray-500 hover:bg-gray-50' }}">
                         <i class="fas fa-wallet"></i> My Wallet
                     </a>
                 </div>
@@ -54,7 +60,10 @@
 
                 <div class="relative z-10 mt-6 md:mt-0">
                     <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 text-center min-w-[140px]">
-                        <span class="block text-4xl font-black">{{ $myRewards->count() }}</span>
+                        {{-- UPDATED: Only count ACTIVE rewards --}}
+                        <span class="block text-4xl font-black">
+                            {{ $myRewards->where('status', 'Active')->count() }}
+                        </span>
                         <span class="text-[10px] font-bold uppercase tracking-wider opacity-80">Active Codes</span>
                     </div>
                 </div>
@@ -72,13 +81,18 @@
 
                 <div id="rewardsList" class="space-y-6">
                     @forelse($myRewards as $redemption)
-                        <div class="group bg-white rounded-[2.5rem] p-1 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-red-500/5 hover:-translate-y-1 transition-all duration-300">
+                        @php
+                            // Check status
+                            $isUsed = strtolower($redemption->status) === 'used';
+                        @endphp
+
+                        <div class="group bg-white rounded-[2.5rem] p-1 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-red-500/5 hover:-translate-y-1 transition-all duration-300 {{ $isUsed ? 'used-card hover:translate-y-0 hover:shadow-none' : '' }}">
                             <div class="p-8 flex flex-col md:flex-row gap-8 items-center">
                                 
                                 {{-- Left: Icon & Value --}}
                                 <div class="flex flex-col items-center justify-center min-w-[120px] text-center border-b md:border-b-0 md:border-r border-slate-100 pb-6 md:pb-0 md:pr-8">
-                                    <div class="h-16 w-16 rounded-2xl bg-green-50 text-green-500 flex items-center justify-center text-2xl shadow-inner mb-3">
-                                        <i class="fas fa-check-circle"></i>
+                                    <div class="h-16 w-16 rounded-2xl {{ $isUsed ? 'bg-gray-100 text-gray-400' : 'bg-green-50 text-green-500' }} flex items-center justify-center text-2xl shadow-inner mb-3">
+                                        <i class="fas {{ $isUsed ? 'fa-history' : 'fa-check-circle' }}"></i>
                                     </div>
                                     <h3 class="text-2xl font-black text-slate-800 leading-none">
                                         {{ $redemption->reward->rewardAmount }}{{ $redemption->reward->rewardType == 'Discount' ? '%' : '' }}
@@ -89,36 +103,58 @@
                                 {{-- Center: Details --}}
                                 <div class="flex-1 text-center md:text-left">
                                     <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
-                                        <span class="px-3 py-1 bg-green-50 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wide">
-                                            Active
-                                        </span>
-                                        <span class="text-xs text-slate-400 font-bold tracking-wide">
-                                            <i class="far fa-clock mr-1"></i> Claimed: {{ \Carbon\Carbon::parse($redemption->redemptionDate)->format('d M Y') }}
-                                        </span>
+                                        
+                                        @if($isUsed)
+                                            {{-- USED STATUS --}}
+                                            <span class="px-3 py-1 bg-gray-200 text-gray-600 text-[10px] font-bold rounded-full uppercase tracking-wide">
+                                                Used
+                                            </span>
+                                            <span class="text-xs text-slate-400 font-bold tracking-wide">
+                                                <i class="far fa-calendar-check mr-1"></i> Used on: {{ $redemption->updated_at?->format('d M Y') }}
+                                            </span>
+                                        @else
+                                            {{-- ACTIVE STATUS --}}
+                                            <span class="px-3 py-1 bg-green-50 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wide">
+                                                Active
+                                            </span>
+                                            <span class="text-xs text-slate-400 font-bold tracking-wide">
+                                                <i class="far fa-clock mr-1"></i> Claimed: {{ \Carbon\Carbon::parse($redemption->redemptionDate)->format('d M Y') }}
+                                            </span>
+                                        @endif
+
                                     </div>
                                     
                                     <h4 class="text-lg font-bold text-slate-800 mb-2">
                                         {{ $redemption->reward->rewardType }} Voucher
                                     </h4>
                                     
+                                    @if(!$isUsed)
                                     <div class="text-sm text-slate-500 font-medium bg-orange-50 border border-orange-100 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg">
                                         <i class="far fa-calendar-times text-orange-500"></i>
                                         <span>Expires on {{ \Carbon\Carbon::parse($redemption->reward->expiryDate)->format('d M Y') }}</span>
                                     </div>
+                                    @endif
                                 </div>
 
                                 {{-- Right: Code & Action --}}
                                 <div class="w-full md:w-auto bg-slate-50 rounded-2xl p-5 border border-slate-100 flex flex-col items-center gap-3 min-w-[200px]">
                                     <div class="text-center">
                                         <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-1">Promo Code</span>
-                                        <span class="font-mono text-xl font-black text-slate-800 tracking-widest select-all">
+                                        <span class="font-mono text-xl font-black {{ $isUsed ? 'text-gray-400 line-through' : 'text-slate-800' }} tracking-widest select-all">
                                             {{ $redemption->reward->voucherCode }}
                                         </span>
                                     </div>
-                                    <button onclick="copyToClipboard('{{ $redemption->reward->voucherCode }}', this)" 
-                                            class="w-full py-2.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl text-sm hover:bg-slate-800 hover:text-white hover:border-slate-800 transition-all active:scale-95 flex items-center justify-center gap-2 group-btn">
-                                        <i class="far fa-copy"></i> <span>Copy Code</span>
-                                    </button>
+                                    
+                                    @if($isUsed)
+                                        <button disabled class="w-full py-2.5 bg-gray-200 border border-gray-200 text-gray-500 font-bold rounded-xl text-sm cursor-not-allowed flex items-center justify-center gap-2">
+                                            <i class="fas fa-lock"></i> <span>Redeemed</span>
+                                        </button>
+                                    @else
+                                        <button onclick="copyToClipboard('{{ $redemption->reward->voucherCode }}', this)" 
+                                                class="w-full py-2.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl text-sm hover:bg-slate-800 hover:text-white hover:border-slate-800 transition-all active:scale-95 flex items-center justify-center gap-2 group-btn">
+                                            <i class="far fa-copy"></i> <span>Copy Code</span>
+                                        </button>
+                                    @endif
                                 </div>
 
                             </div>

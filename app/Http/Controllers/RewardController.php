@@ -38,9 +38,11 @@ class RewardController extends Controller
     {
         $customer = Auth::user();
 
-        // Fetch rewards claimed by this user
         $myRewards = RewardRedemption::with('reward')
             ->where('matricNum', $customer->matricNum)
+            // Sort by Status (Active first) then by Date (Newest first)
+            ->orderByRaw("FIELD(status, 'Active', 'Used')") 
+            ->orderBy('redemptionDate', 'desc')
             ->get();
 
         return view('reward.claimed', compact('myRewards'));
