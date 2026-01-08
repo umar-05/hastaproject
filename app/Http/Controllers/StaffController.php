@@ -379,60 +379,187 @@ class StaffController extends Controller
         return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
     }
 /**
-     * Display the Daily Income Report.
-     */
-    public function dailyIncome(): \Illuminate\View\View
-    {
-        // 1. Fetch Today's Data
-        $todayQuery = \App\Models\Booking::whereDate('created_at', \Carbon\Carbon::today())
-            ->whereIn('bookingStat', ['Confirmed', 'Approved', 'Completed', 'Active']);
+ * Display the Daily Income Report.
+ * 
+ * This method calculates income from PAID payments only,
+ * fetches chart data, and prepares recent transactions.
+ */
+public function dailyIncome(): \Illuminate\View\View
+{
+    // ========================================
+    // 1. TODAY'S INCOME
+    // ========================================
+    // Only count payments that are marked as 'paid' or 'completed'
+    $todayPayments = \App\Models\Payment::whereDate('paymentDate', \Carbon\Carbon::today())
+        ->where('paymentStatus', 'paid') // Adjust this if you use 'completed', 'success', etc.
+        ->get();
+    
+    $todayIncome = $todayPayments->sum('grandTotal'); // Using grandTotal as final income
+    $transactionCount = $todayPayments->count();
 
-        $todayIncome = (float) $todayQuery->sum('totalPrice');
-        $transactionCount = $todayQuery->count();
+    // ========================================
+    // 2. YESTERDAY'S INCOME (for Change %)
+    // ========================================
+    $yesterdayIncome = \App\Models\Payment::whereDate('paymentDate', \Carbon\Carbon::yesterday())
+        ->where('paymentStatus', 'paid')
+        ->sum('grandTotal');
+
+    // Calculate percentage change
+    $change = $yesterdayIncome > 0 
+        ? (($todayIncome - $yesterdayIncome) / $yesterdayIncome) * 100 
+        : ($todayIncome > 0 ? 100 : 0);
+
+    // ========================================
+    // 3. RECENT TRANSACTIONS (for the table)
+    // ========================================
+    $recentTransactionsRaw = \App\Models\Payment::with(['booking.customer'])
+        ->whereDate('paymentDate', \Carbon\Carbon::today())
+        ->where('paymentStatus', 'paid')
+        ->orderBy('paymentDate', 'desc')
+        ->limit(10)
+        ->get();
+
+    // Format for the blade view
+    $recentTransactions = $recentTransactionsRaw->map(function ($payment) {
+        return [
+            'booking_id' => $payment->bookingID ?? 'N/A',
+            'customer' => $payment->booking->customer->name ?? 'Unknown',
+            'amount' => $payment->grandTotal,
+            'date' => \Carbon\Carbon::parse($payment->paymentDate)->format('M d, Y'),
+            'time' => \Carbon\Carbon::parse($payment->paymentDate)->format('h:i A'),
+            'payment_method' => ucfirst($payment->method ?? 'N/A'),
+        ];
+    })->toArray();
+
+    // ========================================
+    // 4. DAILY INCOME CHART (Last 7 Days)
+    // ========================================
+    $dailyIncomeChart = [];
+    for ($i = 6; $i >= 0; $i--) {
+        $date = \Carbon\Carbon::today()->subDays($i);
         
-        // This connects to the "Recent Transactions" table in your UI
-        $recentTransactions = $todayQuery->orderBy('created_at', 'desc')->limit(10)->get();
-
-        // 2. Fetch Yesterday's Data for the "Change" calculation
-        $yesterdayIncome = (float) \App\Models\Booking::whereDate('created_at', \Carbon\Carbon::yesterday())
-            ->whereIn('bookingStat', ['Confirmed', 'Approved', 'Completed', 'Active'])
-            ->sum('totalPrice');
-
-        // Calculate the % Change shown in your green/red UI box
-        $change = $yesterdayIncome > 0 
-            ? (($todayIncome - $yesterdayIncome) / $yesterdayIncome) * 100 
-            : ($todayIncome > 0 ? 100 : 0);
-
-        // 3. Prepare Chart Data (Last 7 Days)
-        $days = [];
-        $incomeData = [];
-        $bookingCounts = [];
-
-        for ($i = 6; $i >= 0; $i--) {
-            $date = \Carbon\Carbon::today()->subDays($i);
-            $days[] = $date->format('D'); 
-            
-            $dayQuery = \App\Models\Booking::whereDate('created_at', $date)
-                ->whereIn('bookingStat', ['Confirmed', 'Approved', 'Completed', 'Active']);
-                
-            $incomeData[] = $dayQuery->sum('totalPrice');
-            $bookingCounts[] = $dayQuery->count();
-        }
-
-        // These variables connect to the "Daily Income Overview" and "Bookings Trend" charts
-        $dailyIncomeChart = ['labels' => $days, 'datasets' => $incomeData];
-        $bookingsTrend = ['labels' => $days, 'datasets' => $bookingCounts];
-
-        return view('staff.reports.dailyincome.index', compact(
-            'todayIncome', 
-            'yesterdayIncome', 
-            'change', 
-            'transactionCount', 
-            'recentTransactions',
-            'dailyIncomeChart',
-            'bookingsTrend'
-        ));
+        $dayIncome = \App\Models\Payment::whereDate('paymentDate', $date)
+            ->where('paymentStatus', 'paid')
+            ->sum('grandTotal');
+        
+        $dailyIncomeChart[] = [
+            'date' => $date->format('Y-m-d'),
+            'total' => round($dayIncome, 2)
+        ];
     }
+
+    // ========================================
+    // 5. BOOKINGS TREND CHART (Last 7 Days)
+    // ========================================
+    $bookingsTrend = [];
+    for ($i = 6; $i >= 0; $i--) {
+        $date = \Carbon\Carbon::today()->subDays($i);
+        
+        $bookingCount = \App\Models\Payment::whereDate('paymentDate', $date)
+            ->where('paymentStatus', 'paid')
+            ->count();
+        
+        $bookingsTrend[] = [
+            'date' => $date->format('Y-m-d'),
+            'count' => $bookingCount
+        ];
+    }
+
+    
+
+    // ========================================
+    // 6. RETURN VIEW WITH ALL DATA
+    // ========================================
+    return view('staff.reports.dailyincome.index', compact(
+        'todayIncome',
+        'yesterdayIncome',
+        'change',
+        'transactionCount',
+        'recentTransactions',
+        'dailyIncomeChart',
+        'bookingsTrend'
+    ));
+}
+/**
+ * Display the Monthly Income Report connected to the database.
+ */
+public function monthlyIncome(): \Illuminate\View\View
+{
+    $now = Carbon::now();
+    $currentYear = $now->year;
+
+    // 1. TOP CARDS DATA (Real Data)
+    $currentMonthIncome = \App\Models\Payment::whereYear('paymentDate', $currentYear)
+        ->whereMonth('paymentDate', $now->month)
+        ->sum('grandTotal');
+
+    $previousMonthIncome = \App\Models\Payment::whereYear('paymentDate', $now->copy()->subMonth()->year)
+        ->whereMonth('paymentDate', $now->copy()->subMonth()->month)
+        ->sum('grandTotal');
+
+    $yearlyTotal = \App\Models\Payment::whereYear('paymentDate', $currentYear)
+        ->sum('grandTotal');
+    
+    // Average Monthly based on months passed so far this year
+    $monthsPassedSoFar = $now->month;
+    $averageMonthly = $monthsPassedSoFar > 0 ? ($yearlyTotal / $monthsPassedSoFar) : 0;
+
+    $cards = [
+        'current_month'   => $currentMonthIncome,
+        'previous_month'  => $previousMonthIncome,
+        'average_monthly' => $averageMonthly,
+        'yearly_total'    => $yearlyTotal,
+    ];
+
+    // 2. PAYMENT METHODS (Dynamic counts for Donut Chart)
+    // Pulls from 'method' column in payment table
+    $paymentMethods = \App\Models\Payment::select('method', DB::raw('count(*) as count'))
+        ->groupBy('method')
+        ->pluck('count', 'method')
+        ->toArray();
+
+    // 3. MONTHLY BREAKDOWN (Dynamic for Table and Bar Chart)
+    $monthlyStats = \App\Models\Payment::select(
+            DB::raw('MONTH(paymentDate) as month'),
+            DB::raw('SUM(grandTotal) as income'),
+            DB::raw('COUNT(paymentID) as bookings'),
+            DB::raw('AVG(grandTotal) as avg')
+        )
+        ->whereYear('paymentDate', $currentYear)
+        ->groupBy('month')
+        ->orderBy('month')
+        ->get()
+        ->keyBy('month');
+
+    $breakdown = [];
+    $prevIncome = 0;
+
+    // Loop through all 12 months to ensure even months with 0 income show up
+    for ($m = 1; $m <= 12; $m++) {
+        $monthData = $monthlyStats->get($m);
+        $income = $monthData ? (float)$monthData->income : 0;
+        
+        // Calculate Growth % compared to the previous month in the loop
+        $growth = ($prevIncome > 0) ? (($income - $prevIncome) / $prevIncome) * 100 : ($prevIncome == 0 && $income > 0 ? 100 : null);
+
+        $breakdown[] = [
+            'month'    => Carbon::create()->month($m)->format('F'),
+            'year'     => $currentYear,
+            'income'   => $income,
+            'bookings' => $monthData ? $monthData->bookings : 0,
+            'avg'      => $monthData ? number_format($monthData->avg, 2) : '0.00',
+            'growth'   => $growth !== null ? round($growth, 1) : null
+        ];
+        
+        $prevIncome = $income;
+    }
+
+    return view('staff.reports.monthlyincome.index', compact(
+        'cards',
+        'paymentMethods',
+        'breakdown'
+    ));
+}
     // ==========================================
     // BLACKLIST MANAGEMENT SECTION
     // ==========================================

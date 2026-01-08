@@ -129,9 +129,11 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
-
+    
+    //Daily-Income Report
     Route::get('/reports/daily-income', [StaffController::class, 'dailyIncome'])->name('report.daily-income');
-
+    //Monthly-Income Report
+    Route::get('/reports/monthly-income', [StaffController::class, 'monthlyIncome'])->name('report.monthly-income');
     // Staff User Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
     Route::post('/store', [StaffController::class, 'store'])->name('store');

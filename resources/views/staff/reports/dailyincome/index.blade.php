@@ -20,7 +20,7 @@
                 <span class="text-2xl">💵</span>
             </div>
             <div class="text-2xl font-bold text-gray-800">
-                RM {{ number_format($todayIncome, 0) }}
+                RM {{ number_format($todayIncome, 2) }}
             </div>
         </div>
 
