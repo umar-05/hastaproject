@@ -378,7 +378,61 @@ class StaffController extends Controller
 
         return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
     }
+/**
+     * Display the Daily Income Report.
+     */
+    public function dailyIncome(): \Illuminate\View\View
+    {
+        // 1. Fetch Today's Data
+        $todayQuery = \App\Models\Booking::whereDate('created_at', \Carbon\Carbon::today())
+            ->whereIn('bookingStat', ['Confirmed', 'Approved', 'Completed', 'Active']);
 
+        $todayIncome = (float) $todayQuery->sum('totalPrice');
+        $transactionCount = $todayQuery->count();
+        
+        // This connects to the "Recent Transactions" table in your UI
+        $recentTransactions = $todayQuery->orderBy('created_at', 'desc')->limit(10)->get();
+
+        // 2. Fetch Yesterday's Data for the "Change" calculation
+        $yesterdayIncome = (float) \App\Models\Booking::whereDate('created_at', \Carbon\Carbon::yesterday())
+            ->whereIn('bookingStat', ['Confirmed', 'Approved', 'Completed', 'Active'])
+            ->sum('totalPrice');
+
+        // Calculate the % Change shown in your green/red UI box
+        $change = $yesterdayIncome > 0 
+            ? (($todayIncome - $yesterdayIncome) / $yesterdayIncome) * 100 
+            : ($todayIncome > 0 ? 100 : 0);
+
+        // 3. Prepare Chart Data (Last 7 Days)
+        $days = [];
+        $incomeData = [];
+        $bookingCounts = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = \Carbon\Carbon::today()->subDays($i);
+            $days[] = $date->format('D'); 
+            
+            $dayQuery = \App\Models\Booking::whereDate('created_at', $date)
+                ->whereIn('bookingStat', ['Confirmed', 'Approved', 'Completed', 'Active']);
+                
+            $incomeData[] = $dayQuery->sum('totalPrice');
+            $bookingCounts[] = $dayQuery->count();
+        }
+
+        // These variables connect to the "Daily Income Overview" and "Bookings Trend" charts
+        $dailyIncomeChart = ['labels' => $days, 'datasets' => $incomeData];
+        $bookingsTrend = ['labels' => $days, 'datasets' => $bookingCounts];
+
+        return view('staff.reports.dailyincome.index', compact(
+            'todayIncome', 
+            'yesterdayIncome', 
+            'change', 
+            'transactionCount', 
+            'recentTransactions',
+            'dailyIncomeChart',
+            'bookingsTrend'
+        ));
+    }
     // ==========================================
     // BLACKLIST MANAGEMENT SECTION
     // ==========================================
