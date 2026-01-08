@@ -118,7 +118,7 @@
             <div class="px-8 py-6 border-b flex justify-between items-center bg-gray-50">
                 <div class="flex items-center gap-3">
                     <div class="bg-red-600 text-white p-2 rounded-lg"><i class="fas fa-user-slash"></i></div>
-                    <h3 class="text-xl font-bold text-gray-900">Add to Blacklist</h3>
+                    <h3 class="text-2xl font-bold text-gray-900">Add to Blacklist</h3>
                 </div>
                 <button onclick="toggleModal('addBlacklistModal')" class="text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
             </div>
@@ -181,7 +181,7 @@
             <div class="px-8 py-6 border-b flex justify-between items-center bg-gray-50">
                 <div class="flex items-center gap-3">
                     <div class="bg-green-600 text-white p-2 rounded-lg"><i class="fas fa-edit"></i></div>
-                    <h3 class="text-xl font-bold text-gray-900">Update Blacklist Reason</h3>
+                    <h3 class="text-2xl font-bold text-gray-900">Update Blacklist Reason</h3>
                 </div>
                 <button onclick="toggleModal('editBlacklistModal')" class="text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
             </div>

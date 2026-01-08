@@ -72,7 +72,7 @@
                              onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/3202/3202926.png';">
                         
                         <div class="flex-1">
-                            <h2 class="text-xl font-bold text-gray-800">{{ $vehicleName }}</h2>
+                            <h2 class="text-2xl font-bold text-gray-800">{{ $vehicleName }}</h2>
                             <p class="text-gray-600">{{ $car->plateNumber }}</p>
                             <div class="flex gap-4 mt-2">
                                 <span class="text-red-600 font-semibold">RM{{ $pricePerDay }}/day</span>

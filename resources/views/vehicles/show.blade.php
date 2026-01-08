@@ -64,7 +64,7 @@
                     
                     {{-- Header Info --}}
                     <div class="animate-fade-up delay-100">
-                        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-tight mb-3">
+                        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight leading-tight mb-3">
                             {{ $vehicle['name'] }}
                         </h1>
                         

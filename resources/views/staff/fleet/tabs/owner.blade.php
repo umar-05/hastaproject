@@ -5,19 +5,19 @@
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         {{-- Header Section --}}
         <div class="bg-gray-50/50 px-8 py-6 border-b border-gray-100">
-            <h3 class="text-xl font-bold text-gray-900">Owner Information</h3>
+            <h3 class="text-2xl font-bold text-gray-900">Owner Information</h3>
             <p class="text-sm text-gray-500 mt-1">Primary contact and legal ownership details for this vehicle.</p>
         </div>
 
         <div class="p-8">
-            {{-- Check if Owner Name exists (using the column name from your Fleet model) --}}
-            @if($fleet->ownerName)
+            {{-- Check if Owner relation exists --}}
+            @if($fleet->owner)
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {{-- Owner Name --}}
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Full Name</label>
                         <p class="text-lg font-bold text-gray-900 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                            {{ $fleet->ownerName }}
+                            {{ $fleet->owner->ownerName }}
                         </p>
                     </div>
 
@@ -25,7 +25,7 @@
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">NRIC / Company Number</label>
                         <p class="text-lg font-bold text-gray-900 p-4 bg-gray-50 rounded-2xl border border-gray-100 font-mono">
-                            {{ $fleet->ownerIc ?? 'N/A' }}
+                            {{ $fleet->owner->ownerIC }}
                         </p>
                     </div>
 
@@ -33,7 +33,7 @@
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Phone Number</label>
                         <p class="text-lg font-bold text-gray-900 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                            {{ $fleet->ownerPhone ?? 'N/A' }}
+                            {{ $fleet->owner->ownerPhoneNum ?? 'N/A' }}
                         </p>
                     </div>
 
@@ -41,7 +41,7 @@
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Email Address</label>
                         <p class="text-lg font-bold text-gray-900 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                            {{ $fleet->ownerEmail ?? 'N/A' }}
+                            {{ $fleet->owner->ownerEmail ?? 'N/A' }}
                         </p>
                     </div>
                 </div>
@@ -55,11 +55,11 @@
                     </div>
                     <h4 class="text-lg font-bold text-gray-900">No Owner Information</h4>
                     <p class="text-sm text-gray-500 max-w-xs mx-auto mt-2">
-                        There are no owner details currently recorded for this vehicle.
+                        There are no owner details linked to this vehicle.
                     </p>
                     {{-- Optional: Link to edit page if you want to add owner later --}}
                     <a href="{{ route('staff.fleet.edit', $fleet->plateNumber) }}" class="mt-4 inline-block text-indigo-600 font-bold text-sm hover:underline">
-                        Edit Vehicle Details &rarr;
+                        Assign Owner &rarr;
                     </a>
                 </div>
             @endif

@@ -23,40 +23,40 @@
         <div class="bg-white rounded-2xl p-5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100 flex items-center justify-between hover:border-red-100 transition-colors">
             <div>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Fleet</p>
-                <h3 class="text-3xl font-extrabold text-gray-800">{{ $totalVehicles ?? 0 }}</h3>
+                <h3 class="text-3xl font-bold text-gray-800">{{ $totalVehicles ?? 0 }}</h3>
             </div>
             <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                <i class="fas fa-car-side text-xl"></i>
+                <i class="fas fa-car-side text-2xl"></i>
             </div>
         </div>
 
         <div class="bg-white rounded-2xl p-5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100 flex items-center justify-between hover:border-green-100 transition-colors">
             <div>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Available</p>
-                <h3 class="text-3xl font-extrabold text-gray-800">{{ $availableCount ?? 0 }}</h3>
+                <h3 class="text-3xl font-bold text-gray-800">{{ $availableCount ?? 0 }}</h3>
             </div>
             <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-                <i class="fas fa-check-circle text-xl"></i>
+                <i class="fas fa-check-circle text-2xl"></i>
             </div>
         </div>
 
         <div class="bg-white rounded-2xl p-5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100 flex items-center justify-between hover:border-yellow-100 transition-colors">
             <div>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">On Road</p>
-                <h3 class="text-3xl font-extrabold text-gray-800">{{ $rentedCount ?? 0 }}</h3>
+                <h3 class="text-3xl font-bold text-gray-800">{{ $rentedCount ?? 0 }}</h3>
             </div>
             <div class="w-12 h-12 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600">
-                <i class="fas fa-key text-xl"></i>
+                <i class="fas fa-key text-2xl"></i>
             </div>
         </div>
 
         <div class="bg-white rounded-2xl p-5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-gray-100 flex items-center justify-between hover:border-purple-100 transition-colors">
             <div>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Service</p>
-                <h3 class="text-3xl font-extrabold text-gray-800">{{ $maintenanceCount ?? 0 }}</h3>
+                <h3 class="text-3xl font-bold text-gray-800">{{ $maintenanceCount ?? 0 }}</h3>
             </div>
             <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
-                <i class="fas fa-tools text-xl"></i>
+                <i class="fas fa-tools text-2xl"></i>
             </div>
         </div>
     </div>

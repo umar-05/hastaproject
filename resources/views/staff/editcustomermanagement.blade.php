@@ -4,7 +4,7 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 
                 <div class="px-8 py-6 border-b border-gray-50 bg-gray-50/50">
-                    <h2 class="text-xl font-bold text-gray-900">Edit Customer Information</h2>
+                    <h2 class="text-2xl font-bold text-gray-900">Edit Customer Information</h2>
                     <p class="text-sm text-gray-500">Updating record for: <span class="font-mono font-bold text-red-600">{{ $customer->matricNum }}</span></p>
                 </div>
 

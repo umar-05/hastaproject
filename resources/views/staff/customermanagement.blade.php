@@ -85,7 +85,7 @@
                                 </td>
                                 <td class="px-6 py-5 text-center">
                                     <button onclick="openDetailsModal('{{ $customer->matricNum }}')" class="text-gray-400 hover:text-red-600 transition-all">
-                                        <i class="far fa-eye text-xl"></i>
+                                        <i class="far fa-eye text-2xl"></i>
                                     </button>
                                 </td>
                                 <td class="px-6 py-5 text-right">

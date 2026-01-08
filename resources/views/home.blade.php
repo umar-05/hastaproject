@@ -41,7 +41,7 @@
             <div class="relative z-10 flex flex-col md:flex-row items-center justify-between p-8 md:p-16">
                 
                 <div class="w-full md:w-1/2 text-white animate-fade-up z-20">
-                    <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6 drop-shadow-lg tracking-tight">
+                    <h1 class="text-5xl md:text-7xl font-bold leading-tight mb-6 drop-shadow-lg tracking-tight">
                         Drive the <br>
                         <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">Extraordinary</span>
                     </h1>
@@ -77,7 +77,7 @@
                                 <span class="block w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
                             </div>
                             <div>
-                                <h2 class="text-xl font-bold text-gray-800">Trip in Progress</h2>
+                                <h2 class="text-2xl font-bold text-gray-800">Trip in Progress</h2>
                                 <p class="text-xs text-gray-500">Booking ID #{{ $activeBooking->bookingID }}</p>
                             </div>
                          </div>
@@ -91,7 +91,7 @@
                         </div>
                         
                         <div class="w-full lg:w-2/3">
-                            <h3 class="text-3xl font-extrabold text-gray-900 mb-1">
+                            <h3 class="text-3xl font-bold text-gray-900 mb-1">
                                 {{ $activeBooking->fleet->brand ?? 'Car' }} {{ $activeBooking->fleet->model ?? 'Model' }}
                             </h3>
                             <p class="text-gray-400 font-mono text-sm tracking-widest uppercase mb-10">
@@ -131,7 +131,7 @@
                 <div class="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-900">Instant Availability</h3>
+                <h3 class="text-2xl font-bold mb-3 text-gray-900">Instant Availability</h3>
                 <p class="text-gray-500 text-sm leading-relaxed">Real-time booking engine allowing you to secure your ideal ride in seconds, 24/7.</p>
             </div>
 
@@ -139,7 +139,7 @@
                 <div class="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-900">Premium Comfort</h3>
+                <h3 class="text-2xl font-bold mb-3 text-gray-900">Premium Comfort</h3>
                 <p class="text-gray-500 text-sm leading-relaxed">Every vehicle is sanitized and inspected to ensure a safe, pristine driving environment.</p>
             </div>
 
@@ -147,7 +147,7 @@
                 <div class="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
-                <h3 class="text-xl font-bold mb-3 text-gray-900">Best Value</h3>
+                <h3 class="text-2xl font-bold mb-3 text-gray-900">Best Value</h3>
                 <p class="text-gray-500 text-sm leading-relaxed">Transparent pricing with no hidden fees. Luxury experience at competitive market rates.</p>
             </div>
         </section>
@@ -156,7 +156,7 @@
         <section class="mb-20 animate-fade-up delay-300">
             <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
                 <div>
-                    <h2 class="text-4xl font-extrabold text-gray-900 tracking-tight mb-2">Choose Your Ride</h2>
+                    <h2 class="text-4xl font-bold text-gray-900 tracking-tight mb-2">Choose Your Ride</h2>
                     <p class="text-gray-500">Find the perfect vehicle for your next adventure.</p>
                 </div>
                 <a href="{{ route('vehicles.index') }}" class="group flex items-center gap-2 text-sm font-bold text-gray-900 hover:text-red-600 transition-colors">
@@ -186,7 +186,7 @@
                                     <h4 class="text-lg font-bold text-gray-900">{{ $vehicle->name }}</h4>
                                 </div>
                                 <div class="text-right">
-                                    <span class="text-red-600 text-xl font-extrabold">RM{{ $vehicle->price }}</span>
+                                    <span class="text-red-600 text-2xl font-bold">RM{{ $vehicle->price }}</span>
                                     <span class="text-gray-400 text-xs font-medium">/day</span>
                                 </div>
                             </div>

@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-xl text-gray-800 leading-tight flex items-center gap-2">
+        <h2 class="font-bold text-2xl text-gray-800 leading-tight flex items-center gap-2">
             <i class="fas fa-wallet text-red-600"></i>
             {{ __('My Reward Wallet') }}
         </h2>
@@ -111,7 +111,7 @@
                                 <div class="w-full md:w-auto bg-slate-50 rounded-2xl p-5 border border-slate-100 flex flex-col items-center gap-3 min-w-[200px]">
                                     <div class="text-center">
                                         <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-1">Promo Code</span>
-                                        <span class="font-mono text-xl font-black text-slate-800 tracking-widest select-all">
+                                        <span class="font-mono text-2xl font-black text-slate-800 tracking-widest select-all">
                                             {{ $redemption->reward->voucherCode }}
                                         </span>
                                     </div>
@@ -129,7 +129,7 @@
                             <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <i class="fas fa-ticket-alt text-4xl text-slate-300"></i>
                             </div>
-                            <h3 class="text-xl font-bold text-slate-800 mb-2">Your wallet is empty</h3>
+                            <h3 class="text-2xl font-bold text-slate-800 mb-2">Your wallet is empty</h3>
                             <p class="text-slate-500 max-w-sm mx-auto mb-8">You haven't claimed any rewards yet. Collect stamps and head to the store!</p>
                             
                             <a href="{{ route('vehicles.index') }}" class="inline-flex items-center gap-2 bg-red-600 text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-red-100 hover:bg-red-700 hover:-translate-y-1 transition-all">

@@ -20,7 +20,7 @@ class FleetSeeder extends Seeder
                 'plateNumber' => 'VHJ8821',
                 'modelName' => 'Proton Saga Premium',
                 'year' => 2023,
-                'color' => 'Jet Grey',
+                'color' => 'Grey',
                 'status' => 'available',
                 'photo1' => 'saga-2017.png', // <--- Added Image
                 'roadtaxStat' => 'Active',
@@ -36,7 +36,7 @@ class FleetSeeder extends Seeder
                 'plateNumber' => 'JQV4512',
                 'modelName' => 'Perodua Myvi 1.5 AV',
                 'year' => 2022,
-                'color' => 'Cranberry Red',
+                'color' => 'Red',
                 'status' => 'available',
                 'photo1' => 'myvi-2020.png', // <--- Added Image
                 'roadtaxStat' => 'Active',
@@ -52,7 +52,7 @@ class FleetSeeder extends Seeder
                 'plateNumber' => 'W3344X',
                 'modelName' => 'Perodua Alza',
                 'year' => 2023,
-                'color' => 'Vintage Brown',
+                'color' => 'Blue',
                 'status' => 'available',
                 'photo1' => 'alza-2019.png', // <--- Added Image
                 'roadtaxStat' => 'Active',
@@ -68,7 +68,7 @@ class FleetSeeder extends Seeder
                 'plateNumber' => 'BQC1029',
                 'modelName' => 'Proton X50 Flagship',
                 'year' => 2024,
-                'color' => 'Passion Red',
+                'color' => 'Silver',
                 'status' => 'available',
                 'photo1' => 'x50-2024.png', // <--- Added Image
                 'roadtaxStat' => 'Active',
@@ -84,7 +84,7 @@ class FleetSeeder extends Seeder
                 'plateNumber' => 'KDD9922',
                 'modelName' => 'Yamaha Y15ZR V2',
                 'year' => 2023,
-                'color' => 'Cyan',
+                'color' => 'Black',
                 'status' => 'available',
                 'photo1' => 'y15zr-2023.png', // <--- Added Image
                 'roadtaxStat' => 'Active',

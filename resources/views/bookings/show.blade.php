@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
             {{ __('Booking Details') }}
         </h2>
     </x-slot>
@@ -95,7 +95,7 @@
                 </div>
 
                 <div class="border-t pt-8 mt-8">
-                    <h3 class="text-xl font-bold mb-6">Pricing Breakdown</h3>
+                    <h3 class="text-2xl font-bold mb-6">Pricing Breakdown</h3>
                     <div class="bg-gray-50 rounded-lg p-6 space-y-4">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Base Price</span>
@@ -131,7 +131,7 @@
 
                 {{-- --- INSPECTION FORMS SECTION --- --}}
                 <div class="border-t pt-8 mt-8">
-                    <h3 class="text-xl font-bold mb-6">Vehicle Inspection Forms</h3>
+                    <h3 class="text-2xl font-bold mb-6">Vehicle Inspection Forms</h3>
                     
                     @php
                         $isPickupDone = !empty($booking->pickupForm);
@@ -237,7 +237,7 @@
 
                 @if($booking->notes)
                 <div class="border-t pt-8 mt-8">
-                    <h3 class="text-xl font-bold mb-4">Notes</h3>
+                    <h3 class="text-2xl font-bold mb-4">Notes</h3>
                     <p class="text-gray-600 bg-gray-50 p-4 rounded-lg">{{ $booking->notes }}</p>
                 </div>
                 @endif

@@ -50,7 +50,7 @@
             <div class="mb-10">
                 <div class="flex justify-between items-center mb-6">
                     {{-- Changed from font-black to font-bold --}}
-                    <h3 class="font-bold text-xl text-gray-800 uppercase tracking-tight">RECENT BOOKINGS</h3>
+                    <h3 class="font-bold text-2xl text-gray-800 uppercase tracking-tight">RECENT BOOKINGS</h3>
                     <a href="{{ route('staff.bookingmanagement') }}" class="inline-flex items-center px-5 py-2 bg-red-50 text-red-600 font-bold text-[10px] uppercase tracking-widest rounded-full hover:bg-red-600 hover:text-white shadow-sm transition-all duration-200">
                         View All
                         <svg class="ml-2 w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -91,7 +91,7 @@
                 <div class="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
                     <div class="flex justify-between items-center mb-8">
                         {{-- Changed from font-black to font-bold --}}
-                        <h3 class="font-bold text-xl text-gray-800 uppercase tracking-tight">Customer Distribution by College</h3>
+                        <h3 class="font-bold text-2xl text-gray-800 uppercase tracking-tight">Customer Distribution by College</h3>
                         <div class="flex items-center space-x-2">
                              <span class="relative flex h-3 w-3">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>

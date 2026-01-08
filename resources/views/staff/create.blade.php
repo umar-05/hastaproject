@@ -9,10 +9,10 @@
                 <div class="px-8 py-6 border-b border-gray-50 flex items-center justify-between">
                     <div class="flex items-center gap-4">
                         <div class="p-3 bg-red-600 rounded-2xl text-white shadow-lg shadow-red-200">
-                            <i class="fas fa-user-plus text-xl"></i>
+                            <i class="fas fa-user-plus text-2xl"></i>
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-gray-900">Add New Customer</h2>
+                            <h2 class="text-2xl font-bold text-gray-900">Add New Customer</h2>
                             <p class="text-sm text-gray-500">Enter customer details below</p>
                         </div>
                     </div>
