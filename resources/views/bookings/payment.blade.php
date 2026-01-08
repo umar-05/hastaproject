@@ -74,6 +74,7 @@
                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
             @endforeach
             <input type="hidden" name="voucher_code" x-model="appliedVoucherCode">
+            <input type="hidden" name="redemption_id" x-model="appliedRedemptionId">
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 
@@ -430,6 +431,7 @@
             discountType: 'percentage', // percentage or fixed
             voucherInput: '',
             appliedVoucherCode: '',
+            appliedRedemptionId: '',
             voucherMessage: '',
             voucherSuccess: false,
             loading: false,
@@ -470,11 +472,13 @@
                         this.discountPercent = parseFloat(data.discount);
                         this.discountType = data.type || 'percentage'; // Support fixed/percent
                         this.appliedVoucherCode = this.voucherInput;
+                        this.appliedRedemptionId = data.redemption_id || '';
                         this.voucherSuccess = true;
                         this.voucherMessage = `Success! ${this.discountType === 'fixed' ? 'RM' + this.discountPercent : this.discountPercent + '%'} discount applied.`;
                     } else {
                         this.discountPercent = 0;
                         this.appliedVoucherCode = '';
+                        this.appliedRedemptionId = '';
                         this.voucherSuccess = false;
                         this.voucherMessage = 'Invalid code.';
                     }

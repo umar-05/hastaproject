@@ -6,23 +6,78 @@ use Illuminate\Database\Eloquent\Model;
 
 class RewardRedemption extends Model
 {
-    // Specify the table name since it's not standard plural
     protected $table = 'rewardredemption';
 
-    // Disable timestamps if your table doesn't have created_at/updated_at columns
-    public $timestamps = false;
+    // Enable timestamps (since we added them in migration)
+    public $timestamps = true;
 
-    // Primary keys (Usually a combination of matricNum and rewardID)
     protected $fillable = [
         'matricNum',
         'rewardID',
         'redemptionDate',
-        'status'
+        'status',
+        'bookingID'
     ];
 
-    // Relationship: Link back to the Reward details (to get voucherCode, etc.)
     public function reward()
     {
         return $this->belongsTo(Reward::class, 'rewardID', 'rewardID');
     }
+
+    /**
+     * Relationships
+     */
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'matricNum', 'matricNum');
+    }
+
+    public function booking()
+    {
+        return $this->belongsTo(Booking::class, 'bookingID', 'bookingID');
+    }
+
+    /**
+     * Scopes
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'Active')
+                     ->whereNull('bookingID'); // Only active if not used yet
+    }
+
+    public function scopeUsed($query)
+    {
+        return $query->where('status', 'Used')
+                     ->whereNotNull('bookingID');
+    }
+
+    /**
+     * Check if this redemption is still usable
+     */
+    public function isUsable()
+    {
+        // Must be Active and not yet linked to a booking
+        if ($this->status !== 'Active' || $this->bookingID !== null) {
+            return false;
+        }
+
+        // Check if the reward itself is still valid
+        return $this->reward && $this->reward->isValidCode();
+    }
+
+    /**
+     * Mark this voucher as used for a specific booking
+     */
+    public function markAsUsed($bookingID)
+    {
+        $this->update([
+            'status' => 'Used',
+            'bookingID' => $bookingID,
+            'used_at' => now()
+        ]);
+    }
+
+
 }

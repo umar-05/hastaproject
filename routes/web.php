@@ -30,8 +30,7 @@ Route::post('/register/process-matric-card', [RegisteredUserController::class, '
     ->name('register.process-matric-card')
     ->middleware('guest');
 
-Route::post('/bookings/validate-voucher', [BookingController::class, 'validateVoucher'])
-    ->name('bookings.validateVoucher');
+
 
 
 // ==============================
@@ -71,7 +70,8 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
 
         // 3. Booking Management
         Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
-        
+        Route::post('/bookings/validate-voucher', [BookingController::class, 'validateVoucher'])
+        ->name('bookings.validateVoucher');
         // Creation & Logic
         Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
         Route::match(['get','post'],'/bookings/payment', [BookingController::class, 'payment'])->name('bookings.payment');
@@ -129,11 +129,13 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // --- Reward Management ---
     
     // 1. FIX: Restore 'staff.rewards' for Sidebar compatibility
-    Route::get('/rewards-dashboard', [StaffController::class, 'rewards'])->name('rewards');
+    Route::get('/rewards-dashboard', [RewardController::class, 'staffIndex'])->name('rewards');
 
-    // 2. CRUD Group (Used by Controllers: staff.reward.index, etc.)
+    // 2. CRUD Group
     Route::prefix('rewards')->name('reward.')->group(function() {
-        Route::get('/', [StaffController::class, 'rewards'])->name('index');
+        // Point this to staffIndex in RewardController
+        Route::get('/', [RewardController::class, 'staffIndex'])->name('index'); 
+        
         Route::get('/create', [RewardController::class, 'create'])->name('create');
         Route::post('/', [RewardController::class, 'store'])->name('store');
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
