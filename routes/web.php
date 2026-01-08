@@ -108,6 +108,12 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
         Route::match(['put','patch'],'/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'update'])->name('update');
         Route::delete('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'destroy'])->name('destroy');
         Route::get('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'show'])->name('show');
+
+        Route::get('/{plateNumber}/overview', [\App\Http\Controllers\Staff\FleetController::class, 'overview'])->name('tabs.overview');
+        Route::get('/{plateNumber}/bookings', [\App\Http\Controllers\Staff\FleetController::class, 'bookings'])->name('tabs.bookings');
+        Route::get('/{plateNumber}/maintenance', [\App\Http\Controllers\Staff\FleetController::class, 'maintenance'])->name('tabs.maintenance');
+        Route::post('/{plateNumber}/maintenance', [\App\Http\Controllers\Staff\FleetController::class, 'storeMaintenance'])->name('maintenance.store');
+        Route::get('/{plateNumber}/owner', [\App\Http\Controllers\Staff\FleetController::class, 'owner'])->name('tabs.owner');
         
         // Approve / Cancel Bookings
         Route::post('/bookings/{id}/approve', [BookingController::class, 'approve'])->name('bookings.approve');

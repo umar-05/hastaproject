@@ -183,7 +183,7 @@
                         
                         <div class="flex gap-1">
                             {{-- ICON BUTTON: Changed from Pencil (Edit) to Eye (View/Show) --}}
-                            <a href="{{ route('staff.fleet.show', $car->plateNumber) }}" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="View">
+                            <a href="{{ route('staff.fleet.tabs.overview', $car->plateNumber) }}" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="View">
                                 <i class="fas fa-eye text-xs"></i>
                             </a>
                             
