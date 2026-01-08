@@ -43,10 +43,10 @@
             <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-yellow-400 opacity-20 rounded-full blur-3xl"></div>
             
             <div class="relative z-10 px-8 py-12 md:px-12 md:py-16">
-                <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
                     Find Your Perfect Drive
                 </h1>
-                <p class="text-red-100 text-lg md:text-xl max-w-2xl font-light">
+                <p class="text-red-100 text-lg md:text-2xl max-w-2xl font-light">
                     Browse our premium fleet. From compact city cars to spacious SUVs, we have the keys to your next journey.
                 </p>
             </div>
@@ -94,10 +94,10 @@
                             <span class="inline-block py-1 px-2 rounded-md bg-gray-100 text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">
                                 {{ $vehicle['type'] }}
                             </span>
-                            <h4 class="text-xl font-bold text-gray-900 leading-tight">{{ $vehicle['name'] }}</h4>
+                            <h4 class="text-2xl font-bold text-gray-900 leading-tight">{{ $vehicle['name'] }}</h4>
                         </div>
                         <div class="text-right">
-                            <span class="block text-hasta-red text-xl font-extrabold">RM{{ $vehicle['price'] }}</span>
+                            <span class="block text-hasta-red text-2xl font-bold">RM{{ $vehicle['price'] }}</span>
                             <span class="text-gray-400 text-xs font-medium">/day</span>
                         </div>
                     </div>

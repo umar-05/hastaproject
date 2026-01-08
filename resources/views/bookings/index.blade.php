@@ -21,7 +21,7 @@
             <div class="grid gap-4">
                 @foreach($bookings as $booking)
                     <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="font-bold text-xl mb-2">{{ $booking->fleet->name ?? 'Vehicle' }}</h3>
+                        <h3 class="font-bold text-2xl mb-2">{{ $booking->fleet->name ?? 'Vehicle' }}</h3>
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div>
                                 <span class="text-gray-600">Pickup:</span> 

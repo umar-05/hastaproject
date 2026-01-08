@@ -8,7 +8,7 @@
     class="space-y-6"
 >
     <header class="mb-4">
-        <h2 class="text-3xl font-extrabold text-gray-800 tracking-tight">
+        <h2 class="text-3xl font-bold text-gray-800 tracking-tight">
             {{ __('Account Deletion') }}
         </h2>
         <p class="mt-2 text-sm text-gray-500">
@@ -19,7 +19,7 @@
     <div class="bg-[#f3f4f6] rounded-[24px] p-8 shadow-[12px_12px_24px_#d1d5db,-12px_-12px_24px_#ffffff] border-l-4 border-[#bb1419]">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
-                <h3 class="text-xl font-bold text-gray-800">Delete Account</h3>
+                <h3 class="text-2xl font-bold text-gray-800">Delete Account</h3>
                 <p class="mt-1 text-sm text-gray-600 max-w-xl">
                     {{ __('Before deleting your account, please download any data or information that you wish to retain.') }}
                 </p>

@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-xl text-gray-800 leading-tight flex items-center gap-2">
+        <h2 class="font-bold text-2xl text-gray-800 leading-tight flex items-center gap-2">
             <i class="fas fa-crown text-red-600"></i>
             {{ __('Loyalty Rewards') }}
         </h2>
@@ -115,7 +115,7 @@
                         <button @click="page = 1" 
                                 :class="page === 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'"
                                 class="p-4 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all duration-300 backdrop-blur-md shadow-lg flex-shrink-0">
-                            <i class="fas fa-chevron-left text-xl"></i>
+                            <i class="fas fa-chevron-left text-2xl"></i>
                         </button>
 
                         {{-- STAMPS CONTAINER --}}
@@ -162,7 +162,7 @@
                         <button @click="page = 2" 
                                 :class="page === 2 ? 'opacity-0 pointer-events-none' : 'opacity-100'"
                                 class="p-4 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all duration-300 backdrop-blur-md shadow-lg flex-shrink-0">
-                            <i class="fas fa-chevron-right text-xl"></i>
+                            <i class="fas fa-chevron-right text-2xl"></i>
                         </button>
                     </div>
 
@@ -214,7 +214,7 @@
                                         @endif
                                     </div>
                                     
-                                    <h3 class="text-xl font-bold text-slate-800 leading-tight mb-2">
+                                    <h3 class="text-2xl font-bold text-slate-800 leading-tight mb-2">
                                         {{ $reward->rewardAmount }}{{ $reward->rewardType == 'Discount' ? '%' : '' }} Off Your Next Purchase
                                     </h3>
                                     

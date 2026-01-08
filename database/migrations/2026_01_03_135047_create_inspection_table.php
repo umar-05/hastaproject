@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('interior1Image')->nullable();
             $table->string('interior2Image')->nullable();
 
+            $table->string('type')->nullable();
             $table->double('mileage')->nullable();
             $table->string('fuelImage')->nullable();
             $table->double('fuelBar')->nullable();
@@ -28,6 +29,9 @@ return new class extends Migration
             $table->dateTime('time')->nullable();
             $table->string('pic')->nullable();
             $table->string('remark')->nullable();
+            $table->string('signature')->nullable();
+            $table->string('bookingID');
+            $table->foreign('bookingID')->references('bookingID')->on('booking')->onDelete('cascade');
 
             $table->timestamps();
         });

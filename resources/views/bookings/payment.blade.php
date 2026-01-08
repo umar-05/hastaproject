@@ -36,9 +36,37 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="mb-8 animate-fade-up">
-            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Checkout</h1>
+            <h1 class="text-4xl font-bold text-gray-900 tracking-tight">Checkout</h1>
             <p class="text-lg text-gray-500 mt-1">Complete your booking for <span class="font-bold text-gray-800">{{ $car->modelName }}</span>.</p>
         </div>
+
+                {{-- ADD THIS TO SEE WHY THE PAGE IS REFRESHING --}}
+        @if ($errors->any())
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md shadow-sm animate-fade-up">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">There were errors with your submission:</h3>
+                        <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Also display Session Errors (like "Vehicle not found") --}}
+        @if (session('error'))
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md shadow-sm">
+                <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+            </div>
+@endif
 
         <form action="{{ route('bookings.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -111,7 +139,7 @@
                             <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </div>
-                            <h3 class="text-xl font-bold text-gray-900">Identity Verification</h3>
+                            <h3 class="text-2xl font-bold text-gray-900">Identity Verification</h3>
                         </div>
                         
                         <div class="space-y-6">
@@ -193,7 +221,7 @@
                             <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                             </div>
-                            <h3 class="text-xl font-bold text-gray-900">Refund Details</h3>
+                            <h3 class="text-2xl font-bold text-gray-900">Refund Details</h3>
                         </div>
 
                         <template x-if="hasBank && !changeBank">
@@ -242,7 +270,7 @@
                         <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-black opacity-10 rounded-full blur-2xl"></div>
                         
                         <div class="relative z-10">
-                            <h2 class="text-xl font-bold mb-6 border-b border-red-500/50 pb-4">Order Summary</h2>
+                            <h2 class="text-2xl font-bold mb-6 border-b border-red-500/50 pb-4">Order Summary</h2>
                             
                             <div class="space-y-3 text-base text-red-50 mb-8">
                                 <div class="flex justify-between">
@@ -281,7 +309,7 @@
 
                             <div class="flex justify-between items-end pt-4 border-t border-red-500/50">
                                 <span class="text-sm font-medium text-red-200 uppercase tracking-wide">Total Payable</span>
-                                <span class="text-4xl font-extrabold tracking-tight text-white drop-shadow-md">
+                                <span class="text-4xl font-bold tracking-tight text-white drop-shadow-md">
                                     RM <span x-text="formatMoney(totalPayable)"></span>
                                 </span>
                             </div>
@@ -319,7 +347,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-3 mt-2 bg-white px-4 py-3 rounded-xl border border-gray-300 shadow-inner">
-                                <span class="font-mono text-xl font-bold text-gray-800 tracking-widest flex-1" id="bankAccNo">139748362455166</span>
+                                <span class="font-mono text-2xl font-bold text-gray-800 tracking-widest flex-1" id="bankAccNo">139748362455166</span>
                                 <button type="button" onclick="copyToClipboard()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3 py-1.5 rounded-lg transition uppercase tracking-wide">Copy</button>
                             </div>
                             <div id="copyFeedback" class="text-green-600 text-xs font-bold text-right mt-1 opacity-0 transition-opacity">Copied!</div>

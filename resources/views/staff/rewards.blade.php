@@ -63,7 +63,7 @@
         {{-- Loyalty Rewards Container --}}
         <div class="max-w-6xl mx-auto bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-10 relative">
             <div class="flex justify-between items-center mb-10">
-                <h2 class="text-xl font-bold text-slate-800">Loyalty Rewards</h2>
+                <h2 class="text-2xl font-bold text-slate-800">Loyalty Rewards</h2>
                 <button onclick="openCreateModal()" class="bg-[#B91C1C] hover:bg-red-800 text-white px-8 py-3 rounded-2xl font-bold transition shadow-lg shadow-red-100 active:scale-95">
                     + Create Reward
                 </button>
