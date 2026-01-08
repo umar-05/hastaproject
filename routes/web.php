@@ -132,6 +132,10 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // 1. FIX: Restore 'staff.rewards' for Sidebar compatibility
     Route::get('/rewards-dashboard', [StaffController::class, 'rewards'])->name('rewards');
 
+    Route::group(['middleware' => ['auth:staff']], function () {
+    Route::get('/receipt/{id}', [BookingController::class, 'viewReceipt'])->name('staff.receipt.view');
+});
+
     // Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');

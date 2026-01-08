@@ -538,13 +538,16 @@ public function monthlyIncome(): \Illuminate\View\View
     // 1. TOP CARDS DATA (Real Data)
     $currentMonthIncome = \App\Models\Payment::whereYear('paymentDate', $currentYear)
         ->whereMonth('paymentDate', $now->month)
+        ->where('paymentStatus', 'paid')
         ->sum('grandTotal');
 
     $previousMonthIncome = \App\Models\Payment::whereYear('paymentDate', $now->copy()->subMonth()->year)
         ->whereMonth('paymentDate', $now->copy()->subMonth()->month)
+        ->where('paymentStatus', 'paid')
         ->sum('grandTotal');
 
     $yearlyTotal = \App\Models\Payment::whereYear('paymentDate', $currentYear)
+        ->where('paymentStatus', 'paid')
         ->sum('grandTotal');
     
     // Average Monthly based on months passed so far this year
@@ -561,6 +564,7 @@ public function monthlyIncome(): \Illuminate\View\View
     // 2. PAYMENT METHODS (Dynamic counts for Donut Chart)
     // Pulls from 'method' column in payment table
     $paymentMethods = \App\Models\Payment::select('method', DB::raw('count(*) as count'))
+        ->where('paymentStatus', 'paid')
         ->groupBy('method')
         ->pluck('count', 'method')
         ->toArray();
@@ -573,6 +577,7 @@ public function monthlyIncome(): \Illuminate\View\View
             DB::raw('AVG(grandTotal) as avg')
         )
         ->whereYear('paymentDate', $currentYear)
+        ->where('paymentStatus', 'paid') 
         ->groupBy('month')
         ->orderBy('month')
         ->get()
