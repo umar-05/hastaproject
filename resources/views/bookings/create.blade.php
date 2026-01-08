@@ -19,36 +19,7 @@
     </style>
 
     @php
-        $vehicleImage = 'default-car.png'; 
-        
-        if (isset($car)) {
-            if (!empty($car->photos1)) {
-                $vehicleImage = $car->photos1;
-            } else {
-                $model = strtolower($car->modelName);
-                $year = $car->year;
-
-                if (str_contains($model, 'axia')) {
-                    $vehicleImage = ($year >= 2023) ? 'axia-2024.png' : 'axia-2018.png';
-                } elseif (str_contains($model, 'bezza')) {
-                    $vehicleImage = 'bezza-2018.png';
-                } elseif (str_contains($model, 'myvi')) {
-                    $vehicleImage = ($year >= 2020) ? 'myvi-2020.png' : 'myvi-2015.png';
-                } elseif (str_contains($model, 'saga')) {
-                    $vehicleImage = 'saga-2017.png';
-                } elseif (str_contains($model, 'alza')) {
-                    $vehicleImage = 'alza-2019.png';
-                } elseif (str_contains($model, 'aruz')) {
-                    $vehicleImage = 'aruz-2020.png';
-                } elseif (str_contains($model, 'vellfire')) {
-                    $vehicleImage = 'vellfire-2020.png';
-                } elseif (str_contains($model, 'x50')) {
-                    $vehicleImage = 'x50-2024.png'; 
-                } elseif (str_contains($model, 'y15')) {
-                    $vehicleImage = 'y15zr-2023.png';
-                }
-            }
-        }
+        $vehicleImage = $car->photo1; 
     @endphp
 
     <div class="min-h-screen bg-gray-100 py-8">

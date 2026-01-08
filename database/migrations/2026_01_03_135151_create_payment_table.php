@@ -16,7 +16,7 @@ return new class extends Migration
             
             $table->string('paymentStatus')->nullable();
             $table->string('method', 50)->nullable();
-            $table->string('receipt_path', 50)->nullable();
+            $table->string('receipt_path', 55)->nullable();
             $table->dateTime('paymentDate')->nullable();
             $table->decimal('discountedPrice', 10, 2)->nullable();
             $table->decimal('amount', 10, 2)->nullable();

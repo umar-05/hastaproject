@@ -1,14 +1,5 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Vehicles - HASTA Travel & Tours</title>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
+<x-app-layout>
+    {{-- Custom Styles for this page --}}
     <style>
         /* Page Load Animation Only */
         @keyframes fadeUp {
@@ -22,10 +13,6 @@
         .delay-100 { animation-delay: 0.1s; }
         .delay-200 { animation-delay: 0.2s; }
     </style>
-</head>
-<body class="font-sans antialiased text-gray-900 bg-gray-50">
-
-    @include('layouts.navigation')
 
     {{-- Error Message Display --}}
     @if(session('error'))
@@ -121,11 +108,6 @@
 
                     <div class="mt-auto">
                         <a href="{{ route('vehicles.show', $vehicle['id']) }}" class="block w-full">
-                            {{-- 
-                                BUTTON CHANGE: 
-                                - bg-hasta-red (Red default)
-                                - hover:bg-red-700 (Darker red hover, simple)
-                            --}}
                             <button class="w-full bg-hasta-red text-white font-bold py-3.5 rounded-xl transition-colors duration-200 hover:bg-red-700 hover:shadow-md flex items-center justify-center">
                                 View Details
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -177,7 +159,7 @@
                     button.classList.remove('bg-white', 'text-gray-600', 'hover:bg-gray-100');
                     button.classList.add('bg-gray-900', 'text-white');
 
-                    // Simple, instant filter logic (No motions)
+                    // Simple, instant filter logic
                     vehicleCards.forEach(card => {
                         const type = card.dataset.type;
                         
@@ -195,5 +177,4 @@
             });
         });
     </script>
-</body>
-</html>
+</x-app-layout>
