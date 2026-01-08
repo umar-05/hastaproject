@@ -126,7 +126,6 @@
                                     <option value="Kolej Tun Dr Ismail">Kolej Tun Dr Ismail</option>
                                     <option value="Kolej Dato Onn Jaafar">Kolej Dato Onn Jaafar</option>
                                 </optgroup>
-
                                 <optgroup label="Fakulti">
                                     <option value="Fakulti Kejuruteraan Awam">Fakulti Kejuruteraan Awam (FKA)</option>
                                     <option value="Fakulti Kejuruteraan Elektrik">Fakulti Kejuruteraan Elektrik (FKE)</option>
@@ -146,7 +145,7 @@
                             <label class="label-visible">Pick-up</label>
                             <div class="flex flex-col bg-gray-100 rounded-2xl p-1.5">
                                 <input type="date" name="pickup_date" id="pickup_date" required class="search-input-text w-full px-2 py-1 bg-transparent border-none focus:ring-0">
-                                <select name="pickup_time" class="search-input-text bg-transparent border-none px-2 py-1 text-xs focus:ring-0">
+                                <select name="pickup_time" id="pickup_time" class="search-input-text bg-transparent border-none px-2 py-1 text-xs focus:ring-0">
                                     @for($h=9; $h<=17; $h++)
                                         <option value="{{ sprintf('%02d:00', $h) }}">{{ date('g:i A', strtotime($h.':00')) }}</option>
                                         <option value="{{ sprintf('%02d:30', $h) }}">{{ date('g:i A', strtotime($h.':30')) }}</option>
@@ -160,7 +159,7 @@
                             <label class="label-visible">Return</label>
                             <div class="flex flex-col bg-gray-100 rounded-2xl p-1.5">
                                 <input type="date" name="return_date" id="return_date" required class="search-input-text w-full px-2 py-1 bg-transparent border-none focus:ring-0">
-                                <select name="return_time" class="search-input-text bg-transparent border-none px-2 py-1 text-xs focus:ring-0">
+                                <select name="return_time" id="return_time" class="search-input-text bg-transparent border-none px-2 py-1 text-xs focus:ring-0">
                                     @for($h=9; $h<=17; $h++)
                                         <option value="{{ sprintf('%02d:00', $h) }}">{{ date('g:i A', strtotime($h.':00')) }}</option>
                                         <option value="{{ sprintf('%02d:30', $h) }}">{{ date('g:i A', strtotime($h.':30')) }}</option>
@@ -234,17 +233,40 @@
     </footer>
 
     <script>
+        const pickupDate = document.getElementById('pickup_date');
+        const returnDate = document.getElementById('return_date');
+        const pickupTime = document.getElementById('pickup_time');
+        const returnTime = document.getElementById('return_time');
+
         // Set minimum dates to today
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('pickup_date').setAttribute('min', today);
-        document.getElementById('return_date').setAttribute('min', today);
+        pickupDate.setAttribute('min', today);
+        returnDate.setAttribute('min', today);
 
-        // Update return date minimum when pickup date changes
-        document.getElementById('pickup_date').addEventListener('change', function() {
-            document.getElementById('return_date').setAttribute('min', this.value);
-            if(document.getElementById('return_date').value < this.value) {
-                document.getElementById('return_date').value = this.value;
+        // Function to handle auto-incrementing return date/time
+        pickupDate.addEventListener('change', function() {
+            if (this.value) {
+                // 1. Create a date object based on pickup
+                let dateObj = new Date(this.value);
+                
+                // 2. Add exactly 1 day
+                dateObj.setDate(dateObj.getDate() + 1);
+                
+                // 3. Format back to YYYY-MM-DD
+                let nextDay = dateObj.toISOString().split('T')[0];
+                
+                // 4. Update Return Date value and its minimum limit
+                returnDate.value = nextDay;
+                returnDate.setAttribute('min', this.value); // Allow same day return but default to next
+                
+                // 5. Sync the return time to match pickup time
+                returnTime.value = pickupTime.value;
             }
+        });
+
+        // Sync return time if pickup time changes after date is set
+        pickupTime.addEventListener('change', function() {
+            returnTime.value = this.value;
         });
     </script>
 </body>
