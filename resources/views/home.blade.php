@@ -18,14 +18,12 @@
         }
         .animate-fade-up { animation: fadeUp 0.8s ease-out forwards; }
         
-        /* Hero Section Styling */
         .hero-gradient {
             background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%);
             position: relative;
             overflow: hidden;
         }
 
-        /* Subtle Car Pattern Background */
         .hero-pattern {
             position: absolute;
             inset: 0;
@@ -33,18 +31,17 @@
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.2 34.5L50 31V19c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H28v-2c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v12l-4.2 3.5c-.5.4-.8 1-.8 1.6V42c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2v-1h20v1c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2v-5.9c0-.6-.3-1.2-.8-1.6zM22 21h4v10h-4V21zm20 10V21h4v10h-4z' fill='%23ffffff' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
 
-        /* Visible Text & Title Case Styling */
         .label-visible {
-            color: #1f2937 !important; /* Dark Gray */
+            color: #1f2937 !important; 
             font-size: 0.85rem !important;
             font-weight: 700 !important;
             margin-bottom: 0.5rem;
             display: block;
-            text-transform: capitalize; /* Forces First Letter Caps */
+            text-transform: capitalize;
         }
 
         .search-input-text {
-            color: #000000 !important; /* Maximum Visibility */
+            color: #000000 !important; 
             font-weight: 600;
             font-size: 0.95rem;
         }
@@ -79,7 +76,7 @@
                         {{-- Pick-up Location --}}
                         <div class="md:col-span-3 text-left">
                             <label class="label-visible">Pick-up Location</label>
-                            <select name="pickup_location" required class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-hasta-red outline-none">
+                            <select name="pickup_location" required class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none">
                                 <option value="Student Mall">Student Mall</option>
                                 <optgroup label="Kolej">
                                     <option value="Kolej Perdana">Kolej Perdana</option>
@@ -95,15 +92,9 @@
                                     <option value="Kolej Dato Onn Jaafar">Kolej Dato Onn Jaafar</option>
                                 </optgroup>
                                 <optgroup label="Fakulti">
-                                    <option value="Fakulti Kejuruteraan Awam">Fakulti Kejuruteraan Awam (FKA)</option>
-                                    <option value="Fakulti Kejuruteraan Elektrik">Fakulti Kejuruteraan Elektrik (FKE)</option>
                                     <option value="Fakulti Komputeran">Fakulti Komputeran (FC)</option>
-                                    <option value="Fakulti Sains">Fakulti Sains (FS)</option>
+                                    <option value="Fakulti Kejuruteraan Elektrik">Fakulti Kejuruteraan Elektrik (FKE)</option>
                                     <option value="Fakulti Pengurusan">Fakulti Pengurusan (FM)</option>
-                                    <option value="Fakulti Kejuruteraan Mekanikal">Fakulti Kejuruteraan Mekanikal (FKM)</option>
-                                    <option value="Fakulti Kejuruteraan Kimia dan Kejuruteraan Tenaga">Fakulti Kejuruteraan Kimia dan Kejuruteraan Tenaga (FKT)</option>
-                                    <option value="Fakulti Alam Bina dan Ukur">Fakulti Alam Bina dan Ukur (FABU)</option>
-                                    <option value="Fakulti Sains Sosial dan Kemanusiaan">Fakulti Sains Sosial dan Kemanusiaan (FSSK)</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -111,36 +102,15 @@
                         {{-- Return Location --}}
                         <div class="md:col-span-3 text-left">
                             <label class="label-visible">Return Location</label>
-                            <select name="return_location" required class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-hasta-red outline-none">
+                            <select name="return_location" required class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none">
                                 <option value="Student Mall">Student Mall</option>
-                                <optgroup label="Kolej">
-                                    <option value="Kolej Perdana">Kolej Perdana</option>
-                                    <option value="Kolej 9">Kolej 9</option>
-                                    <option value="Kolej 10">Kolej 10</option>
-                                    <option value="Kolej Datin Seri Endon">Kolej Datin Seri Endon</option>
-                                    <option value="Kolej Rahman Putra">Kolej Rahman Putra</option>
-                                    <option value="Kolej Tun Fatimah">Kolej Tun Fatimah</option>
-                                    <option value="Kolej Tun Razak">Kolej Tun Razak</option>
-                                    <option value="Kolej Tun Hussein Onn">Kolej Tun Hussein Onn</option>
-                                    <option value="Kolej Tunku Canselor">Kolej Tunku Canselor</option>
-                                    <option value="Kolej Tun Dr Ismail">Kolej Tun Dr Ismail</option>
-                                    <option value="Kolej Dato Onn Jaafar">Kolej Dato Onn Jaafar</option>
-                                </optgroup>
-                                <optgroup label="Fakulti">
-                                    <option value="Fakulti Kejuruteraan Awam">Fakulti Kejuruteraan Awam (FKA)</option>
-                                    <option value="Fakulti Kejuruteraan Elektrik">Fakulti Kejuruteraan Elektrik (FKE)</option>
-                                    <option value="Fakulti Komputeran">Fakulti Komputeran (FC)</option>
-                                    <option value="Fakulti Sains">Fakulti Sains (FS)</option>
-                                    <option value="Fakulti Pengurusan">Fakulti Pengurusan (FM)</option>
-                                    <option value="Fakulti Kejuruteraan Mekanikal">Fakulti Kejuruteraan Mekanikal (FKM)</option>
-                                    <option value="Fakulti Kejuruteraan Kimia dan Kejuruteraan Tenaga">Fakulti Kejuruteraan Kimia dan Kejuruteraan Tenaga (FKT)</option>
-                                    <option value="Fakulti Alam Bina dan Ukur">Fakulti Alam Bina dan Ukur (FABU)</option>
-                                    <option value="Fakulti Sains Sosial dan Kemanusiaan">Fakulti Sains Sosial dan Kemanusiaan (FSSK)</option>
-                                </optgroup>
+                                <option value="Kolej Perdana">Kolej Perdana</option>
+                                <option value="Kolej 9">Kolej 9</option>
+                                <option value="Kolej 10">Kolej 10</option>
                             </select>
                         </div>
 
-                        {{-- Pick-up --}}
+                        {{-- Pick-up Date & Time --}}
                         <div class="md:col-span-2 text-left">
                             <label class="label-visible">Pick-up</label>
                             <div class="flex flex-col bg-gray-100 rounded-2xl p-1.5">
@@ -154,7 +124,7 @@
                             </div>
                         </div>
 
-                        {{-- Return --}}
+                        {{-- Return Date & Time --}}
                         <div class="md:col-span-2 text-left">
                             <label class="label-visible">Return</label>
                             <div class="flex flex-col bg-gray-100 rounded-2xl p-1.5">
@@ -170,7 +140,7 @@
 
                         {{-- Search Button --}}
                         <div class="md:col-span-2 pt-6">
-                            <button type="submit" class="w-full bg-hasta-red text-white h-[60px] rounded-2xl hover:bg-red-700 transition-all shadow-xl flex items-center justify-center group">
+                            <button type="submit" class="w-full bg-red-600 text-white h-[60px] rounded-2xl hover:bg-red-700 transition-all shadow-xl flex items-center justify-center group">
                                 <span class="font-bold text-lg mr-2">Search</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                             </button>
@@ -187,7 +157,7 @@
                     <h2 class="text-4xl font-extrabold text-gray-900 tracking-tight mb-2">Choose Your Ride</h2>
                     <p class="text-gray-500">Find the perfect vehicle for your next adventure.</p>
                 </div>
-                <a href="{{ route('vehicles.index') }}" class="text-sm font-bold text-gray-900 hover:text-hasta-red flex items-center gap-2">
+                <a href="{{ route('vehicles.index') }}" class="text-sm font-bold text-gray-900 hover:text-red-600 flex items-center gap-2">
                     View Full Fleet &rarr;
                 </a>
             </div>
@@ -202,14 +172,16 @@
                             <div class="flex justify-between items-end mb-4">
                                 <div>
                                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ $vehicle->type }}</p>
-                                    <h4 class="text-lg font-bold text-gray-900">{{ $vehicle->name }}</h4>
+                                    <h4 class="text-lg font-bold text-gray-900">{{ $vehicle->modelName }}</h4>
                                 </div>
                                 <div class="text-right">
-                                    <span class="text-hasta-red text-xl font-extrabold">Rm{{ $vehicle->price }}</span>
+                                    <span class="text-red-600 text-xl font-extrabold">RM{{ $vehicle->pricePerDay }}</span>
                                     <span class="text-gray-400 text-xs">/day</span>
                                 </div>
                             </div>
-                            <a href="{{ route('vehicles.show', $vehicle->plateNumber) }}" class="block w-full py-3.5 rounded-xl bg-hasta-red text-white text-center font-bold text-sm hover:opacity-90 transition-opacity">
+                            
+                            {{-- This link now includes current search parameters --}}
+                            <a href="{{ route('vehicles.show', array_merge(['vehicle' => $vehicle->plateNumber], request()->query())) }}" class="block w-full py-3.5 rounded-xl bg-red-600 text-white text-center font-bold text-sm hover:opacity-90 transition-opacity">
                                 Book Now
                             </a>
                         </div>
@@ -224,7 +196,7 @@
 
     </main>
 
-    <footer class="bg-hasta-red text-white py-12 px-8 mt-16">
+    <footer class="bg-red-600 text-white py-12 px-8 mt-16">
         <div class="max-w-7xl mx-auto flex flex-col items-center text-center">
             <img src="{{ asset('images/HASTALOGO.svg') }}" class="h-10 mb-6 brightness-0 invert">
             <p class="text-sm font-semibold mb-1">Hasta Travel & Tours</p>
@@ -238,33 +210,36 @@
         const pickupTime = document.getElementById('pickup_time');
         const returnTime = document.getElementById('return_time');
 
-        // Set minimum dates to today
-        const today = new Date().toISOString().split('T')[0];
-        pickupDate.setAttribute('min', today);
-        returnDate.setAttribute('min', today);
+        // Initial setup: Set today and tomorrow as default values
+        window.addEventListener('load', () => {
+            const now = new Date();
+            const tomorrow = new Date();
+            tomorrow.setDate(now.getDate() + 1);
 
-        // Function to handle auto-incrementing return date/time
+            const todayStr = now.toISOString().split('T')[0];
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+            pickupDate.setAttribute('min', todayStr);
+            returnDate.setAttribute('min', todayStr);
+
+            // Only set if value is empty
+            if(!pickupDate.value) pickupDate.value = todayStr;
+            if(!returnDate.value) returnDate.value = tomorrowStr;
+        });
+
         pickupDate.addEventListener('change', function() {
             if (this.value) {
-                // 1. Create a date object based on pickup
                 let dateObj = new Date(this.value);
-                
-                // 2. Add exactly 1 day
                 dateObj.setDate(dateObj.getDate() + 1);
                 
-                // 3. Format back to YYYY-MM-DD
                 let nextDay = dateObj.toISOString().split('T')[0];
                 
-                // 4. Update Return Date value and its minimum limit
                 returnDate.value = nextDay;
-                returnDate.setAttribute('min', this.value); // Allow same day return but default to next
-                
-                // 5. Sync the return time to match pickup time
+                returnDate.setAttribute('min', this.value);
                 returnTime.value = pickupTime.value;
             }
         });
 
-        // Sync return time if pickup time changes after date is set
         pickupTime.addEventListener('change', function() {
             returnTime.value = this.value;
         });
