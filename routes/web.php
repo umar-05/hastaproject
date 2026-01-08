@@ -98,10 +98,6 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
     
-    // Note: 'bookings.show' is already defined in SHARED ROUTES above, so we don't need a duplicate here 
-    // unless you specifically need a staff-only route with a different controller method.
-    // If you need it: Route::get('/booking-details/{bookingID}', [StaffController::class, 'showBooking'])->name('bookings.details');
-
     Route::resource('mission', MissionController::class);
     Route::get('/fleet/check', [StaffController::class, 'checkAvailability'])->name('fleet.check');
     Route::get('/pickup-return', [StaffController::class, 'pickupReturnSchedule'])->name('pickup-return');
@@ -131,7 +127,11 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     });
 
     // --- Reward Management ---
-    // Consolidated into one group
+    
+    // 1. FIX: Restore 'staff.rewards' for Sidebar compatibility
+    Route::get('/rewards-dashboard', [StaffController::class, 'rewards'])->name('rewards');
+
+    // 2. CRUD Group (Used by Controllers: staff.reward.index, etc.)
     Route::prefix('rewards')->name('reward.')->group(function() {
         Route::get('/', [StaffController::class, 'rewards'])->name('index');
         Route::get('/create', [RewardController::class, 'create'])->name('create');
