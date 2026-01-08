@@ -48,9 +48,9 @@
                     <div class="lg:col-span-4 h-56 bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-200 relative group">
                         <div class="absolute inset-0 bg-gradient-to-tr from-gray-100 to-transparent opacity-50"></div>
                         {{-- Handle photo logic inline or use generic default --}}
-                        <img src="{{ asset('images/' . ($fleet->photo1 ?? 'default-car.png')) }}" 
-                             class="h-full w-full object-contain p-4 transition-transform duration-500 group-hover:scale-110 relative z-10" 
-                             alt="{{ $fleet->modelName }}">
+                        <img src="{{ $fleet->photo1 && str_contains($fleet->photo1, '/') ? asset('storage/' . $fleet->photo1) : asset('images/' . ($fleet->photo1 ?? 'default.png')) }}" 
+                        class="w-full h-full object-contain p-4 transform group-hover:scale-110 transition-transform duration-700 relative z-0" 
+                        alt="{{ $fleet->modelName }}">
                     </div>
 
                     {{-- Stats Grid --}}

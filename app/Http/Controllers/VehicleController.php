@@ -57,8 +57,9 @@ class VehicleController extends Controller
             'plateNumber'  => $fleet->plateNumber,
             'name'         => $fleet->modelName . ' ' . $fleet->year,
             'type'         => $specs['type'],
-            'price'        => $specs['price'],
-            // CHANGE: Use photo1 column
+            
+            'price'        => $fleet->price, 
+
             'image'        => $fleet->photo1 ?? $specs['image'], 
             'transmission' => 'Automatic',
             'fuel'         => 'RON 95',
@@ -74,23 +75,21 @@ class VehicleController extends Controller
         $model = strtolower($modelName);
         
         $configs = [
-            'axia'     => ['type' => 'Hatchback', 'price' => 120, 'image' => 'axia-2018.png', 'seats' => 5, 'luggage' => 2],
-            'bezza'    => ['type' => 'Sedan',     'price' => 140, 'image' => 'bezza-2018.png', 'seats' => 5, 'luggage' => 3],
-            'myvi'     => ['type' => 'Hatchback', 'price' => 130, 'image' => 'myvi-2015.png', 'seats' => 5, 'luggage' => 2],
-            'saga'     => ['type' => 'Sedan',     'price' => 120, 'image' => 'saga-2017.png', 'seats' => 5, 'luggage' => 3],
-            'alza'     => ['type' => 'MPV',       'price' => 200, 'image' => 'alza-2019.png', 'seats' => 7, 'luggage' => 4],
-            'aruz'     => ['type' => 'SUV',       'price' => 180, 'image' => 'aruz-2020.png', 'seats' => 7, 'luggage' => 5],
-            'vellfire' => ['type' => 'MPV',       'price' => 500, 'image' => 'vellfire-2020.png','seats' => 7, 'luggage' => 6],
-            'x50'      => ['type' => 'SUV',       'price' => 250, 'image' => 'x50-2024.png', 'seats' => 5, 'luggage' => 4],
-            'y15'      => ['type' => 'Motorcycle','price' => 50,  'image' => 'y15zr-2023.png','seats' => 2, 'luggage' => 0],
+            'axia'     => ['type' => 'Hatchback', 'image' => 'axia-2018.png', 'seats' => 5, 'luggage' => 2],
+            'bezza'    => ['type' => 'Sedan',     'image' => 'bezza-2018.png', 'seats' => 5, 'luggage' => 3],
+            'myvi'     => ['type' => 'Hatchback', 'image' => 'myvi-2015.png', 'seats' => 5, 'luggage' => 2],
+            'saga'     => ['type' => 'Sedan',     'image' => 'saga-2017.png', 'seats' => 5, 'luggage' => 3],
+            'alza'     => ['type' => 'MPV',       'image' => 'alza-2019.png', 'seats' => 7, 'luggage' => 4],
+            'aruz'     => ['type' => 'SUV',       'image' => 'aruz-2020.png', 'seats' => 7, 'luggage' => 5],
+            'vellfire' => ['type' => 'MPV',       'image' => 'vellfire-2020.png','seats' => 7, 'luggage' => 6],
+            'x50'      => ['type' => 'SUV',       'image' => 'x50-2024.png', 'seats' => 5, 'luggage' => 4],
+            'y15'      => ['type' => 'Motorcycle','image' => 'y15zr-2023.png','seats' => 2, 'luggage' => 0],
         ];
 
         if (str_contains($model, 'myvi') && $year >= 2020) {
-            $configs['myvi']['price'] = 150;
             $configs['myvi']['image'] = 'myvi-2020.png';
         }
         if (str_contains($model, 'axia') && $year >= 2023) {
-            $configs['axia']['price'] = 130;
             $configs['axia']['image'] = 'axia-2024.png';
         }
 
@@ -100,9 +99,9 @@ class VehicleController extends Controller
             }
         }
 
+        // Fallback
         return [
             'type'    => 'Sedan',
-            'price'   => 150,
             'image'   => 'default-car.png',
             'seats'   => 5,
             'luggage' => 2

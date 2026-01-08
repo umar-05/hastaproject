@@ -21,8 +21,9 @@ class FleetSeeder extends Seeder
                 'modelName' => 'Proton Saga Premium',
                 'year' => 2023,
                 'color' => 'Grey',
+                'price' => 130,
                 'status' => 'available',
-                'photo1' => 'saga-2017.png', // <--- Added Image
+                'photo1' => 'saga-2017.png',
                 'roadtaxStat' => 'Active',
                 'roadtaxActiveDate' => $today->toDateString(),
                 'roadtaxExpiryDate' => $nextYear->toDateString(),
@@ -37,8 +38,9 @@ class FleetSeeder extends Seeder
                 'modelName' => 'Perodua Myvi 1.5 AV',
                 'year' => 2022,
                 'color' => 'Red',
+                'price' => 130,
                 'status' => 'available',
-                'photo1' => 'myvi-2020.png', // <--- Added Image
+                'photo1' => 'myvi-2020.png',
                 'roadtaxStat' => 'Active',
                 'roadtaxActiveDate' => $today->toDateString(),
                 'roadtaxExpiryDate' => $nextYear->toDateString(),
@@ -53,8 +55,9 @@ class FleetSeeder extends Seeder
                 'modelName' => 'Perodua Alza',
                 'year' => 2023,
                 'color' => 'Blue',
+                'price' => 170,
                 'status' => 'available',
-                'photo1' => 'alza-2019.png', // <--- Added Image
+                'photo1' => 'alza-2019.png',
                 'roadtaxStat' => 'Active',
                 'roadtaxActiveDate' => $today->toDateString(),
                 'roadtaxExpiryDate' => $nextYear->toDateString(),
@@ -69,8 +72,9 @@ class FleetSeeder extends Seeder
                 'modelName' => 'Proton X50 Flagship',
                 'year' => 2024,
                 'color' => 'Silver',
+                'price' => 200,
                 'status' => 'available',
-                'photo1' => 'x50-2024.png', // <--- Added Image
+                'photo1' => 'x50-2024.png',
                 'roadtaxStat' => 'Active',
                 'roadtaxActiveDate' => $today->toDateString(),
                 'roadtaxExpiryDate' => $nextYear->toDateString(),
@@ -85,8 +89,9 @@ class FleetSeeder extends Seeder
                 'modelName' => 'Yamaha Y15ZR V2',
                 'year' => 2023,
                 'color' => 'Black',
+                'price' => 50,
                 'status' => 'available',
-                'photo1' => 'y15zr-2023.png', // <--- Added Image
+                'photo1' => 'y15zr-2023.png',
                 'roadtaxStat' => 'Active',
                 'roadtaxActiveDate' => $today->toDateString(),
                 'roadtaxExpiryDate' => $nextYear->toDateString(),
@@ -98,9 +103,8 @@ class FleetSeeder extends Seeder
         ];
 
         foreach ($fleets as $fleet) {
-            // Use updateOrCreate to avoid duplicate entry errors if seeding multiple times
             Fleet::updateOrCreate(
-                ['plateNumber' => $fleet['plateNumber']], // Check by plate number
+                ['plateNumber' => $fleet['plateNumber']],
                 $fleet
             );
         }

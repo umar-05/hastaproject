@@ -12,6 +12,7 @@ return new class extends Migration
             $table->string('plateNumber')->primary(); 
             $table->string('modelName');
             $table->integer('year');
+            $table->integer('price');
             $table->string('photo1')->nullable();
             $table->string('photo2')->nullable();
             $table->string('photo3')->nullable();

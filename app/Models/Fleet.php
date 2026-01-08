@@ -6,78 +6,57 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Fleet extends Model
-
 {
     use HasFactory;
-    
+
     protected $table = 'fleet';
     protected $primaryKey = 'plateNumber';
+    
+    // Since your primary key is a string (e.g., "VHJ8821"), we must tell Laravel
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $guarded = [];
 
+    // *** CRITICAL: All fields you want to save MUST be listed here ***
     protected $fillable = [
         'plateNumber',
         'modelName',
         'year',
+        'color',
+        'price',
+        'status',
+        'ownerIC',
+        
+        // Gallery Photos
         'photo1',
         'photo2',
         'photo3',
-        'ownerIC',
+
+        // Road Tax Details
+        'roadtaxStat',
         'roadtaxActiveDate',
         'roadtaxExpiryDate',
+        'roadtaxFile',
+
+        // Insurance Details
         'insuranceStat',
         'insuranceActiveDate',
         'insuranceExpiryDate',
-        'status',
-        'note',
-        'matricNum',
-        'staffID',
+        'insuranceFile',
+
+        // Grant
+        'grantFile',
+        
+        'note'
     ];
 
-    protected $casts = [
-        'year' => 'integer',
-        'roadtaxActiveDate' => 'date',
-        'roadtaxExpiryDate' => 'date',
-        'insuranceActiveDate' => 'date',
-        'insuranceExpiryDate' => 'date',
-    ];
-
-    /**
-     * Relationships
-     */
-    public function maintenance()
-    {
-        // Parameter 2: Foreign Key (name of the column in the 'maintenances' table)
-        // Parameter 3: Local Key (name of the column in this 'fleet' table)
-        return $this->hasMany(Maintenance::class, 'plateNumber', 'plateNumber'); 
-    }
-    public function bookings()
-    {
-        return $this->hasMany(Booking::class, 'plateNumber', 'plateNumber');
-    }
-
+    // Relationships
     public function owner()
     {
-        // belongsTo(RelatedModel, foreignKey, ownerKey)
         return $this->belongsTo(Owner::class, 'ownerIC', 'ownerIC');
     }
 
-    /**
-     * Availability Logic
-     */
-    public function isAvailable($startDate, $endDate)
+    public function maintenance()
     {
-        return !$this->bookings()
-            ->where('bookingStat', '!=', 'cancelled')
-            ->where(function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('pickupDate', [$startDate, $endDate])
-                    ->orWhereBetween('returnDate', [$startDate, $endDate])
-                    ->orWhere(function ($q) use ($startDate, $endDate) {
-                        $q->where('pickupDate', '<=', $startDate)
-                          ->where('returnDate', '>=', $endDate);
-                    });
-            })
-            ->exists();
+        return $this->hasMany(Maintenance::class, 'plateNumber', 'plateNumber');
     }
 }

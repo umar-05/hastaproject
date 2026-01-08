@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Fleet;
 use App\Models\Reward;
@@ -22,11 +23,14 @@ class BookingController extends Controller
         try {
             $car = Fleet::where('plateNumber', $fleetId)->firstOrFail();       
             $vehicleInfo = $this->getVehicleInfoForDisplay($car->modelName, $car->year);
-            $pricePerDay = $car->price_per_day ?? $vehicleInfo['price'];       
+            
+            // Use database price
+            $pricePerDay = $car->price;       
+            
             $image = $vehicleInfo['image'];
             $vehicleName = $car->modelName . ($car->year ? ' ' . $car->year : '');
 
-            // FIXED: Get ACTIVE vouchers that haven't been used yet
+            // Get ACTIVE vouchers that haven't been used yet for the customer
             $userVouchers = collect([]);
             if (Auth::guard('customer')->check()) {
                 $userVouchers = RewardRedemption::where('matricNum', Auth::guard('customer')->user()->matricNum)
@@ -42,6 +46,7 @@ class BookingController extends Controller
             $rewards = Reward::where('rewardStatus', 'Active')->get();
 
             return view('bookings.create', compact('car', 'rewards', 'userVouchers', 'pricePerDay', 'image', 'vehicleName'));
+
         } catch (\Exception $e) {
             return redirect()->route('vehicles.index')
                 ->with('error', 'Vehicle not found: ' . $e->getMessage());     
@@ -53,6 +58,7 @@ class BookingController extends Controller
         $modelName = strtolower($modelName);
         $year = $year ?? 0;
         $image = 'default-car.png';
+
         if (strpos($modelName, 'axia') !== false) { $image = $year == 2024 ? 'axia-2024.png' : 'axia-2018.png'; }
         elseif (strpos($modelName, 'bezza') !== false) { $image = 'bezza-2018.png'; }
         elseif (strpos($modelName, 'myvi') !== false) { $image = $year >= 2020 ? 'myvi-2020.png' : 'myvi-2015.png'; }
@@ -63,17 +69,7 @@ class BookingController extends Controller
         elseif (strpos($modelName, 'x50') !== false) { $image = 'x50-2024.png'; }
         elseif (strpos($modelName, 'y15') !== false) { $image = 'y15zr-2023.png'; }
 
-        $price = 120;
-        if (strpos($modelName, 'bezza') !== false) { $price = 140; }
-        elseif (strpos($modelName, 'myvi') !== false && $year >= 2020) { $price = 150; }
-        elseif (strpos($modelName, 'axia') !== false && $year == 2024) { $price = 130; }
-        elseif (strpos($modelName, 'alza') !== false) { $price = 200; }        
-        elseif (strpos($modelName, 'aruz') !== false) { $price = 180; }        
-        elseif (strpos($modelName, 'vellfire') !== false) { $price = 500; }
-        elseif (strpos($modelName, 'x50') !== false) { $price = 250; }
-        elseif (strpos($modelName, 'y15') !== false) { $price = 50; }
-
-        return ['price' => $price, 'image' => $image];
+        return ['image' => $image];
     }
 
     public function store(Request $request)
@@ -84,79 +80,103 @@ class BookingController extends Controller
         }
 
         $validated = $request->validate([
-            'plateNumber' => 'required|exists:fleet,plateNumber',
-            'start_date' => 'required|date',
-            'start_time' => 'required',
-            'end_date' => 'required|date',
-            'end_time' => 'required',
-            'pickup_location' => 'required|string',
-            'return_location' => 'required|string',
-            'redemption_id' => 'nullable|exists:rewardredemption,id', // CHANGED: Use redemption ID instead of reward ID
-            'payment_method' => 'required|string',
-            'receipt' => 'required|file|max:5120',
-            'total_amount' => 'required|numeric',
+            'plateNumber'     => 'required|exists:fleet,plateNumber',
+            'start_date'      => 'required|date',
+            'start_time'      => 'required',
+            'end_date'        => 'required|date',
+            'end_time'        => 'required',
+            'pickup_location' => 'required|string|max:255',
+            'return_location' => 'required|string|max:255',
+            'redemption_id'   => 'nullable|exists:rewardredemption,id',
+            'payment_method'  => 'required|string',
+            'payer_bank'      => 'nullable|string|max:255',
+            'payer_account'   => 'nullable|string|max:255',
+            'receipt'         => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'total_amount'    => 'required|numeric',
+            'deposit_amount'  => 'nullable|numeric',
         ]);
 
         DB::beginTransaction();
 
         try {
-            $basePrice = $request->total_amount;
-            $finalPrice = $basePrice;
+            // 1. Save Bank Info if provided
+            if ($request->filled('payer_bank')) $customer->bankName = $request->payer_bank;
+            if ($request->filled('payer_account')) $customer->accountNum = preg_replace('/[^0-9]/', '', $request->payer_account);
+            if ($customer->isDirty()) $customer->save();
+
+            // 2. Fetch Fleet
+            $fleet = Fleet::where('plateNumber', $validated['plateNumber'])->firstOrFail();
+
+            // 3. Recalculate Logic (Server-side calculation for security)
+            $start = Carbon::parse($validated['start_date'] . ' ' . $validated['start_time']);
+            $end = Carbon::parse($validated['end_date'] . ' ' . $validated['end_time']);
+            $diffInSeconds = abs($end->timestamp - $start->timestamp);
+            $days = ceil($diffInSeconds / 86400); 
+            $days = $days < 1 ? 1 : $days;
+
+            $pricePerDay = $fleet->price; 
+            $deposit = $request->input('deposit_amount', 50); // Default to 50 if not sent
+
+            // Calculate Base Price
+            $basePrice = ($days * $pricePerDay) + $deposit;
+            
+            $discountAmount = 0;
             $appliedRewardId = null;
 
-            // --- FIXED VOUCHER USAGE LOGIC ---
+            // 4. Handle Voucher / Discount
             if ($request->filled('redemption_id')) {
-                // Get the specific redemption (voucher instance)
                 $redemption = RewardRedemption::find($request->redemption_id);
 
                 // Validate ownership and usability
-                if (!$redemption || 
-                    $redemption->matricNum !== $customer->matricNum || 
-                    !$redemption->isUsable()) {
+                if (!$redemption || $redemption->matricNum !== $customer->matricNum || !$redemption->isUsable()) {
                     DB::rollBack();
                     return back()->with('error', 'Invalid or expired voucher.')->withInput();
                 }
 
-                // Calculate discount based on reward type
                 $reward = $redemption->reward;
-                $discount = 0;
                 
                 if ($reward->rewardType === 'Discount') {
-                    // Percentage discount
-                    $discount = ($basePrice * $reward->rewardAmount) / 100;
+                    // Percentage discount (applied to base price excluding deposit, usually, but here applied to total)
+                    // Adjust logic if discount shouldn't apply to deposit
+                    $subTotal = $days * $pricePerDay;
+                    $discountAmount = ($subTotal * $reward->rewardAmount) / 100;
                 } else {
                     // Fixed amount discount
-                    $discount = $reward->rewardAmount;
+                    $discountAmount = $reward->rewardAmount;
                 }
-
-                $finalPrice = max(0, $basePrice - $discount);
+                
                 $appliedRewardId = $reward->rewardID;
             }
 
+            // Ensure price doesn't go below 0 (or below deposit, depending on policy)
+            $finalPrice = max(0, $basePrice - $discountAmount);
+
+            // 5. Upload Receipt
             $bookingID = 'BK' . strtoupper(uniqid());
             $receiptPath = $request->file('receipt')->store('receipts', 'public');
 
-            // Create the booking
+            // 6. Create Booking
             $booking = Booking::create([
-                'bookingID'     => $bookingID,
-                'matricNum'     => $customer->matricNum,
-                'plateNumber'   => $validated['plateNumber'],
-                'rewardID'      => $appliedRewardId, 
-                'pickupDate'    => $validated['start_date'] . ' ' . $validated['start_time'],
-                'returnDate'    => $validated['end_date'] . ' ' . $validated['end_time'],
-                'pickupLoc'     => $validated['pickup_location'],
-                'returnLoc'     => $validated['return_location'],
-                'totalPrice'    => $finalPrice, 
-                'bookingStat'   => 'pending',
+                'bookingID'      => $bookingID,
+                'matricNum'      => $customer->matricNum,
+                'plateNumber'    => $validated['plateNumber'],
+                'rewardID'       => $appliedRewardId,
+                'pickupDate'     => $validated['start_date'] . ' ' . $validated['start_time'],
+                'returnDate'     => $validated['end_date'] . ' ' . $validated['end_time'],
+                'pickupLoc'      => $validated['pickup_location'],
+                'returnLoc'      => $validated['return_location'],
+                'deposit'        => $deposit,
+                'totalPrice'     => $finalPrice,
+                'bookingStat'    => 'pending',
                 'paymentReceipt' => $receiptPath
             ]);
 
-            // CRITICAL: Mark voucher as USED immediately and link to booking
-            if ($request->filled('redemption_id')) {
-                $redemption = RewardRedemption::find($request->redemption_id);
+            // 7. Mark voucher as USED
+            if ($request->filled('redemption_id') && isset($redemption)) {
                 $redemption->markAsUsed($bookingID);
             }
 
+            // 8. Create Payment Record
             Payment::create([
                 'paymentID'       => 'PAY' . strtoupper(uniqid()), 
                 'bookingID'       => $bookingID,
@@ -164,8 +184,9 @@ class BookingController extends Controller
                 'method'          => $request->payment_method,
                 'paymentDate'     => now(),
                 'amount'          => $basePrice,
-                'discountedPrice' => $finalPrice,
+                'discountedPrice' => $discountAmount,
                 'grandTotal'      => $finalPrice,
+                'receipt_path'    => $receiptPath 
             ]);
 
             DB::commit();
@@ -188,7 +209,7 @@ class BookingController extends Controller
         $booking = Booking::with('payment')->where('bookingID', $id)->first();
 
         if (!$booking) {
-            return back()->with('error', "Booking not found.");
+            return back()->with('error', "System Error: Could not find booking with ID '$id'");
         }
 
         if (strtolower($booking->bookingStat) !== 'pending') {
@@ -196,18 +217,14 @@ class BookingController extends Controller
         }
 
         DB::transaction(function () use ($booking) {
-            // Update Booking Status to Approved
             $booking->update(['bookingStat' => 'approved']);
 
             if ($booking->payment) {
                 $booking->payment->update(['paymentStatus' => 'paid']);
             }
-            
-            // Customer will get 1 stamp when booking becomes 'completed' in storeInspection()
-            // No action needed here for stamps
         });
 
-        return back()->with('success', 'Booking approved! Customer can now pick up the car.');
+        return back()->with('success', 'Booking approved and Payment marked as Paid!');
     }
 
     public function reject($id)
@@ -231,7 +248,6 @@ class BookingController extends Controller
                 ]);
             }
 
-            // Update booking status
             $booking->update(['bookingStat' => 'rejected']);
 
             DB::commit();
@@ -252,18 +268,16 @@ class BookingController extends Controller
     public function validateVoucher(Request $request)
     {
         try {
-            // 1. Match the name sent from Javascript (voucher_code)
+            // 1. Match the name sent from Javascript
             $code = $request->input('voucher_code') ?? $request->input('voucherCode');
-            
-            // 2. Use the 'customer' guard since you don't use the default User model
-            $customer = \Illuminate\Support\Facades\Auth::guard('customer')->user();
+            $customer = Auth::guard('customer')->user();
 
             if (!$customer) {
                 return response()->json(['valid' => false, 'message' => 'Session expired. Please re-login.']);
             }
 
-            // 3. Query the redemption record
-            $redemption = \App\Models\RewardRedemption::where('matricNum', $customer->matricNum)
+            // 2. Query the redemption record (Check if user OWNS the voucher)
+            $redemption = RewardRedemption::where('matricNum', $customer->matricNum)
                 ->where('status', 'Active')
                 ->whereHas('reward', function ($query) use ($code) {
                     $query->where('voucherCode', $code);
@@ -275,12 +289,13 @@ class BookingController extends Controller
                 return response()->json(['valid' => false, 'message' => 'Voucher not found or not owned by you.']);
             }
 
-            // 4. Return data based on your Reward model columns (rewardAmount and rewardType)
+            // 3. Return data based on Reward model
             return response()->json([
                 'valid' => true,
                 'redemption_id' => $redemption->id,
                 'discount' => $redemption->reward->rewardAmount,
-                'type' => ($redemption->reward->rewardType === 'Discount' ? 'percentage' : 'fixed')
+                'type' => ($redemption->reward->rewardType === 'Discount' ? 'percentage' : 'fixed'),
+                'message' => 'Voucher applied successfully!'
             ]);
 
         } catch (\Exception $e) {
@@ -310,6 +325,8 @@ class BookingController extends Controller
             $start = new \DateTime($booking->pickupDate);
             $end = new \DateTime($booking->returnDate);
             $days = $end->diff($start)->days ?: 1;
+            
+            // Calculate base price cleanly
             $basePrice = (float)$booking->totalPrice - (float)$booking->deposit;
 
             if (request()->ajax()) {
@@ -352,6 +369,7 @@ class BookingController extends Controller
 
             $isStaff = Auth::guard('staff')->check();
             $query = Booking::where('bookingID', $bookingId);
+            
             if (!$isStaff) {
                 $query->where('matricNum', auth()->id());
             }
@@ -361,7 +379,7 @@ class BookingController extends Controller
                 return back()->with('error', 'Cannot cancel.');
             }
 
-            // IMPORTANT: If this booking used a voucher, return it
+            // Return Voucher
             $redemption = RewardRedemption::where('bookingID', $bookingId)->first();
             if ($redemption) {
                 $redemption->update([
@@ -427,7 +445,11 @@ class BookingController extends Controller
         if (!is_null($requestedTotal) && $requestedTotal !== '') {
             $full_amount = (float) $requestedTotal;
         } else {
-            $pricePerDay = $car->price_per_day ?? 120;
+            if (!is_null($requestedPricePerDay) && $requestedPricePerDay !== '') {
+                $pricePerDay = (float) $requestedPricePerDay;
+            } else {
+                $pricePerDay = $car->price; 
+            }
             $full_amount = $days * $pricePerDay;
         }
 
@@ -489,10 +511,12 @@ class BookingController extends Controller
             $path = $request->file('pickupForm')->store('inspections', 'public');
             $booking->pickupForm = $path;
         }
+
         if ($request->hasFile('returnForm')) {
             $path = $request->file('returnForm')->store('inspections', 'public');
             $booking->returnForm = $path;
         }
+
         $booking->save();
 
         return back()->with('success', 'Inspection images saved successfully!');
@@ -540,11 +564,13 @@ class BookingController extends Controller
         $inspection->dateOut = now();
         $inspection->time = now();
 
+        // Handle Signature (Base64)
         if ($request->filled('signature')) {
             $base64_image = $request->input('signature');
             if (preg_match('/^data:image\/(\w+);base64,/', $base64_image, $type)) {
                 $base64_image = substr($base64_image, strpos($base64_image, ',') + 1);
                 $type = strtolower($type[1]); 
+
                 $base64_decode = base64_decode($base64_image);
                 if ($base64_decode !== false) {
                     $filename = 'sig_' . time() . '_' . Str::random(5) . '.' . $type;
@@ -583,8 +609,8 @@ class BookingController extends Controller
             if ($booking->bookingStat !== 'completed') {
                 $booking->bookingStat = 'completed';
 
-                // CHANGED: Award 1 stamp per booking (not based on days)
-                $earnedPoints = 1; // Always 1 stamp per completed booking
+                // Award 1 stamp per completed booking
+                $earnedPoints = 1; 
 
                 if ($booking->customer) {
                     $booking->customer->increment('rewardPoints', $earnedPoints);
@@ -595,7 +621,7 @@ class BookingController extends Controller
 
         $msg = ucfirst($request->type) . ' inspection submitted successfully!';
         if ($earnedPoints > 0) {
-            $msg .= " Customer earned $earnedPoints stamp!"; // Changed "points" to "stamp"
+            $msg .= " Customer earned $earnedPoints stamp!";
         }
 
         return redirect()->route('bookings.show', $bookingID)

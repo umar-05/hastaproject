@@ -4,11 +4,8 @@
 <div class="max-w-5xl mx-auto animate-fade-in-up">
     
     <div class="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden relative">
-        
-        {{-- Decorative Background Blob --}}
         <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-50 pointer-events-none"></div>
 
-        {{-- Header Section --}}
         <div class="bg-gradient-to-r from-gray-50 to-white px-10 py-8 border-b border-gray-100 relative z-10">
             <div class="flex items-center gap-4">
                 <div class="p-3 bg-indigo-100 text-indigo-600 rounded-xl shadow-sm">
@@ -21,11 +18,10 @@
             </div>
         </div>
 
-        <form action="{{ route('staff.fleet.update', $fleet->plateNumber) }}" method="POST" class="p-10 relative z-10">
+        <form action="{{ route('staff.fleet.update', $fleet->plateNumber) }}" method="POST" class="p-10 relative z-10" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
-            {{-- Hidden Fields for Validation --}}
             <input type="hidden" name="ownerIC" value="{{ $fleet->ownerIC }}">
             <input type="hidden" name="ownerName" value="{{ $fleet->owner->ownerName ?? '' }}">
             <input type="hidden" name="ownerPhone" value="{{ $fleet->owner->ownerPhoneNum ?? '' }}">
@@ -42,7 +38,6 @@
                         <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Vehicle Identity</h4>
                     </div>
 
-                    {{-- Model Name --}}
                     <div class="group">
                         <label class="block text-xs font-bold text-gray-500 mb-2 ml-1 group-focus-within:text-indigo-600 transition-colors">Model Name</label>
                         <input type="text" name="modelName" value="{{ old('modelName', $fleet->modelName) }}" 
@@ -52,7 +47,6 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-6">
-                        {{-- Year --}}
                         <div class="group">
                             <label class="block text-xs font-bold text-gray-500 mb-2 ml-1 group-focus-within:text-indigo-600 transition-colors">Year</label>
                             <input type="number" name="year" value="{{ old('year', $fleet->year) }}" 
@@ -61,21 +55,27 @@
                             @error('year') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
                         </div>
 
-                        {{-- Color --}}
+                        {{-- ADDED: Price Field --}}
                         <div class="group">
-                            <label class="block text-xs font-bold text-gray-500 mb-2 ml-1 group-focus-within:text-indigo-600 transition-colors">Color</label>
-                            <input type="text" name="color" value="{{ old('color', $fleet->color) }}" 
-                                   class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-200 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all font-bold text-gray-900 shadow-sm"
-                                   placeholder="e.g. Jet Grey">
-                            @error('color') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
+                            <label class="block text-xs font-bold text-gray-500 mb-2 ml-1 group-focus-within:text-indigo-600 transition-colors">Price (RM)</label>
+                            <input type="number" name="price" value="{{ old('price', $fleet->price) }}" 
+                                   class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-200 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all font-bold text-gray-900 text-center shadow-sm"
+                                   placeholder="150">
+                            @error('price') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
                         </div>
+                    </div>
+
+                    <div class="group">
+                        <label class="block text-xs font-bold text-gray-500 mb-2 ml-1 group-focus-within:text-indigo-600 transition-colors">Color</label>
+                        <input type="text" name="color" value="{{ old('color', $fleet->color) }}" 
+                               class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-200 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all font-bold text-gray-900 shadow-sm"
+                               placeholder="e.g. Jet Grey">
+                        @error('color') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
                 {{-- RIGHT COLUMN: Status & Actions --}}
                 <div class="space-y-8">
-                    
-                    {{-- Status Selector (Visual) --}}
                     <div>
                         <div class="flex items-center gap-2 mb-4">
                             <span class="p-1.5 bg-purple-50 text-purple-600 rounded-lg">
