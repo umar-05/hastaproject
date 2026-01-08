@@ -294,6 +294,8 @@ class BookingController extends Controller
             $booking = Booking::with(['fleet', 'reward', 'customer']) 
                 ->where('bookingID', $bookingId)
                 ->firstOrFail();
+            
+            $payment = Payment::where('bookingID', $bookingId)->first();
 
             $isStaff = Auth::guard('staff')->check();
             $isOwner = auth()->id() == $booking->matricNum;
@@ -314,7 +316,7 @@ class BookingController extends Controller
                 return view('bookings.partials.show_modal', compact('booking', 'basePrice', 'days'));
             }
 
-            return view('bookings.show', compact('booking', 'basePrice'));
+            return view('bookings.show', compact('booking', 'payment', 'basePrice'));
 
         } catch (\Exception $e) {
             if (request()->ajax()) {

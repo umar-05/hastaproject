@@ -149,10 +149,10 @@
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Payment Status</span>
                             <span class="px-3 py-1 rounded-full text-sm font-semibold
-                                @if(strtolower($booking->paymentStatus) === 'paid') bg-green-100 text-green-800
+                                @if(strtolower($payment->paymentStatus) === 'paid') bg-green-100 text-green-800
                                 @else bg-yellow-100 text-yellow-800
                                 @endif">
-                                {{ ucfirst($booking->paymentStatus ?? 'Pending') }}
+                                {{ ucfirst($payment->paymentStatus ?? 'Pending') }}
                             </span>
                         </div>
                     </div>
@@ -245,14 +245,17 @@
                                 </div>
 
                                 {{-- Logic: Disable Return button if Pickup is not done yet --}}
-                                @if($isPickupDone)
+                                @if($isPickupDone && $booking->returnDate->isFuture()) 
+                                    <button disabled class="block w-full border border-gray-200 bg-gray-100 text-gray-400 font-bold py-3 rounded-xl cursor-not-allowed">
+                                        Available on {{ $booking->returnDate->format('d M') }}
+                                    </button>
+                                @elseif($isPickupDone && ($booking->returnDate->isToday() || $booking->returnDate->isPast()))
                                     <a href="{{ route('bookings.return-form', $booking->bookingID) }}" 
                                        class="block w-full border text-center font-bold py-3 rounded-xl transition
                                        @if($isReturnDone) border-gray-300 bg-white text-gray-700 hover:bg-gray-50 
                                        @else bg-red-600 text-white hover:bg-red-700 shadow-md 
-                                       @endif">
-                                        {{ $isReturnDone ? 'View Return Details' : 'Submit Return Form' }}
-                                    </a>
+                                       @endif"> 
+                                        {{ $isReturnDone ? 'View Return Details' : 'Submit Return Form' }}</a>
                                 @else
                                     <button disabled class="block w-full border border-gray-200 bg-gray-100 text-gray-400 font-bold py-3 rounded-xl cursor-not-allowed">
                                         Complete Pickup First
@@ -278,7 +281,7 @@
                         Back to Bookings
                     </a>
 
-                    @if($booking->bookingStat !== 'completed' && $booking->bookingStat !== 'cancelled')
+                    @if($booking->bookingStat !== 'completed' && $booking->bookingStat !== 'cancelled' && !$isPickupDone && !$isReturnDone )
                         <form action="{{ route('bookings.cancel', $booking->bookingID) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this booking? This action cannot be undone.');">
                             @csrf
                             <button type="submit" class="bg-white text-red-600 border border-red-200 font-bold py-2.5 px-6 rounded-lg hover:bg-red-50 hover:border-red-300 transition shadow-sm uppercase text-xs tracking-widest flex items-center">
