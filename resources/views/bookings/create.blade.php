@@ -22,8 +22,8 @@
         $vehicleImage = 'default-car.png'; 
         
         if (isset($car)) {
-            if (!empty($car->photos)) {
-                $vehicleImage = $car->photos;
+            if (!empty($car->photos1)) {
+                $vehicleImage = $car->photos1;
             } else {
                 $model = strtolower($car->modelName);
                 $year = $car->year;

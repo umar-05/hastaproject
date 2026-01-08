@@ -103,24 +103,7 @@
                 
                 $fuelLevel = $car->fuel_level ?? 75;
                 $fuelColor = $fuelLevel > 50 ? 'bg-green-500' : ($fuelLevel > 20 ? 'bg-yellow-500' : 'bg-red-500');
-                
-                // IMAGE LOGIC (Dynamic selection based on model/year)
-                $vehicleImage = 'default-car.png';
-                if (!empty($car->photos)) {
-                    $vehicleImage = $car->photos;
-                } else {
-                    $model = strtolower($car->modelName);
-                    $year = $car->year;
-                    if (str_contains($model, 'axia')) { $vehicleImage = ($year >= 2023) ? 'axia-2024.png' : 'axia-2018.png'; }
-                    elseif (str_contains($model, 'bezza')) { $vehicleImage = 'bezza-2018.png'; }
-                    elseif (str_contains($model, 'myvi')) { $vehicleImage = ($year >= 2020) ? 'myvi-2020.png' : 'myvi-2015.png'; }
-                    elseif (str_contains($model, 'saga')) { $vehicleImage = 'saga-2017.png'; }
-                    elseif (str_contains($model, 'alza')) { $vehicleImage = 'alza-2019.png'; }
-                    elseif (str_contains($model, 'aruz')) { $vehicleImage = 'aruz-2020.png'; }
-                    elseif (str_contains($model, 'vellfire')) { $vehicleImage = 'vellfire-2020.png'; }
-                    elseif (str_contains($model, 'x50')) { $vehicleImage = 'x50-2024.png'; }
-                    elseif (str_contains($model, 'y15')) { $vehicleImage = 'y15zr-2023.png'; }
-                }
+                $vehicleImage = $car->photo1;
             @endphp
 
             <div class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col h-full overflow-hidden">

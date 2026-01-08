@@ -93,39 +93,10 @@
                             $vehicleType = 'Car';
                             
                             if ($booking->fleet) {
-                                $fleet = $booking->fleet;
-                                $vehicleName = $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : '');
-                                $modelName = strtolower($fleet->modelName);
-                                $year = $fleet->year ?? 0;
-                                
-                                if (strpos($modelName, 'axia') !== false) {
-                                    $vehicleImage = $year == 2024 ? 'axia-2024.png' : 'axia-2018.png';
-                                    $vehicleType = 'Hatchback';
-                                } elseif (strpos($modelName, 'bezza') !== false) {
-                                    $vehicleImage = 'bezza-2018.png';
-                                    $vehicleType = 'Sedan';
-                                } elseif (strpos($modelName, 'myvi') !== false) {
-                                    $vehicleImage = $year >= 2020 ? 'myvi-2020.png' : 'myvi-2015.png';
-                                    $vehicleType = 'Hatchback';
-                                } elseif (strpos($modelName, 'saga') !== false) {
-                                    $vehicleImage = 'saga-2017.png';
-                                    $vehicleType = 'Sedan';
-                                } elseif (strpos($modelName, 'alza') !== false) {
-                                    $vehicleImage = 'alza-2019.png';
-                                    $vehicleType = 'MPV';
-                                } elseif (strpos($modelName, 'aruz') !== false) {
-                                    $vehicleImage = 'aruz-2020.png';
-                                    $vehicleType = 'SUV';
-                                } elseif (strpos($modelName, 'vellfire') !== false) {
-                                    $vehicleImage = 'vellfire-2020.png';
-                                    $vehicleType = 'MPV';
-                                } elseif (strpos($modelName, 'x50') !== false) {
-                                    $vehicleImage = 'x50-2024.png';
-                                    $vehicleType = 'SUV';
-                                } elseif (strpos($modelName, 'y15') !== false) {
-                                    $vehicleImage = 'y15zr-2023.png';
-                                    $vehicleType = 'Motorcycle';
-                                }
+                            $fleet = $booking->fleet;
+                            $vehicleName = $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : '');
+                            $vehicleImage = $fleet->photo1;
+                            $vehicleType = 'Vehicle'; // *
                             }
                             
                             // Determine Status Color

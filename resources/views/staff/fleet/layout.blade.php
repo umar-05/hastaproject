@@ -28,7 +28,10 @@
 
                 <div class="py-6 grid grid-cols-1 lg:grid-cols-4 gap-8 items-center">
                     <div class="lg:col-span-1 h-40 bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center border border-gray-200">
-                         <img src="{{ asset('images/cars/' . ($fleet->image ?? 'default_car.png')) }}" class="h-full w-full object-contain p-2 hover:scale-105 transition-transform">
+                        {{-- CHANGE: Use photo1 and standard images path --}}
+                            <img src="{{ asset('images/' . $fleet->photo1) }}" 
+                            class="h-full w-full object-contain p-2 hover:scale-105 transition-transform" 
+                            alt="{{ $fleet->modelName }}">
                     </div>
                     <div class="lg:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
