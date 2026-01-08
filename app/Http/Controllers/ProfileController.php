@@ -15,15 +15,33 @@ class ProfileController extends Controller
     /**
      * Display the user's profile form.
      */
-    public function edit(Request $request): View
-    {
-        // Explicitly fetch the logged-in customer
-        $user = Auth::guard('customer')->user();
+public function edit(Request $request): View
+{
+    $user = Auth::guard('customer')->user();
 
-        return view('profile.edit', [
-            'user' => $request->user('customer'), // Explicitly specify 'customer' guard
-        ]);
-    }
+    // Define the mapping for dropdowns
+    $stateData = [
+        'JOHOR' => ['Johor Bahru', 'Batu Pahat', 'Kluang', 'Muar', 'Skudai', 'Pasir Gudang'],
+        'SELANGOR' => ['Shah Alam', 'Petaling Jaya', 'Subang Jaya', 'Klang', 'Cyberjaya', 'Sepang'],
+        'KUALA LUMPUR' => ['Kuala Lumpur', 'Kepong', 'Cheras', 'Setiawangsa'],
+        'PENANG' => ['Georgetown', 'Butterworth', 'Bayan Lepas', 'Bukit Mertajam'],
+        'PERAK' => ['Ipoh', 'Taiping', 'Manjung', 'Teluk Intan'],
+        'MELAKA' => ['Melaka City', 'Alor Gajah', 'Jasin'],
+        'NEGERI SEMBILAN' => ['Seremban', 'Port Dickson', 'Nilai'],
+        'PAHANG' => ['Kuantan', 'Temerloh', 'Bentong'],
+        'KEDAH' => ['Alor Setar', 'Sungei Petani', 'Kulim'],
+        'KELANTAN' => ['Kota Bharu', 'Pasir Mas', 'Tumpat'],
+        'TERENGGANU' => ['Kuala Terengganu', 'Dungun', 'Kemaman'],
+        'PERLIS' => ['Kangar', 'Arau'],
+        'SABAH' => ['Kota Kinabalu', 'Sandakan', 'Tawau'],
+        'SARAWAK' => ['Kuching', 'Miri', 'Sibu', 'Bintulu'],
+    ];
+
+    return view('profile.edit', [
+        'user' => $user,
+        'stateData' => $stateData,
+    ]);
+}
 
     /**
      * Update the user's profile information.
