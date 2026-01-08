@@ -100,6 +100,25 @@
                     <div><label class="block text-gray-700 font-bold mb-2">Return Notes</label><textarea name="notes" class="w-full border-gray-200 bg-gray-50 rounded-xl p-3 h-24 focus:ring-hasta-red focus:border-hasta-red resize-none" placeholder="Damage or issues...">{{ $inspection->remark ?? '' }}</textarea></div>
                 </div>
 
+                {{-- ADDED: Rental Agreement Display --}}
+                <div class="mb-12">
+                    <h3 class="text-lg font-bold mb-4 text-gray-900">Rental Agreement</h3>
+                    <div class="w-full h-96 md:h-[500px] bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden shadow-inner relative group">
+                        {{-- PDF VIEWER pointing to 'public/documents/hasta-rental-agreement.pdf' --}}
+                        <iframe 
+                            src="{{ asset('documents/hasta-rental-agreement.pdf') }}#toolbar=0&navpanes=0" 
+                            class="w-full h-full"
+                            type="application/pdf">
+                        </iframe>
+                        
+                        {{-- Loading/Fallback Text --}}
+                        <div class="absolute inset-0 flex items-center justify-center bg-gray-50 -z-10">
+                            <p class="text-gray-500 text-sm">Loading Agreement...</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-center text-gray-400 mt-2">Please read the agreement before signing below.</p>
+                </div>
+
                 {{-- Signature --}}
                 <div class="mb-10">
                     <h3 class="text-lg font-bold mb-2 text-gray-900">Signature</h3>
@@ -112,7 +131,12 @@
                             <input type="hidden" name="signature" id="signature">
                         @endif
                     </div>
-                    <div class="mt-6 flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100"><input type="checkbox" name="confirm" required {{ isset($inspection) ? 'checked' : '' }} class="mt-1 w-5 h-5 rounded border-gray-300 text-hasta-red focus:ring-hasta-red cursor-pointer"><label class="text-gray-600 text-sm leading-relaxed cursor-pointer font-medium">I acknowledge that I have inspected the vehicle and confirm its condition as documented above.</label></div>
+                    <div class="mt-6 flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <input type="checkbox" name="confirm" required {{ isset($inspection) ? 'checked' : '' }} class="mt-1 w-5 h-5 rounded border-gray-300 text-hasta-red focus:ring-hasta-red cursor-pointer">
+                        <label class="text-gray-600 text-sm leading-relaxed cursor-pointer font-medium">
+                            I acknowledge that I have inspected the vehicle, read the rental agreement above, and confirm the condition as documented.
+                        </label>
+                    </div>
                 </div>
 
                 {{-- Button --}}

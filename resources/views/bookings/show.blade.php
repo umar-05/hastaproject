@@ -209,7 +209,7 @@
                                 </div>
                                 <div class="ml-3">
                                     <p class="text-sm text-yellow-700">
-                                        Inspection forms will be available once the booking is <strong>Confirmed</strong>.
+                                        Inspection forms will be available once the booking is <strong>Approved</strong>.
                                     </p>
                                 </div>
                             </div>

@@ -537,8 +537,9 @@ public function showPickupForm($bookingID)
         // We use the current timestamp so !empty() returns true in your View
         if ($request->type === 'pickup') {
             $booking->pickupForm = now(); 
-        } else {
+        } elseif ($request->type === 'return') {
             $booking->returnForm = now();
+            $booking->bookingStat = 'completed';
         }
         $booking->save();
 
