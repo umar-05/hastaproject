@@ -20,6 +20,8 @@ class Fleet extends Model
         'plateNumber',
         'modelName',
         'year',
+        'price',
+        'color',
         'photo1',
         'photo2',
         'photo3',
