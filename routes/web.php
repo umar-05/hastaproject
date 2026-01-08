@@ -50,13 +50,25 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
     
     // Booking Management
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+    
+    // --- SPECIFIC ROUTES FIRST ---
+    // Move 'create', 'payment', 'store', etc. ABOVE the wildcard route
     Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
-    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     Route::match(['get','post'],'/bookings/payment', [BookingController::class, 'payment'])->name('bookings.payment');
     Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
-    Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+    Route::post('/bookings/validate-voucher', [BookingController::class, 'validateVoucher'])->name('bookings.validateVoucher');
     Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
+    Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/bookings/{booking}/forms', [BookingController::class, 'uploadForms'])->name('bookings.upload-forms');
+    
+    // Inspection Routes (Specific)
+    Route::get('/bookings/{booking}/pickup-inspection', [BookingController::class, 'showPickupForm'])->name('bookings.pickup-form');
+    Route::get('/bookings/{booking}/return-inspection', [BookingController::class, 'showReturnForm'])->name('bookings.return-form');
+    Route::post('/bookings/{booking}/inspection', [BookingController::class, 'storeInspection'])->name('bookings.store-inspection');
+
+    // --- WILDCARD ROUTE LAST ---
+    // This catches anything else (like IDs) that didn't match the specific routes above
+    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     
     // Vehicle Inspection Forms
     Route::get('/bookings/{booking}/pickup-inspection', [BookingController::class, 'showPickupForm'])->name('bookings.pickup-form');
