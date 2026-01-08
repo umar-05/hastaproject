@@ -81,8 +81,31 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // This single line handles index, create, store, show, edit, update, destroy
     // It creates routes like: staff.fleet.index, staff.fleet.create, staff.fleet.show, etc.
     // ========================================================
-    Route::resource('fleet', FleetController::class);
+    //Route::resource('fleet', FleetController::class);
+   Route::prefix('/fleet')->name('fleet.')->group(function () {
+    
+    // 2. SHOW ONE FLEET DASHBOARD (Requires ID or Plate)
+    // URL: /staff/fleet/JWA-8888
+    Route::get('/{plateNumber}', [FleetController::class, 'show'])->name('show');
 
+    Route::get('/', [FleetController::class, 'index'])->name('index');         // route('staff.fleet.index')
+        Route::get('/create', [FleetController::class, 'create'])->name('create'); // route('staff.fleet.create')
+        Route::post('/', [FleetController::class, 'store'])->name('store');        // route('staff.fleet.store')
+        
+        // 3. Edit/Update/Delete (Must be defined before the generic {plateNumber} show route)
+        Route::get('/{plateNumber}/edit', [FleetController::class, 'edit'])->name('edit');
+        Route::put('/{plateNumber}', [FleetController::class, 'update'])->name('update');
+        Route::delete('/{plateNumber}', [FleetController::class, 'destroy'])->name('destroy');
+
+    // 3. TABS (Nested under the specific fleet)
+    Route::prefix('{plateNumber}')->group(function() {
+        Route::get('/overview', [FleetController::class, 'overview'])->name('tabs.overview');
+        Route::get('/bookings', [FleetController::class, 'bookings'])->name('tabs.bookings');
+        Route::get('/maintenance', [FleetController::class, 'maintenance'])->name('tabs.maintenance');
+        Route::post('/maintenance', [FleetController::class, 'storeMaintenance'])->name('maintenance.store');
+        Route::get('/owner', [FleetController::class, 'owner'])->name('tabs.owner');
+    });
+});
     // Reward Management (Staff)
     Route::get('/dashboard/reward', [RewardController::class, 'index'])->name('rewards');
     Route::post('/dashboard/reward', [RewardController::class, 'store'])->name('rewards.store');

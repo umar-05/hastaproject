@@ -28,6 +28,17 @@ class Maintenance extends Model
         'cost' => 'decimal:2',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->maintenanceID)) {
+                // Generates a random string ID like "M-659A2B"
+                $model->maintenanceID = 'M-' . strtoupper(substr(uniqid(), -6));
+            }
+        });
+    }
+
     /**
      * Relationship to Fleet
      */

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Fleet extends Model
 
@@ -20,18 +22,16 @@ class Fleet extends Model
         'plateNumber',
         'modelName',
         'year',
-        'photos',
-        'ownerName',
-        'ownerIc',
-        'ownerPhone',
-        'ownerEmail',
+        'color',
+        'status',
+        'image',
+        'ownerIC',
         'roadtaxStat',
         'taxActivedate',
         'taxExpirydate',
         'insuranceStat',
         'insuranceActivedate',
         'insuranceExpirydate',
-        'status',
         'note',
         'matricNum',
         'staffID',
@@ -65,6 +65,11 @@ class Fleet extends Model
         return $this->hasMany(Maintenance::class, 'plateNumber', 'plateNumber');
     }
     
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(Owner::class, 'ownerIC', 'ownerIC');
+    }
+
 
 
     /**
