@@ -16,7 +16,7 @@ return new class extends Migration
             // Primary Key
             $table->string('matricNum')->primary();
 
-            $table->string('faculty');
+            $table->string('faculty')->nullable();
             $table->text('collegeAddress')->nullable();
             $table->string('name');
             $table->string('email')->unique();
