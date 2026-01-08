@@ -8,7 +8,7 @@
                 <p class="text-gray-500 text-sm">View and manage all rental bookings</p>
             </div>
 
-            {{-- SEARCH & ACTION BAR (Unchanged) --}}
+            {{-- SEARCH & ACTION BAR --}}
             <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
                 <form action="{{ route('staff.bookingmanagement') }}" method="GET" class="flex items-center gap-3 flex-1 max-w-4xl">
                     <div class="relative flex-1">
@@ -24,7 +24,7 @@
                         <select name="status" onchange="this.form.submit()" class="block w-full pl-3 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 sm:text-sm appearance-none bg-white">
                             <option value="">All Status</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+                            <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
                             <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
                             <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                         </select>
@@ -46,14 +46,14 @@
                 </div>
             </div>
 
-            {{-- STATUS METRICS (Unchanged) --}}
+            {{-- STATUS METRICS --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
                 <div class="bg-white p-5 rounded-xl border-l-4 border-blue-500 shadow-sm">
                     <p class="text-3xl font-bold text-gray-800">{{ $totalBookings ?? 0 }}</p>
                     <p class="text-sm font-medium text-gray-500">Total Bookings</p>
                 </div>
                 <div class="bg-white p-5 rounded-xl border-l-4 border-green-500 shadow-sm">
-                    <p class="text-3xl font-bold text-gray-800">{{ $confirmedCount ?? 0 }}</p>
+                    <p class="text-3xl font-bold text-gray-800">{{ $approvedCount ?? 0 }}</p>
                     <p class="text-sm font-medium text-gray-500">Confirmed</p>
                 </div>
                 <div class="bg-white p-5 rounded-xl border-l-4 border-yellow-500 shadow-sm">
@@ -74,7 +74,7 @@
             <div class="bg-white shadow-sm border border-gray-200 rounded-xl">
                 <div class="max-h-[60vh] overflow-y-auto">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                        <thead class="bg-gray-50 sticky top-0 z-10">
                             <tr>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Booking ID</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Customer</th>
@@ -83,184 +83,178 @@
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Return</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Amount</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Verification</th>
                                 <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @if(isset($bookings) && $bookings->count())
-                            @foreach($bookings as $booking)
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $booking->bookingID }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $booking->customer->name ?? $booking->matricNum }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    {{ $booking->fleet ? $booking->fleet->modelName : 'N/A' }} -<br><span class="text-gray-400">{{ $booking->fleet->plateNumber ?? $booking->plateNumber }}</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    {{ \Carbon\Carbon::parse($booking->pickupDate ?? $booking->pickup_date)->format('Y-m-d') }}<br><span class="font-bold">{{ \Carbon\Carbon::parse($booking->pickupDate ?? $booking->pickup_date)->format('H:i') }}</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    {{ \Carbon\Carbon::parse($booking->returnDate ?? $booking->return_date)->format('Y-m-d') }}<br><span class="font-bold">{{ \Carbon\Carbon::parse($booking->returnDate ?? $booking->return_date)->format('H:i') }}</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">RM {{ number_format($booking->totalPrice ?? $booking->total_price ?? 0, 2) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ ($booking->bookingStat ?? $booking->booking_stat) === 'confirmed' ? 'bg-green-100 text-green-800' : (($booking->bookingStat ?? $booking->booking_stat) === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800') }}">
-                                        {{ ucfirst($booking->bookingStat ?? $booking->booking_stat ?? 'unknown') }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center space-x-2">
-                                    <button class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded text-xs font-bold inline-flex items-center">Pickup</button>
-                                    <button class="bg-gray-100 text-gray-400 px-3 py-1 rounded text-xs font-bold inline-flex items-center">Return</button>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex justify-end items-center gap-3">
-                                        
-                                        {{-- --- MODIFIED SECTION: View Details Button --- --}}
-                                        {{-- We use onclick to call JS and pass the route --}}
-                                        <button 
-                                            onclick="openBookingModal('{{ route('bookings.show', $booking->bookingID) }}')" 
-                                            class="p-1.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 cursor-pointer" 
-                                            title="View Details">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                                            </svg>
-                                        </button>
-                                        {{-- --------------------------------------------- --}}
-
-                                        {{-- APPROVE BOOKING --}}
-                                        @if(($booking->bookingStat ?? $booking->booking_stat) === 'pending')
-                                        <form action="{{ route('staff.fleet.bookings.approve', $booking->bookingID) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" onclick="return confirm('Approve this booking?')" class="text-gray-400 hover:text-green-600 transition" title="Approve Booking">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            @forelse($bookings as $booking)
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {{ $booking->bookingID }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        {{ $booking->customer->name ?? $booking->matricNum }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        {{ $booking->fleet->modelName ?? 'N/A' }}
+                                        <br>
+                                        <span class="text-xs text-gray-400">{{ $booking->fleet->plateNumber ?? $booking->plateNumber }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        {{ \Carbon\Carbon::parse($booking->pickupDate)->format('Y-m-d') }}
+                                        <br>
+                                        <span class="font-bold">{{ \Carbon\Carbon::parse($booking->pickupDate)->format('H:i') }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        {{ \Carbon\Carbon::parse($booking->returnDate)->format('Y-m-d') }}
+                                        <br>
+                                        <span class="font-bold">{{ \Carbon\Carbon::parse($booking->returnDate)->format('H:i') }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                                        RM {{ number_format($booking->totalPrice, 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @php
+                                            $status = strtolower($booking->bookingStat);
+                                            $badgeClass = match($status) {
+                                                'approved', 'confirmed' => 'bg-green-100 text-green-800',
+                                                'pending' => 'bg-yellow-100 text-yellow-800',
+                                                'cancelled' => 'bg-red-100 text-red-800',
+                                                'completed' => 'bg-gray-100 text-gray-800',
+                                                default => 'bg-gray-100 text-gray-800'
+                                            };
+                                        @endphp
+                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $badgeClass }}">
+                                            {{ ucfirst($status) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex justify-end items-center gap-2">
+                                            
+                                            {{-- 1. VIEW DETAILS (MODAL) --}}
+                                            <button onclick="openBookingModal('{{ route('bookings.show', $booking->bookingID) }}')" 
+                                                    class="p-1.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition" 
+                                                    title="View Details">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                                 </svg>
                                             </button>
-                                        </form>
-                                        @endif
 
-                                        {{-- CANCEL BOOKING --}}
-                                        @if(($booking->bookingStat ?? $booking->booking_stat) !== 'cancelled' && ($booking->bookingStat ?? $booking->booking_stat) !== 'completed')
-                                        <form action="{{ route('staff.fleet.bookings.cancel', $booking->bookingID) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" onclick="return confirm('Cancel this booking?')" class="text-gray-400 hover:text-red-600 transition" title="Cancel booking">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                                </svg>
-                                            </button>
-                                        </form>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                            @else
-                            <tr>
-                                <td colspan="9" class="px-6 py-8 text-center text-gray-500">No bookings found.</td>
-                            </tr>
-                            @endif
+                                            {{-- 2. APPROVE (Only if pending) --}}
+                                            @if($status === 'pending')
+                                                <form action="{{ route('staff.fleet.bookings.approve', $booking->bookingID) }}" method="POST" class="inline-block">
+                                                    @csrf
+                                                    <button type="submit" onclick="return confirm('Approve this booking?')" class="p-1.5 hover:bg-green-50 text-gray-400 hover:text-green-600 rounded-md transition" title="Approve">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            {{-- 3. CANCEL (Unless already cancelled/completed) --}}
+                                            @if(!in_array($status, ['cancelled', 'completed']))
+                                                <form action="{{ route('staff.fleet.bookings.cancel', $booking->bookingID) }}" method="POST" class="inline-block">
+                                                    @csrf
+                                                    <button type="submit" onclick="return confirm('Cancel this booking?')" class="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-md transition" title="Cancel">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                            
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                            <span class="text-lg font-medium">No bookings found</span>
+                                            <p class="text-sm text-gray-400 mt-1">Try adjusting your search filters.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            @if(isset($bookings))
-            <div class="mt-4 px-6 py-4 bg-white border-t">
-                {{ $bookings->appends(['search' => request('search')])->links() }}
+            @if(isset($bookings) && $bookings->count())
+            <div class="mt-4 px-6 py-4 bg-white border-t rounded-xl shadow-sm">
+                {{ $bookings->appends(['search' => request('search'), 'status' => request('status')])->links() }}
             </div>
             @endif
         </div>
     </div>
 
-    {{-- --- ADDED SECTION: Modal HTML --- --}}
+    {{-- MODAL --}}
     <div id="bookingModal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm"></div> {{-- Added backdrop-blur for modern feel --}}
-
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" onclick="closeBookingModal()"></div>
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                {{-- CHANGED: sm:max-w-3xl TO sm:max-w-6xl (Wider Window) --}}
                 <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-6xl border border-gray-200">
-                    
-                    {{-- Header with Close Button --}}
                     <div class="bg-white px-6 py-4 border-b border-gray-100 flex justify-between items-center sticky top-0 z-20">
                         <h3 class="text-lg font-bold text-gray-800">Booking Details</h3>
                         <button type="button" onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600 transition bg-gray-100 hover:bg-gray-200 rounded-full p-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
-
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-8 min-h-[400px]" id="modalContent">
-                        {{-- Loading State --}}
-                        <div class="flex flex-col justify-center items-center h-64 text-gray-400">
-                            <svg class="animate-spin mb-4 h-10 w-10 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <p class="font-medium animate-pulse">Loading...</p>
-                        </div>
+                        {{-- Content loaded via JS --}}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- --- ADDED SECTION: JavaScript --- --}}
     <script>
-    function openBookingModal(url) {
-        const modal = document.getElementById('bookingModal');
-        const content = document.getElementById('modalContent');
-        
-        // Show Modal
-        modal.classList.remove('hidden');
+        function openBookingModal(url) {
+            const modal = document.getElementById('bookingModal');
+            const content = document.getElementById('modalContent');
+            
+            modal.classList.remove('hidden');
+            content.innerHTML = `
+                <div class="flex flex-col justify-center items-center h-64 text-gray-500">
+                    <svg class="animate-spin mb-3 h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="font-medium animate-pulse">Loading booking details...</p>
+                </div>
+            `;
 
-        // Show Loading State
-        content.innerHTML = `
-            <div class="flex flex-col justify-center items-center h-40 text-gray-500">
-                <svg class="animate-spin mb-3 h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <p>Loading details...</p>
-            </div>
-        `;
-
-        // --- THE FIX IS HERE ---
-        fetch(url, {
-            method: 'GET',
-            headers: {
-    'X-Requested-With': 'XMLHttpRequest', // <--- This tells Controller to use the "Partial" view
-    'Accept': 'text/html',
-    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-},
-            credentials: 'include' // <--- THIS IS CRITICAL: It sends your login cookies
-        })
-        .then(async response => {
-            if (response.status === 401 || response.status === 419) {
-                return '<p class="text-red-500 text-center py-8">Session expired. Please refresh the page and login again.</p>';
-            }
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.text();
-        })
-        .then(html => {
-            content.innerHTML = html;
-        })
-        .catch(error => {
-            content.innerHTML = '<p class="text-red-500 text-center py-8">Error loading details. Please try again.</p>';
-            console.error('Error:', error);
-        });
-    }
-        function closeBookingModal() {
-            document.getElementById('bookingModal').classList.add('hidden');
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'text/html',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                },
+                credentials: 'include'
+            })
+            .then(async response => {
+                if (response.status === 401 || response.status === 419) {
+                    return '<div class="text-center py-12"><p class="text-red-500 font-bold">Session expired.</p><p class="text-gray-500 text-sm mt-2">Please refresh the page and login again.</p></div>';
+                }
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.text();
+            })
+            .then(html => {
+                content.innerHTML = html;
+            })
+            .catch(error => {
+                content.innerHTML = '<div class="text-center py-12 text-red-500">Error loading details. Please try again later.</div>';
+                console.error('Error:', error);
+            });
         }
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('bookingModal');
-            if (event.target.classList.contains('bg-opacity-75')) {
-                closeBookingModal();
-            }
+        function closeBookingModal() {
+            document.getElementById('bookingModal').classList.add('hidden');
         }
     </script>
 </x-staff-layout>

@@ -80,4 +80,11 @@ class Booking extends Model
     {
         return $query->where('bookingStat', 'completed');
     }
+
+    public function payment()
+    {
+        // Assuming Booking has 'bookingID' as PK
+        return $this->hasOne(Payment::class, 'bookingID', 'bookingID');
+    }
+
 }

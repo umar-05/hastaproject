@@ -76,7 +76,7 @@
                     <button class="filter-btn px-5 py-2 rounded-full text-sm font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition-all whitespace-nowrap" data-filter="pending">
                         Pending
                     </button>
-                    <button class="filter-btn px-5 py-2 rounded-full text-sm font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition-all whitespace-nowrap" data-filter="confirmed">
+                    <button class="filter-btn px-5 py-2 rounded-full text-sm font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition-all whitespace-nowrap" data-filter="approved">
                         Approved
                     </button>
                     <button class="filter-btn px-5 py-2 rounded-full text-sm font-bold bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition-all whitespace-nowrap" data-filter="cancelled">
