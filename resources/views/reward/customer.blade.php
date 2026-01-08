@@ -13,41 +13,70 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in { animation: fadeInUp 0.6s ease-out forwards; }
-        .delay-100 { animation-delay: 0.1s; }
-
-        /* Stamp Styles */
-        .stamp-container { perspective: 1000px; }
-        .stamp {
-            width: 50px; height: 50px; /* Optimal size */
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 800; border-radius: 50%;
-            font-size: 18px; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        
+        /* CIRCLE ANIMATION STYLES */
+        .stamp-wrapper {
             position: relative;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        /* Empty State */
-        .stamp.empty {
-            background-color: rgba(255,255,255,0.15);
-            border: 2px dashed rgba(255,255,255,0.4);
-            color: rgba(255,255,255,0.6);
+        
+        /* The Background Circle (Gray) */
+        .circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.2);
+            stroke-width: 3;
         }
-        /* Filled State */
-        .stamp.filled {
-            background-color: #ffffff;
-            color: #b91c1c; /* HASTA Red */
-            border: 2px solid white;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-            transform: scale(1.1);
+
+        /* The Progress Circle (White) */
+        .circle-progress {
+            fill: none;
+            stroke: #ffffff;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-dasharray: 126; /* Circumference of r=20 */
+            stroke-dashoffset: 126; /* Start empty */
+            transition: stroke-dashoffset 1s ease-out;
+            transform: rotate(-90deg); /* Start from top */
+            transform-origin: 50% 50%;
         }
-        /* Active Pulse for filled stamps */
-        .stamp.filled::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: 50%; border: 2px solid white;
-            animation: ripple 1.5s infinite;
+
+        /* Filled State: Offset 0 means full circle */
+        .stamp-wrapper.filled .circle-progress {
+            stroke-dashoffset: 0;
         }
-        @keyframes ripple {
-            0% { transform: scale(1); opacity: 0.6; }
-            100% { transform: scale(1.5); opacity: 0; }
+
+        /* Inner Content */
+        .stamp-content {
+            position: absolute;
+            font-weight: 800;
+            font-size: 16px;
+            color: rgba(255,255,255,0.7);
+            z-index: 10;
+        }
+        
+        .stamp-wrapper.filled .stamp-content {
+            color: #b91c1c; /* Red Checkmark */
+            font-size: 20px;
+        }
+
+        /* White background circle behind checkmark for contrast */
+        .stamp-bg-fill {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            background: white;
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition-delay: 0.5s; /* Wait for circle to draw first */
+        }
+
+        .stamp-wrapper.filled .stamp-bg-fill {
+            transform: scale(1);
         }
     </style>
 
@@ -79,7 +108,7 @@
                        class="px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 {{ request()->routeIs('reward.index') ? 'bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg transform scale-105' : 'text-gray-500 hover:bg-gray-50' }}">
                         <i class="fas fa-store"></i> Rewards Store
                     </a>
-                    <a href="{{ route('reward.claimed') }}" 
+                    <a href="{{ route('rewards.claimed') }}" 
                        class="px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 {{ request()->routeIs('reward.claimed') ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg transform scale-105' : 'text-gray-500 hover:bg-gray-50' }}">
                         <i class="fas fa-wallet"></i> My Wallet
                     </a>
@@ -87,8 +116,8 @@
             </div>
 
             {{-- 3. HERO SECTION: LOYALTY CARD --}}
-            {{-- Added mb-16 for more space below, and adjusted p-8 md:p-10 for tighter internal padding --}}
-            <div x-data="{ page: {{ Auth::user()->stamps > 10 ? 2 : 1 }} }" 
+            {{-- Using rewardPoints instead of stamps --}}
+            <div x-data="{ page: {{ (int)Auth::user()->rewardPoints > 10 ? 2 : 1 }} }" 
                  class="animate-fade-in relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#B91C1C] via-[#DC2626] to-[#EF4444] shadow-2xl shadow-red-200 p-8 md:p-10 mb-20 text-white">
                 
                 {{-- Decorative Background --}}
@@ -100,18 +129,18 @@
                     {{-- Left: Text Info --}}
                     <div class="text-center md:text-left space-y-2 max-w-md">
                         <h1 class="text-4xl md:text-5xl font-black tracking-tight leading-tight">
-                            {{ Auth::user()->stamps }} <span class="text-red-100 text-3xl block md:inline">Stamps Collected</span>
+                            {{ Auth::user()->rewardPoints }} <span class="text-red-100 text-3xl block md:inline">Stamps Collected</span>
                         </h1>
                         <p class="text-red-100 font-medium text-lg leading-relaxed pt-2">
-                            Rent for <span class="text-white font-bold border-b-2 border-white/40">10 hours+</span> to earn a stamp. 
-                            Collect 20 to reach maximum status!
+                            Earn <span class="text-white font-bold border-b-2 border-white/40">1 Stamp</span> for every day you rent! 
+                            Collect stamps to unlock exclusive rewards below.
                         </p>
                     </div>
 
                     {{-- Right: Slider Stamp Grid --}}
                     <div class="flex-1 w-full max-w-xl flex items-center justify-center gap-6">
                         
-                        {{-- LEFT ARROW (Visible with bg-white/20) --}}
+                        {{-- LEFT ARROW --}}
                         <button @click="page = 1" 
                                 :class="page === 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'"
                                 class="p-4 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all duration-300 backdrop-blur-md shadow-lg flex-shrink-0">
@@ -131,9 +160,21 @@
                                  x-transition:leave-end="opacity-0 transform -translate-x-8"
                                  class="absolute inset-0 flex flex-wrap justify-center gap-3 md:gap-4 content-center">
                                 @for ($i = 1; $i <= 10; $i++)
-                                    <div class="stamp-container" title="Stamp {{ $i }}">
-                                        <div class="stamp {{ $i <= Auth::user()->stamps ? 'filled' : 'empty' }}">
-                                            @if($i <= Auth::user()->stamps) <i class="fas fa-check"></i> @else {{ $i }} @endif
+                                    {{-- CORRECTED LOGIC: Use rewardPoints --}}
+                                    @php $isFilled = (int)Auth::user()->rewardPoints >= $i; @endphp
+                                    <div class="stamp-wrapper {{ $isFilled ? 'filled' : '' }}" title="Stamp {{ $i }}">
+                                        {{-- SVG Circle --}}
+                                        <svg width="60" height="60" viewBox="0 0 60 60" class="absolute inset-0">
+                                            <circle cx="30" cy="30" r="20" class="circle-bg"></circle>
+                                            <circle cx="30" cy="30" r="20" class="circle-progress"></circle>
+                                        </svg>
+                                        
+                                        {{-- White Background (pops in later) --}}
+                                        <div class="stamp-bg-fill"></div>
+
+                                        {{-- Content (Checkmark or Number) --}}
+                                        <div class="stamp-content">
+                                            @if($isFilled) <i class="fas fa-check"></i> @else {{ $i }} @endif
                                         </div>
                                     </div>
                                 @endfor
@@ -146,19 +187,26 @@
                                  x-transition:enter-end="opacity-100 transform translate-x-0"
                                  x-transition:leave="transition ease-in duration-200"
                                  x-transition:leave-start="opacity-100 transform translate-x-0"
-                                 x-transition:leave-end="opacity-0 transform translate-x-8"
+                                 x-transition:leave-end="opacity-0 transform -translate-x-8"
                                  class="absolute inset-0 flex flex-wrap justify-center gap-3 md:gap-4 content-center">
                                 @for ($i = 11; $i <= 20; $i++)
-                                    <div class="stamp-container" title="Stamp {{ $i }}">
-                                        <div class="stamp {{ $i <= Auth::user()->stamps ? 'filled' : 'empty' }}">
-                                            @if($i <= Auth::user()->stamps) <i class="fas fa-check"></i> @else {{ $i }} @endif
+                                    {{-- CORRECTED LOGIC: Use rewardPoints --}}
+                                    @php $isFilled = (int)Auth::user()->rewardPoints >= $i; @endphp
+                                    <div class="stamp-wrapper {{ $isFilled ? 'filled' : '' }}" title="Stamp {{ $i }}">
+                                        <svg width="60" height="60" viewBox="0 0 60 60" class="absolute inset-0">
+                                            <circle cx="30" cy="30" r="20" class="circle-bg"></circle>
+                                            <circle cx="30" cy="30" r="20" class="circle-progress"></circle>
+                                        </svg>
+                                        <div class="stamp-bg-fill"></div>
+                                        <div class="stamp-content">
+                                            @if($isFilled) <i class="fas fa-check"></i> @else {{ $i }} @endif
                                         </div>
                                     </div>
                                 @endfor
                             </div>
                         </div>
 
-                        {{-- RIGHT ARROW (Visible with bg-white/20) --}}
+                        {{-- RIGHT ARROW --}}
                         <button @click="page = 2" 
                                 :class="page === 2 ? 'opacity-0 pointer-events-none' : 'opacity-100'"
                                 class="p-4 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all duration-300 backdrop-blur-md shadow-lg flex-shrink-0">
@@ -168,8 +216,7 @@
 
                 </div>
 
-                {{-- Gamification Notification --}}
-                @if(Auth::user()->stamps >= 3)
+                @if((int)Auth::user()->rewardPoints >= 3)
                 <div class="mt-6 bg-white/10 border border-white/20 rounded-xl p-3 flex items-center justify-center gap-3 backdrop-blur-sm animate-pulse">
                     <i class="fas fa-gift text-yellow-300"></i>
                     <p class="text-sm font-bold">
@@ -223,7 +270,7 @@
                                             <i class="fas fa-ticket-alt text-slate-300"></i> {{ $reward->totalClaimable }} left
                                         </span>
                                         <span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                                        <span class="flex items-center gap-1.5 {{ Auth::user()->stamps >= $reward->rewardPoints ? 'text-green-600 font-bold' : 'text-slate-400' }}">
+                                        <span class="flex items-center gap-1.5 {{ (int)Auth::user()->rewardPoints >= (int)$reward->rewardPoints ? 'text-green-600 font-bold' : 'text-slate-400' }}">
                                             <i class="fas fa-stamp"></i> Cost: {{ $reward->rewardPoints }} Stamps
                                         </span>
                                     </div>
@@ -231,7 +278,13 @@
 
                                 {{-- Action Side --}}
                                 <div class="w-full md:w-auto">
-                                    @if(Auth::user()->stamps >= $reward->rewardPoints)
+                                    {{-- FIX: Using rewardPoints for comparison --}}
+                                    @php 
+                                        $canClaim = (int)Auth::user()->rewardPoints >= (int)$reward->rewardPoints;
+                                        $hasStock = $reward->totalClaimable > 0;
+                                    @endphp
+
+                                    @if($canClaim && $hasStock)
                                         <form action="{{ route('rewards.claim') }}" method="POST" onsubmit="return confirm('Confirm claim for {{ $reward->rewardPoints }} stamps?')">
                                             @csrf
                                             <input type="hidden" name="rewardID" value="{{ $reward->rewardID }}">
@@ -245,11 +298,17 @@
                                         {{-- Locked State --}}
                                         <div class="flex flex-col items-center">
                                             <button disabled class="w-full md:w-auto px-8 py-4 bg-slate-50 text-slate-300 border border-slate-100 rounded-2xl font-bold cursor-not-allowed flex items-center gap-2">
-                                                <i class="fas fa-lock"></i> Locked
+                                                @if(!$hasStock)
+                                                    <i class="fas fa-times-circle"></i> Out of Stock
+                                                @else
+                                                    <i class="fas fa-lock"></i> Locked
+                                                @endif
                                             </button>
-                                            <span class="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-wide">
-                                                Need {{ $reward->rewardPoints - Auth::user()->stamps }} More
-                                            </span>
+                                            @if($hasStock)
+                                                <span class="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+                                                    Need {{ (int)$reward->rewardPoints - (int)Auth::user()->rewardPoints }} More
+                                                </span>
+                                            @endif
                                         </div>
                                     @endif
                                 </div>

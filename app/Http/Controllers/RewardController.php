@@ -49,33 +49,35 @@ class RewardController extends Controller
     /**
      * Process a reward claim (Customer Action).
      */
-    public function claim(Request $request)
+    public function claim(Request $request) 
     {
-        $request->validate(['rewardID' => 'required|exists:rewards,rewardID']); // Ensure table name is correct (usually plural 'rewards')
-        
-        $reward = Reward::where('rewardID', $request->rewardID)->firstOrFail();
-        $customer = Auth::user();
+        $customer = auth()->user(); // Get logged in student
+        $reward = Reward::find($request->rewardID);
 
-        // 1. Logic: Ensure user has enough stamps/points
-        if ($customer->stamps < $reward->rewardPoints) {
-            return back()->with('error', 'Not enough stamps!');
+        // 1. Check Points
+        if ($customer->rewardPoints < $reward->rewardPoints) {
+            return back()->with('error', 'Not enough points!');
         }
 
-        // 2. Create the Redemption Record (FIXED: Was creating a Reward before)
+        // 2. Prevent Duplicate Claims (Optional, based on your previous request)
+        $exists = RewardRedemption::where('matricNum', $customer->matricNum)
+                    ->where('rewardID', $reward->rewardID)->exists();
+        if ($exists) {
+            return back()->with('error', 'You already have this voucher.');
+        }
+
+        // 3. Create the Voucher (Status: Active)
         RewardRedemption::create([
             'matricNum' => $customer->matricNum,
             'rewardID' => $reward->rewardID,
             'redemptionDate' => now(),
-            'status' => 'Active' // Optional, if you have a status column
+            'status' => 'Active' 
         ]);
 
-        // 3. Deduct Stamps from Customer (Optional but recommended)
-        // $customer->decrement('stamps', $reward->rewardPoints);
+        // 4. DEDUCT POINTS
+        $customer->decrement('rewardPoints', $reward->rewardPoints);
 
-        // 4. Reduce slots available
-        $reward->decrement('totalClaimable');
-
-        return redirect()->route('rewards.claimed')->with('success', 'Reward claimed successfully!');
+        return back()->with('success', 'Voucher claimed successfully!');
     }
 
 

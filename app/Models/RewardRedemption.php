@@ -17,6 +17,7 @@ class RewardRedemption extends Model
         'matricNum',
         'rewardID',
         'redemptionDate',
+        'status'
     ];
 
     // Relationship: Link back to the Reward details (to get voucherCode, etc.)

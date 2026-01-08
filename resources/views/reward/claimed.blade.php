@@ -27,7 +27,7 @@
                        class="px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 {{ request()->routeIs('reward.index') ? 'bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg transform scale-105' : 'text-gray-500 hover:bg-gray-50' }}">
                         <i class="fas fa-store"></i> Rewards Store
                     </a>
-                    <a href="{{ route('reward.claimed') }}" 
+                    <a href="{{ route('rewards.claimed') }}" 
                        class="px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 {{ request()->routeIs('reward.claimed') ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg transform scale-105' : 'text-gray-500 hover:bg-gray-50' }}">
                         <i class="fas fa-wallet"></i> My Wallet
                     </a>

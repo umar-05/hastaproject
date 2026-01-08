@@ -66,7 +66,7 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
 
         // 2. Rewards Store
         Route::get('/rewards', [RewardController::class, 'index'])->name('reward.index');
-        Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('reward.claimed');
+        Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('rewards.claimed');
         Route::post('/rewards/claim', [RewardController::class, 'claim'])->name('rewards.claim');
 
         // 3. Booking Management
@@ -97,7 +97,7 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // --- Dashboard & Main Operations ---
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
-    
+    Route::get('/booking-details/{bookingID}', [StaffController::class, 'showBooking'])->name('bookings.show');
     Route::resource('mission', MissionController::class);
     Route::get('/fleet/check', [StaffController::class, 'checkAvailability'])->name('fleet.check');
     Route::get('/pickup-return', [StaffController::class, 'pickupReturnSchedule'])->name('pickup-return');

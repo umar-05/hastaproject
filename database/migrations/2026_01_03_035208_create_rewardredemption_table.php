@@ -20,6 +20,8 @@ return new class extends Migration
 
             $table->string('rewardID')->nullable();
             $table->foreign('rewardID')->references('rewardID')->on('reward');
+            
+            $table->string('status')->nullable();
 
             $table->primary(['matricNum', 'rewardID']);
 
