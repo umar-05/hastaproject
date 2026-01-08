@@ -112,9 +112,12 @@ class CustomerController extends Controller
 
                                      return (object) [
                                          'plateNumber' => $fleet->plateNumber,
-                                         'name' => $fleet->modelName, 
+                                         'name' => $fleet->modelName,
+                                         // view-friendly keys
+                                         'modelName'   => $fleet->modelName,
                                          'type' => $type,
                                          'price' => $price,
+                                         'pricePerDay' => $price,
                                          'image' => $fleet->photo1,
                                          'seats' => str_contains($type, 'Motorcycle') ? 2 : 5,
                                          'transmission' => str_contains($type, 'Motorcycle') ? 'Manual' : 'Auto'

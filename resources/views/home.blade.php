@@ -217,6 +217,7 @@
                     <div class="group bg-white rounded-3xl p-4 shadow-sm hover:shadow-xl transition-all border border-transparent hover:border-gray-100">
                         {{-- Image --}}
                         <div class="relative bg-gray-50 rounded-2xl p-6 h-56 flex items-center justify-center mb-4">
+                            
                             <img src="{{ asset('images/'.$vehicle->image) }}" alt="{{ $vehicle->modelName }}" class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500">
                         </div>
                         
@@ -224,6 +225,7 @@
                         <div class="px-2">
                             <div class="flex justify-between items-end mb-4">
                                 <div>
+                                    
                                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ $vehicle->type }}</p>
                                     <h4 class="text-lg font-bold text-gray-900">{{ $vehicle->modelName }}</h4>
                                 </div>
@@ -234,7 +236,7 @@
                             </div>
                             
                             {{-- Booking Button --}}
-                            <a href="{{ route('vehicles.show', array_merge(['vehicle' => $vehicle->plateNumber], request()->query())) }}" class="block w-full py-3.5 rounded-xl bg-red-600 text-white text-center font-bold text-sm hover:opacity-90 transition-opacity">
+                            <a href="{{ route('vehicles.show', array_merge(['id' => $vehicle->plateNumber], request()->query())) }}" class="block w-full py-3.5 rounded-xl bg-red-600 text-white text-center font-bold text-sm hover:opacity-90 transition-opacity">
                                 Book Now
                             </a>
                         </div>

@@ -19,7 +19,34 @@
     </style>
 
     @php
-        $vehicleImage = $car->photo1; 
+        // 1. Capture the data from the URL (Home page search)
+        // We check both 'pickup_date' and 'start_date' just in case
+        $prePickupDate = request('pickup_date') ?? request('start_date');
+        $preReturnDate = request('return_date') ?? request('end_date');
+        $prePickupTime = request('pickup_time') ?? request('start_time') ?? '09:00';
+        $preReturnTime = request('return_time') ?? request('end_time') ?? '09:00';
+        $prePickupLoc = request('pickup_location');
+        $preReturnLoc = request('return_location');
+
+        // Vehicle Image Logic
+        $vehicleImage = 'default-car.png'; 
+        if (isset($car)) {
+            if (!empty($car->photos)) {
+                $vehicleImage = $car->photos;
+            } else {
+                $model = strtolower($car->modelName);
+                $year = $car->year;
+                if (str_contains($model, 'axia')) { $vehicleImage = ($year >= 2023) ? 'axia-2024.png' : 'axia-2018.png'; }
+                elseif (str_contains($model, 'bezza')) { $vehicleImage = 'bezza-2018.png'; }
+                elseif (str_contains($model, 'myvi')) { $vehicleImage = ($year >= 2020) ? 'myvi-2020.png' : 'myvi-2015.png'; }
+                elseif (str_contains($model, 'saga')) { $vehicleImage = 'saga-2017.png'; }
+                elseif (str_contains($model, 'alza')) { $vehicleImage = 'alza-2019.png'; }
+                elseif (str_contains($model, 'aruz')) { $vehicleImage = 'aruz-2020.png'; }
+                elseif (str_contains($model, 'vellfire')) { $vehicleImage = 'vellfire-2020.png'; }
+                elseif (str_contains($model, 'x50')) { $vehicleImage = 'x50-2024.png'; }
+                elseif (str_contains($model, 'y15')) { $vehicleImage = 'y15zr-2023.png'; }
+            }
+        }
     @endphp
 
     <div class="min-h-screen bg-gray-100 py-8">
@@ -38,7 +65,7 @@
                     <div class="bg-white border rounded-lg p-4 mb-6 flex items-center gap-4">
                         <img src="{{ asset('images/' . $vehicleImage) }}" class="w-32 h-32 object-contain">
                         <div class="flex-1">
-                            <h2 class="text-2xl font-bold text-gray-800">{{ $vehicleName }}</h2>
+                            <h2 class="text-xl font-bold text-gray-800">{{ $vehicleName }}</h2>
                             <p class="text-gray-600">{{ $car->plateNumber }}</p>
                             <div class="flex gap-4 mt-2">
                                 <span class="text-red-600 font-semibold">RM{{ $pricePerDay }}/day</span>

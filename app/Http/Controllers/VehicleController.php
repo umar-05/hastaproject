@@ -56,9 +56,13 @@ class VehicleController extends Controller
             'id'           => $fleet->plateNumber,
             'plateNumber'  => $fleet->plateNumber,
             'name'         => $fleet->modelName . ' ' . $fleet->year,
+            // keep original model name for views that expect this property
+            'modelName'    => $fleet->modelName,
             'type'         => $specs['type'],
             
-            'price'        => $fleet->price, 
+            // legacy/view-friendly price key
+            'price'        => $fleet->price,
+            'pricePerDay'  => $fleet->price,
 
             'image'        => $fleet->photo1 ?? $specs['image'], 
             'transmission' => 'Automatic',
