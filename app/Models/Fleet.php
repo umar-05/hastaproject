@@ -23,11 +23,7 @@ class Fleet extends Model
         'photo1',
         'photo2',
         'photo3',
-        'ownerName',
-        'ownerIc',
-        'ownerPhone',
-        'ownerEmail',
-        'roadtaxStat',
+        'ownerIC',
         'roadtaxActiveDate',
         'roadtaxExpiryDate',
         'insuranceStat',
@@ -60,8 +56,12 @@ class Fleet extends Model
     {
         return $this->hasMany(Booking::class, 'plateNumber', 'plateNumber');
     }
-    
 
+    public function owner()
+    {
+        // belongsTo(RelatedModel, foreignKey, ownerKey)
+        return $this->belongsTo(Owner::class, 'ownerIC', 'ownerIC');
+    }
 
     /**
      * Availability Logic

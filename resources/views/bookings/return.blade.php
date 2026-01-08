@@ -27,7 +27,7 @@
 
                 {{-- Booking Details --}}
                 <div class="bg-gray-50 rounded-2xl p-8 mb-8 border border-gray-100">
-                    <h2 class="text-xl font-bold mb-6 text-gray-900">Booking Details</h2>
+                    <h2 class="text-2xl font-bold mb-6 text-gray-900">Booking Details</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
                         <div><p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Booking ID</p><p class="font-bold text-lg text-gray-900">#{{ $booking->bookingID }}</p></div>
                         <div><p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Plate Number</p><p class="font-bold text-lg text-gray-900">{{ $booking->plateNumber ?? 'N/A' }}</p></div>

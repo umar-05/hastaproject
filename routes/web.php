@@ -98,6 +98,7 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
     Route::get('/booking-details/{bookingID}', [StaffController::class, 'showBooking'])->name('bookings.show');
+    
     Route::resource('mission', MissionController::class);
     Route::get('/fleet/check', [StaffController::class, 'checkAvailability'])->name('fleet.check');
     Route::get('/pickup-return', [StaffController::class, 'pickupReturnSchedule'])->name('pickup-return');
@@ -132,6 +133,30 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/rewards-dashboard', [RewardController::class, 'staffIndex'])->name('rewards');
 
     // 2. CRUD Group
+    Route::group(['middleware' => ['auth:staff']], function () {
+    Route::get('/receipt/{id}', [BookingController::class, 'viewReceipt'])->name('staff.receipt.view');
+});
+
+    // Profile Management
+    Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
+    Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
+    
+    //Daily-Income Report
+    Route::get('/reports/daily-income', [StaffController::class, 'dailyIncome'])->name('report.daily-income');
+    //Monthly-Income Report
+    Route::get('/reports/monthly-income', [StaffController::class, 'monthlyIncome'])->name('report.monthly-income');
+    // Staff User Management
+    Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
+    Route::post('/store', [StaffController::class, 'store'])->name('store');
+
+    Route::get('/reports', [StaffController::class, 'reports'])->name('report');
+    Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
+    
+    Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+    Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
+    Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
+    Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+    
     Route::prefix('rewards')->name('reward.')->group(function() {
         // Point this to staffIndex in RewardController
         Route::get('/', [RewardController::class, 'staffIndex'])->name('index'); 
@@ -143,12 +168,12 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
         Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy');
     });
 
-    // --- Reports ---
+    /*// --- Reports ---
     Route::get('/reports', [StaffController::class, 'reports'])->name('report');
     Route::get('/reports/daily-income', function () {
         return view('staff.reports.dailyincome.index');
     })->name('report.daily-income');
-    
+    */
     Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses'])->name('reports.incomeExpenses');
 
     // Blacklist

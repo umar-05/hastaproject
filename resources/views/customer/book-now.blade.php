@@ -16,7 +16,7 @@
     <main class="max-w-7xl mx-auto px-8 py-12">
 
         <section class="mb-12">
-            <h1 class="text-4xl font-extrabold mb-4">Our Vehicle Fleet</h1>
+            <h1 class="text-4xl font-bold mb-4">Our Vehicle Fleet</h1>
             <p class="text-gray-600 text-lg">Choose the perfect vehicle for your journey</p>
         </section>
 
@@ -48,11 +48,11 @@
                 </div>
                 <div class="flex justify-between items-start mb-2">
                     <div>
-                        <h4 class="text-xl font-bold">{{ $vehicle['name'] }}</h4>
+                        <h4 class="text-2xl font-bold">{{ $vehicle['name'] }}</h4>
                         <p class="text-gray-500 text-sm">{{ $vehicle['type'] }}</p>
                     </div>
                     <div class="text-right">
-                        <span class="text-hasta-red text-xl font-bold">RM{{ $vehicle['price'] }}</span>
+                        <span class="text-hasta-red text-2xl font-bold">RM{{ $vehicle['price'] }}</span>
                         <p class="text-gray-500 text-xs">per day</p>
                     </div>
                 </div>

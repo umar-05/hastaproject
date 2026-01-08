@@ -162,7 +162,7 @@
                             <a href="{{ route('staff.report.daily-income') }}" class="submenu-link {{ request()->routeIs('staff.report.daily-income') ? 'active' : '' }}">
                                 Daily Income
                             </a>
-                            <a href="#" class="submenu-link">
+                            <a href="{{ route('staff.report.monthly-income') }}" class="submenu-link {{ request()->routeIs('staff.report.monthly-income') ? 'active' : '' }}">
                                 Monthly Income
                             </a>
                             <a href="{{ route('staff.reports.incomeExpenses') }}" class="submenu-link {{ request()->routeIs('staff.reports.incomeExpenses') ? 'active' : '' }}">

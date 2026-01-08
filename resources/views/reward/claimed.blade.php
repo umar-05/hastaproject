@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-bold text-xl text-gray-800 leading-tight flex items-center gap-2">
+        <h2 class="font-bold text-2xl text-gray-800 leading-tight flex items-center gap-2">
             <i class="fas fa-wallet text-red-600"></i>
             {{ __('My Reward Wallet') }}
         </h2>
@@ -116,7 +116,7 @@
                                 <div class="w-full md:w-auto bg-slate-50 rounded-2xl p-5 border border-slate-100 flex flex-col items-center gap-3 min-w-[200px]">
                                     <div class="text-center">
                                         <span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-1">Promo Code</span>
-                                        <span class="font-mono text-xl font-black text-slate-800 tracking-widest select-all">
+                                        <span class="font-mono text-2xl font-black text-slate-800 tracking-widest select-all">
                                             {{ $redemption->reward->voucherCode }}
                                         </span>
                                     </div>

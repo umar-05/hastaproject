@@ -25,7 +25,7 @@
         <div class="container mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center">
-                    <div class="bg-red-600 text-white px-4 py-2 font-bold text-xl rounded">
+                    <div class="bg-red-600 text-white px-4 py-2 font-bold text-2xl rounded">
                         HASTA
                     </div>
                 </div>
@@ -81,7 +81,7 @@
                     
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <h3 class="text-xl font-bold">Perodua Axia 2018</h3>
+                            <h3 class="text-2xl font-bold">Perodua Axia 2018</h3>
                             <p class="text-gray-500 text-sm">Hatchback</p>
                         </div>
                         <div class="text-right">
@@ -120,7 +120,7 @@
                     
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <h3 class="text-xl font-bold">Perodua Bezza 2018</h3>
+                            <h3 class="text-2xl font-bold">Perodua Bezza 2018</h3>
                             <p class="text-gray-500 text-sm">Sedan</p>
                         </div>
                         <div class="text-right">
@@ -159,7 +159,7 @@
                     
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <h3 class="text-xl font-bold">Perodua Myvi 2015</h3>
+                            <h3 class="text-2xl font-bold">Perodua Myvi 2015</h3>
                             <p class="text-gray-500 text-sm">Hatchback</p>
                         </div>
                         <div class="text-right">
@@ -198,7 +198,7 @@
                     
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <h3 class="text-xl font-bold">Perodua Myvi 2020</h3>
+                            <h3 class="text-2xl font-bold">Perodua Myvi 2020</h3>
                             <p class="text-gray-500 text-sm">Hatchback</p>
                         </div>
                         <div class="text-right">
@@ -237,7 +237,7 @@
                     
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <h3 class="text-xl font-bold">Perodua Axia 2024</h3>
+                            <h3 class="text-2xl font-bold">Perodua Axia 2024</h3>
                             <p class="text-gray-500 text-sm">Hatchback</p>
                         </div>
                         <div class="text-right">
@@ -276,7 +276,7 @@
                     
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <h3 class="text-xl font-bold">Proton Saga 2017</h3>
+                            <h3 class="text-2xl font-bold">Proton Saga 2017</h3>
                             <p class="text-gray-500 text-sm">Sedan</p>
                         </div>
                         <div class="text-right">
@@ -315,7 +315,7 @@
                     
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <h3 class="text-xl font-bold">Perodua Alza 2019</h3>
+                            <h3 class="text-2xl font-bold">Perodua Alza 2019</h3>
                             <p class="text-gray-500 text-sm">MPV</p>
                         </div>
                         <div class="text-right">
@@ -354,7 +354,7 @@
                     
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <h3 class="text-xl font-bold">Perodua Aruz 2020</h3>
+                            <h3 class="text-2xl font-bold">Perodua Aruz 2020</h3>
                             <p class="text-gray-500 text-sm">SUV</p>
                         </div>
                         <div class="text-right">
@@ -393,7 +393,7 @@
                     
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <h3 class="text-xl font-bold">Toyota Vellfire 2020</h3>
+                            <h3 class="text-2xl font-bold">Toyota Vellfire 2020</h3>
                             <p class="text-gray-500 text-sm">MPV</p>
                         </div>
                         <div class="text-right">

@@ -7,32 +7,22 @@ use App\Models\Fleet;
 
 class VehicleController extends Controller
 {
-    /**
-     * Display the Public Welcome/Home Page with Featured Vehicles
-     */
     public function welcome()
     {
-        // Fetch 3 latest available vehicles
         $featuredVehicles = Fleet::latest()
                                  ->take(3)
                                  ->get()
                                  ->map(function ($fleet) {
-                                     // Reuse the existing formatting logic
                                      $data = $this->formatVehicleData($fleet);
-                                     // Convert array to Object to match home.blade.php syntax ($vehicle->name)
                                      return (object) $data;
                                  });
 
-        // Pass null for activeBooking since guests don't have one
         return view('home', [
             'featuredVehicles' => $featuredVehicles,
             'activeBooking' => null 
         ]);
     }
 
-    /**
-     * Display a listing of the vehicles.
-     */
     public function index()
     {
         $fleets = Fleet::where('status', 'available')
@@ -58,20 +48,18 @@ class VehicleController extends Controller
         return $this->index();
     }
 
-    /**
-     * Helper: Format Fleet model into a standardized array.
-     */
     private function formatVehicleData($fleet)
     {
         $specs = $this->resolveSpecs($fleet->modelName, $fleet->year);
 
         return [
             'id'           => $fleet->plateNumber,
-            'plateNumber'  => $fleet->plateNumber, // Ensure this exists for the route key
+            'plateNumber'  => $fleet->plateNumber,
             'name'         => $fleet->modelName . ' ' . $fleet->year,
             'type'         => $specs['type'],
             'price'        => $specs['price'],
-            'image'        => $fleet->photos ?? $specs['image'],
+            // CHANGE: Use photo1 column
+            'image'        => $fleet->photo1 ?? $specs['image'], 
             'transmission' => 'Automatic',
             'fuel'         => 'RON 95',
             'ac'           => true,

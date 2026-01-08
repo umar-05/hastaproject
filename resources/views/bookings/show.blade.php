@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
             {{ __('Booking Details') }}
         </h2>
     </x-slot>
@@ -58,37 +58,8 @@
                         $fleet = $booking->fleet;
                         $vehicleName = $fleet->modelName;
                         
-                        $modelName = strtolower($fleet->modelName);
-                        $year = $fleet->year ?? 0;
-                        
-                        if (strpos($modelName, 'axia') !== false) {
-                            $vehicleImage = $year == 2024 ? 'axia-2024.png' : 'axia-2018.png';
-                            $vehicleType = 'Hatchback';
-                        } elseif (strpos($modelName, 'bezza') !== false) {
-                            $vehicleImage = 'bezza-2018.png';
-                            $vehicleType = 'Sedan';
-                        } elseif (strpos($modelName, 'myvi') !== false) {
-                            $vehicleImage = $year >= 2020 ? 'myvi-2020.png' : 'myvi-2015.png';
-                            $vehicleType = 'Hatchback';
-                        } elseif (strpos($modelName, 'saga') !== false) {
-                            $vehicleImage = 'saga-2017.png';
-                            $vehicleType = 'Sedan';
-                        } elseif (strpos($modelName, 'alza') !== false) {
-                            $vehicleImage = 'alza-2019.png';
-                            $vehicleType = 'MPV';
-                        } elseif (strpos($modelName, 'aruz') !== false) {
-                            $vehicleImage = 'aruz-2020.png';
-                            $vehicleType = 'SUV';
-                        } elseif (strpos($modelName, 'vellfire') !== false) {
-                            $vehicleImage = 'vellfire-2020.png';
-                            $vehicleType = 'MPV';
-                        } elseif (strpos($modelName, 'x50') !== false) {
-                            $vehicleImage = 'x50-2024.png';
-                            $vehicleType = 'SUV';
-                        } elseif (strpos($modelName, 'y15') !== false) {
-                            $vehicleImage = 'y15zr-2023.png';
-                            $vehicleType = 'Motorcycle';
-                        }
+                        // CHANGE: Use photo1
+                        $vehicleImage = $fleet->photo1;
                     }
                 @endphp
 
@@ -124,7 +95,7 @@
                 </div>
 
                 <div class="border-t pt-8 mt-8">
-                    <h3 class="text-xl font-bold mb-6">Pricing Breakdown</h3>
+                    <h3 class="text-2xl font-bold mb-6">Pricing Breakdown</h3>
                     <div class="bg-gray-50 rounded-lg p-6 space-y-4">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Base Price</span>
@@ -160,7 +131,7 @@
 
                 {{-- --- INSPECTION FORMS SECTION --- --}}
                 <div class="border-t pt-8 mt-8">
-                    <h3 class="text-xl font-bold mb-6">Vehicle Inspection Forms</h3>
+                    <h3 class="text-2xl font-bold mb-6">Vehicle Inspection Forms</h3>
                     
                     @php
                         $isPickupDone = !empty($booking->pickupForm);
@@ -269,7 +240,7 @@
 
                 @if($booking->notes)
                 <div class="border-t pt-8 mt-8">
-                    <h3 class="text-xl font-bold mb-4">Notes</h3>
+                    <h3 class="text-2xl font-bold mb-4">Notes</h3>
                     <p class="text-gray-600 bg-gray-50 p-4 rounded-lg">{{ $booking->notes }}</p>
                 </div>
                 @endif

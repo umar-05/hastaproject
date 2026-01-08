@@ -29,7 +29,7 @@
             
             <div class="flex flex-col md:flex-row justify-between items-end mb-8 animate-fade-up">
                 <div>
-                    <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight mb-2">My Bookings</h1>
+                    <h1 class="text-4xl font-bold text-gray-900 tracking-tight mb-2">My Bookings</h1>
                     <p class="text-gray-500">Manage your upcoming trips and view history.</p>
                 </div>
                 
@@ -62,7 +62,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">No bookings found</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">No bookings found</h3>
                     <p class="text-gray-500 mb-8 text-center max-w-sm">Looks like you haven't started your journey with us yet.</p>
                     <a href="{{ route('vehicles.index') }}" class="bg-hasta-red hover:bg-red-700 text-white font-bold px-8 py-3 rounded-xl transition shadow-lg shadow-red-200">
                         Browse Vehicles
@@ -93,39 +93,10 @@
                             $vehicleType = 'Car';
                             
                             if ($booking->fleet) {
-                                $fleet = $booking->fleet;
-                                $vehicleName = $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : '');
-                                $modelName = strtolower($fleet->modelName);
-                                $year = $fleet->year ?? 0;
-                                
-                                if (strpos($modelName, 'axia') !== false) {
-                                    $vehicleImage = $year == 2024 ? 'axia-2024.png' : 'axia-2018.png';
-                                    $vehicleType = 'Hatchback';
-                                } elseif (strpos($modelName, 'bezza') !== false) {
-                                    $vehicleImage = 'bezza-2018.png';
-                                    $vehicleType = 'Sedan';
-                                } elseif (strpos($modelName, 'myvi') !== false) {
-                                    $vehicleImage = $year >= 2020 ? 'myvi-2020.png' : 'myvi-2015.png';
-                                    $vehicleType = 'Hatchback';
-                                } elseif (strpos($modelName, 'saga') !== false) {
-                                    $vehicleImage = 'saga-2017.png';
-                                    $vehicleType = 'Sedan';
-                                } elseif (strpos($modelName, 'alza') !== false) {
-                                    $vehicleImage = 'alza-2019.png';
-                                    $vehicleType = 'MPV';
-                                } elseif (strpos($modelName, 'aruz') !== false) {
-                                    $vehicleImage = 'aruz-2020.png';
-                                    $vehicleType = 'SUV';
-                                } elseif (strpos($modelName, 'vellfire') !== false) {
-                                    $vehicleImage = 'vellfire-2020.png';
-                                    $vehicleType = 'MPV';
-                                } elseif (strpos($modelName, 'x50') !== false) {
-                                    $vehicleImage = 'x50-2024.png';
-                                    $vehicleType = 'SUV';
-                                } elseif (strpos($modelName, 'y15') !== false) {
-                                    $vehicleImage = 'y15zr-2023.png';
-                                    $vehicleType = 'Motorcycle';
-                                }
+                            $fleet = $booking->fleet;
+                            $vehicleName = $fleet->modelName . ($fleet->year ? ' ' . $fleet->year : '');
+                            $vehicleImage = $fleet->photo1;
+                            $vehicleType = 'Vehicle'; // *
                             }
                             
                             // Determine Status Color
@@ -154,7 +125,7 @@
                                 <div class="flex-1 w-full">
                                     <div class="flex justify-between items-start mb-4">
                                         <div>
-                                            <h3 class="text-xl font-bold text-gray-900">{{ $vehicleName }}</h3>
+                                            <h3 class="text-2xl font-bold text-gray-900">{{ $vehicleName }}</h3>
                                             <p class="text-sm text-gray-500 mb-2">{{ $vehicleType }}</p>
 
                                             {{-- --- NEW: INSPECTION FORM STATUS TAGS --- --}}
