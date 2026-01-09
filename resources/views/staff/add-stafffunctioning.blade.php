@@ -75,7 +75,7 @@
                             <x-input-error :messages="$errors->get('position')" class="mt-2" />
                         </div>
 
-                        {{-- Email - Note: Username split only shown on Add --}}
+                        {{-- Corporate Email (UPDATED: Always Split Input) --}}
                         <div class="col-span-1 md:col-span-2">
                             <label for="email" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Corporate Email</label>
                             <div class="relative flex items-center">
@@ -83,17 +83,24 @@
                                     <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>
                                 </div>
 
-                                @if(isset($staff))
-                                    {{-- Full Email input for Editing --}}
-                                    <input id="email" type="email" name="email" value="{{ old('email', $staff->email) }}" required 
-                                        class="pl-11 block w-full bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20 text-gray-700 py-3 transition duration-200 font-medium">
-                                @else
-                                    {{-- Username @ Domain split for Adding --}}
-                                    <input id="email_username" type="text" name="email_username" value="{{ old('email_username') }}" required placeholder="username"
-                                        class="pl-11 block w-full bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl focus:bg-white focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20 text-gray-700 py-3 transition duration-200 placeholder-gray-400 font-medium">
-                                    <span class="inline-flex items-center px-4 py-3 rounded-r-xl border border-l-0 border-gray-200 bg-gray-100 text-gray-500 font-bold text-sm tracking-wide">@hasta.com</span>
-                                @endif
+                                {{-- Username Input --}}
+                                <input 
+                                    id="email_username" 
+                                    type="text" 
+                                    name="email_username" 
+                                    {{-- If editing, split email to get username. If new, get old input. --}}
+                                    value="{{ isset($staff) ? explode('@', $staff->email)[0] : old('email_username') }}" 
+                                    required 
+                                    placeholder="username"
+                                    class="pl-11 block w-full bg-gray-50 border border-gray-200 border-r-0 rounded-l-xl focus:bg-white focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20 text-gray-700 py-3 transition duration-200 placeholder-gray-400 font-medium"
+                                >
+                                
+                                {{-- Fixed Domain Label --}}
+                                <span class="inline-flex items-center px-4 py-3 rounded-r-xl border border-l-0 border-gray-200 bg-gray-100 text-gray-500 font-bold text-sm tracking-wide">
+                                    @hasta.com
+                                </span>
                             </div>
+                            {{-- We display validation errors for 'email' since controller validates full email --}}
                             <x-input-error :messages="$errors->get('email')" class="mt-2" />
                         </div>
 

@@ -21,7 +21,7 @@
                     <p class="text-gray-400 text-[11px] font-bold uppercase tracking-widest mb-3">Total Income</p>
                     <div class="flex items-center gap-4">
                         <div class="bg-green-50 text-green-500 p-3 rounded-xl">
-                            <i class="fas fa-chart-line text-xl"></i>
+                            <i class="fas fa-chart-line text-2xl"></i>
                         </div>
                         <div>
                             <span class="text-2xl font-bold text-gray-900">RM 333,600</span>
@@ -34,7 +34,7 @@
                     <p class="text-gray-400 text-[11px] font-bold uppercase tracking-widest mb-3">Total Expenses</p>
                     <div class="flex items-center gap-4">
                         <div class="bg-red-50 text-red-500 p-3 rounded-xl">
-                            <i class="fas fa-chart-area text-xl"></i>
+                            <i class="fas fa-chart-area text-2xl"></i>
                         </div>
                         <div>
                             <span class="text-2xl font-bold text-gray-900">RM 82,100</span>
@@ -47,7 +47,7 @@
                     <p class="text-gray-400 text-[11px] font-bold uppercase tracking-widest mb-3">Net Profit</p>
                     <div class="flex items-center gap-4">
                         <div class="bg-blue-50 text-blue-500 p-3 rounded-xl">
-                            <i class="fas fa-dollar-sign text-xl"></i>
+                            <i class="fas fa-dollar-sign text-2xl"></i>
                         </div>
                         <div>
                             <span class="text-2xl font-bold text-gray-900">RM 251,500</span>
@@ -60,7 +60,7 @@
                     <p class="text-gray-400 text-[11px] font-bold uppercase tracking-widest mb-3">Profit Margin</p>
                     <div class="flex items-center gap-4">
                         <div class="bg-purple-50 text-purple-500 p-3 rounded-xl">
-                            <i class="fas fa-percentage text-xl"></i>
+                            <i class="fas fa-percentage text-2xl"></i>
                         </div>
                         <div>
                             <span class="text-2xl font-bold text-gray-900">75.4%</span>
@@ -110,7 +110,7 @@
                     <div class="mt-10 pt-6 border-t border-gray-100 flex justify-between items-center">
                         <span class="text-md font-bold text-gray-500">Total Expenses</span>
                         {{-- Changed font-black to font-bold --}}
-                        <span class="text-xl font-bold text-red-600">RM 15,200</span>
+                        <span class="text-2xl font-bold text-red-600">RM 15,200</span>
                     </div>
                 </div>
 

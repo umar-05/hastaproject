@@ -12,6 +12,7 @@ return new class extends Migration
             $table->string('plateNumber')->primary(); 
             $table->string('modelName');
             $table->integer('year');
+            $table->integer('price');
             $table->string('photo1')->nullable();
             $table->string('photo2')->nullable();
             $table->string('photo3')->nullable();
@@ -37,9 +38,6 @@ return new class extends Migration
             
             $table->string('staffID')->nullable();
             $table->foreign('staffID')->references('staffID')->on('staff');
-
-            $table->string('inspectionID')->nullable();
-            $table->foreign('inspectionID')->references('inspectionID')->on('inspection');
 
             $table->string('ownerIC')->nullable();
             $table->foreign('ownerIC')->references('ownerIC')->on('owner');

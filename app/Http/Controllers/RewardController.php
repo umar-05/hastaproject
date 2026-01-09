@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\Reward;
 use App\Models\RewardRedemption;
 
@@ -13,106 +14,152 @@ class RewardController extends Controller
     // CUSTOMER METHODS
     // ==========================================
 
-    /**
-     * Show the main loyalty rewards page (customer view).
-     */
     public function index()
     {
         $user = Auth::user();
 
+        // Display all active rewards
         $availableRewards = Reward::active() 
-            ->where('totalClaimable', '>', 0)
-            // Hide rewards the user has already claimed
-            ->whereDoesntHave('redemptions', function($query) use ($user) {
-                $query->where('matricNum', $user->matricNum);
+            ->where(function($query) {
+                $query->where('totalClaimable', 0) // unlimited
+                      ->orWhereRaw('claimedCount < totalClaimable'); // or still has slots
             })
+            ->orderBy('rewardPoints', 'asc')
             ->get();
 
         return view('reward.customer', compact('availableRewards'));
     }
 
-    /**
-     * Show the user's claimed rewards.
-     */
     public function claimed()
     {
         $customer = Auth::user();
 
-        // Fetch rewards claimed by this user
-        $myRewards = RewardRedemption::with('reward')
+        // Get ALL redemptions (both Active and Used)
+        $myRewards = RewardRedemption::with('reward', 'booking')
             ->where('matricNum', $customer->matricNum)
+            ->orderBy('redemptionDate', 'desc')
             ->get();
 
         return view('reward.claimed', compact('myRewards'));
     }
 
-    /**
-     * Process a reward claim (Customer Action).
-     */
-    public function claim(Request $request)
+    public function claim(Request $request) 
     {
-        $request->validate(['rewardID' => 'required|exists:rewards,rewardID']); // Ensure table name is correct (usually plural 'rewards')
-        
-        $reward = Reward::where('rewardID', $request->rewardID)->firstOrFail();
-        $customer = Auth::user();
+        try {
+            DB::beginTransaction();
 
-        // 1. Logic: Ensure user has enough stamps/points
-        if ($customer->stamps < $reward->rewardPoints) {
-            return back()->with('error', 'Not enough stamps!');
+            $customer = auth()->user(); 
+            $reward = Reward::findOrFail($request->rewardID);
+
+            // 1. Validate reward is still claimable
+            if (!$reward->isValidCode()) {
+                return back()->with('error', 'This reward is no longer available.');
+            }
+
+            // 2. Check if customer has enough stamps
+            if ($customer->rewardPoints < $reward->rewardPoints) {
+                return back()->with('error', 'Not enough stamps! You need ' . 
+                    $reward->rewardPoints . ' stamps but only have ' . 
+                    $customer->rewardPoints . ' stamps.');
+            }
+
+            // 3. CHECK IF ALREADY HAS ACTIVE VOUCHER FOR THIS REWARD
+            // Prevent users from claiming multiple active vouchers of the same reward
+            $hasActive = RewardRedemption::where('matricNum', $customer->matricNum)
+                        ->where('rewardID', $reward->rewardID)
+                        ->where('status', 'Active')
+                        ->whereNull('bookingID')
+                        ->exists();
+
+            if ($hasActive) {
+                return back()->with('error', 'You already have an active voucher for this reward. Please use it first!');
+            }
+
+            // 4. Check if reward has reached its claim limit
+            if ($reward->totalClaimable > 0 && $reward->claimedCount >= $reward->totalClaimable) {
+                return back()->with('error', 'This reward has reached its claim limit.');
+            }
+
+            // 5. Create the redemption (voucher in wallet)
+            RewardRedemption::create([
+                'matricNum' => $customer->matricNum,
+                'rewardID' => $reward->rewardID,
+                'redemptionDate' => now(),
+                'status' => 'Active', // Active until used in a booking
+                'bookingID' => null,  // Not yet linked to any booking
+                'used_at' => null
+            ]);
+
+            // 6. DEDUCT STAMPS from customer
+            $customer->decrement('rewardPoints', $reward->rewardPoints);
+            
+            // 7. Increment the reward's claimed count
+            $reward->increment('claimedCount');
+
+            DB::commit();
+
+            return redirect()->route('rewards.claimed')
+                ->with('success', 'Voucher claimed successfully! Check your wallet.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to claim reward: ' . $e->getMessage());
         }
-
-        // 2. Create the Redemption Record (FIXED: Was creating a Reward before)
-        RewardRedemption::create([
-            'matricNum' => $customer->matricNum,
-            'rewardID' => $reward->rewardID,
-            'redemptionDate' => now(),
-            'status' => 'Active' // Optional, if you have a status column
-        ]);
-
-        // 3. Deduct Stamps from Customer (Optional but recommended)
-        // $customer->decrement('stamps', $reward->rewardPoints);
-
-        // 4. Reduce slots available
-        $reward->decrement('totalClaimable');
-
-        return redirect()->route('rewards.claimed')->with('success', 'Reward claimed successfully!');
     }
 
+    /**
+     * Get available vouchers for booking checkout (API endpoint)
+     */
+    public function getAvailableVouchers()
+    {
+        $customer = Auth::user();
+        
+        // Get only ACTIVE vouchers that haven't been used yet
+        $vouchers = RewardRedemption::where('matricNum', $customer->matricNum)
+            ->where('status', 'Active')
+            ->whereNull('bookingID')
+            ->with('reward')
+            ->get()
+            ->filter(function($redemption) {
+                // Double-check the reward is still valid
+                return $redemption->isUsable();
+            });
+
+        return response()->json($vouchers);
+    }
 
     // ==========================================
     // STAFF METHODS
     // ==========================================
 
-    /**
-     * Display the reward list for STAFF.
-     */
     public function staffIndex()
     {
-        $rewards = Reward::latest()->paginate(10);
-        return view('staff.rewards', compact('rewards'));
+        $activeRewards = Reward::where('rewardStatus', 'Active')->latest()->get();
+        $inactiveRewards = Reward::where('rewardStatus', 'Inactive')->latest()->get();
+
+        $stats = [
+            'total'  => Reward::count(),
+            'active' => $activeRewards->count(),
+            'slots'  => Reward::sum('totalClaimable') - Reward::sum('claimedCount'),
+        ];
+
+        return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
     }
 
-    /**
-     * Show form to create a new reward.
-     */
     public function create()
     {
-        return view('staff.rewards.create'); // Ensure this view exists
+        return view('staff.rewards.create');
     }
 
-    /**
-     * Store a new reward (Staff Action).
-     */
     public function store(Request $request)
     {
-        // 1. TRANSLATION LAYER
+        // Map frontend field names to database columns
         if ($request->has('name')) $request->merge(['voucherCode' => $request->name]);
         if ($request->has('points_required')) $request->merge(['rewardPoints' => $request->points_required]);
         if ($request->has('type')) $request->merge(['rewardType' => $request->type]);
         if ($request->has('value')) $request->merge(['rewardAmount' => $request->value]);
         if ($request->has('expiry_date')) $request->merge(['expiryDate' => $request->expiry_date]);
 
-        // 2. VALIDATION
         $validated = $request->validate([
             'voucherCode'    => 'required|string|max:255',
             'rewardType'     => 'required|in:Discount,Extra Hours', 
@@ -123,26 +170,23 @@ class RewardController extends Controller
             'rewardStatus'   => 'required|in:Active,Inactive',
         ]);
 
-        // 3. GENERATE CUSTOM ID (Fixes Error 1364)
-        // Find the last reward to determine the next number
-        $latest = \App\Models\Reward::orderBy('rewardID', 'desc')->first();
-        
+        // Generate new reward ID
+        $latest = Reward::latest()->first();
         if (!$latest) {
             $newID = 'RWD001';
         } else {
-            // Remove 'RWD' (3 chars), take the number, add 1
             $number = intval(substr($latest->rewardID, 3)); 
             $newID = 'RWD' . str_pad($number + 1, 3, '0', STR_PAD_LEFT);
         }
 
-        // 4. SAVE TO DATABASE
-        \App\Models\Reward::create([
-            'rewardID'       => $newID, // <--- Added this line
+        Reward::create([
+            'rewardID'       => $newID,
             'voucherCode'    => $validated['voucherCode'],
             'rewardType'     => $validated['rewardType'],
             'rewardAmount'   => $validated['rewardAmount'] ?? null,
             'rewardPoints'   => $validated['rewardPoints'],
             'totalClaimable' => $validated['totalClaimable'],
+            'claimedCount'   => 0, // Initialize to 0
             'expiryDate'     => $validated['expiryDate'] ?? null,
             'rewardStatus'   => $validated['rewardStatus'],
         ]);
@@ -151,32 +195,23 @@ class RewardController extends Controller
             ->with('status', 'Reward created successfully!');
     }
 
-    /**
-     * Show form to edit a reward.
-     */
     public function edit($id)
     {
         $reward = Reward::findOrFail($id);
-        return view('staff.rewards.edit', compact('reward')); // Ensure this view exists
+        return view('staff.rewards.edit', compact('reward'));
     }
 
-    /**
-     * Update the specified reward in storage.
-     */
     public function update(Request $request, $id)
     {
-        // 1. Find the Reward
-        // We use where() -> firstOrFail() to ensure it works even with custom string IDs like 'RWD001'
-        $reward = \App\Models\Reward::where('rewardID', $id)->firstOrFail();
+        $reward = Reward::where('rewardID', $id)->firstOrFail();
 
-        // 2. TRANSLATION LAYER (Map Form Names -> DB Columns)
+        // Map frontend field names to database columns
         if ($request->has('name')) $request->merge(['voucherCode' => $request->name]);
         if ($request->has('points_required')) $request->merge(['rewardPoints' => $request->points_required]);
         if ($request->has('type')) $request->merge(['rewardType' => $request->type]);
         if ($request->has('value')) $request->merge(['rewardAmount' => $request->value]);
         if ($request->has('expiry_date')) $request->merge(['expiryDate' => $request->expiry_date]);
 
-        // 3. VALIDATION
         $validated = $request->validate([
             'voucherCode'    => 'required|string|max:255',
             'rewardType'     => 'required|in:Discount,Extra Hours',
@@ -187,7 +222,6 @@ class RewardController extends Controller
             'rewardStatus'   => 'required|in:Active,Inactive',
         ]);
 
-        // 4. UPDATE DATABASE
         $reward->update([
             'voucherCode'    => $validated['voucherCode'],
             'rewardType'     => $validated['rewardType'],
@@ -202,14 +236,19 @@ class RewardController extends Controller
             ->with('status', 'Reward updated successfully!');
     }
 
-    /**
-     * Remove the specified reward from storage.
-     */
     public function destroy($id)
     {
-        // Find the reward by your custom 'rewardID' column
-        $reward = \App\Models\Reward::where('rewardID', $id)->firstOrFail();
+        $reward = Reward::where('rewardID', $id)->firstOrFail();
         
+        // Check if reward has active redemptions
+        $hasActiveRedemptions = RewardRedemption::where('rewardID', $id)
+            ->where('status', 'Active')
+            ->exists();
+
+        if ($hasActiveRedemptions) {
+            return back()->with('error', 'Cannot delete reward with active vouchers. Please wait for all vouchers to be used or expired.');
+        }
+
         $reward->delete();
 
         return redirect()->route('staff.reward.index')

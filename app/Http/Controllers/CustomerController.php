@@ -84,7 +84,7 @@ class CustomerController extends Controller
         $activeBooking = null;
         if ($customer) {
             $activeBooking = Booking::where('matricNum', $customer->matricNum)
-                                    ->where('bookingStat', 'active') // Ensure this matches DB value (Active/active)
+                                    ->where('bookingStat', 'active') 
                                     ->with('fleet')
                                     ->first();
         }
@@ -97,33 +97,10 @@ class CustomerController extends Controller
                                      $model = strtolower($fleet->modelName);
                                      $year = $fleet->year;
                                      
-                                     // --- Image Logic ---
-                                     // Check if 'photos' column has data, otherwise fallback
-                                     if (!empty($fleet->photos)) {
-                                         $image = $fleet->photos;
-                                     } else {
-                                         $image = 'default-car.png'; // Default fallback
-                                         if (str_contains($model, 'axia')) $image = ($year >= 2023) ? 'axia-2024.png' : 'axia-2018.png';
-                                         elseif (str_contains($model, 'bezza')) $image = 'bezza-2018.png';
-                                         elseif (str_contains($model, 'myvi')) $image = ($year >= 2020) ? 'myvi-2020.png' : 'myvi-2015.png';
-                                         elseif (str_contains($model, 'saga')) $image = 'saga-2017.png';
-                                         elseif (str_contains($model, 'alza')) $image = 'alza-2019.png';
-                                         elseif (str_contains($model, 'aruz')) $image = 'aruz-2020.png';
-                                         elseif (str_contains($model, 'vellfire')) $image = 'vellfire-2020.png';
-                                         elseif (str_contains($model, 'x50')) $image = 'x50-2024.png';
-                                         elseif (str_contains($model, 'y15')) $image = 'y15zr-2023.png';
-                                     }
+                                      
 
-                                     // --- Price Logic ---
-                                     $price = 150; 
-                                     if (str_contains($model, 'axia')) $price = 120;
-                                     elseif (str_contains($model, 'bezza')) $price = 140;
-                                     elseif (str_contains($model, 'myvi')) $price = 130;
-                                     elseif (str_contains($model, 'alza')) $price = 200;
-                                     elseif (str_contains($model, 'vellfire')) $price = 500;
-                                     elseif (str_contains($model, 'aruz')) $price = 180;
-                                     elseif (str_contains($model, 'x50')) $price = 250;
-                                     elseif (str_contains($model, 'y15')) $price = 50;
+                                     // --- Price Logic (UPDATED) ---
+                                     $price = $fleet->price;
 
                                      // --- Type Logic ---
                                      $type = 'Car';
@@ -135,10 +112,13 @@ class CustomerController extends Controller
 
                                      return (object) [
                                          'plateNumber' => $fleet->plateNumber,
-                                         'name' => $fleet->modelName, // Removed year concatenation to match style
+                                         'name' => $fleet->modelName,
+                                         // view-friendly keys
+                                         'modelName'   => $fleet->modelName,
                                          'type' => $type,
                                          'price' => $price,
-                                         'image' => $image,
+                                         'pricePerDay' => $price,
+                                         'image' => $fleet->photo1,
                                          'seats' => str_contains($type, 'Motorcycle') ? 2 : 5,
                                          'transmission' => str_contains($type, 'Motorcycle') ? 'Manual' : 'Auto'
                                      ];

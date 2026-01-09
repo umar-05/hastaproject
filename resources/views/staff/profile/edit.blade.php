@@ -3,7 +3,7 @@
     {{-- Main Container --}}
     <div class="max-w-5xl mx-auto pb-12 pt-8">
 
-        {{-- Simple Page Header (Since Banner is removed) --}}
+        {{-- Simple Page Header --}}
         <div class="mb-8 px-4 md:px-0">
             <h2 class="font-bold text-4xl text-gray-800 tracking-tight">Profile Settings</h2>
             <p class="text-gray-500 text-sm mt-1">Manage your personal information and security settings.</p>
@@ -45,11 +45,27 @@
                                 <input name="icNum_passport" type="text" value="{{ old('icNum_passport', $user->icNum_passport) }}" class="mt-1 w-full bg-gray-50 border-transparent focus:border-red-500 focus:bg-white focus:ring-0 rounded-xl px-4 py-3 text-sm font-medium transition-colors" placeholder="Identity Number">
                             </div>
 
+                            {{-- UPDATED EMAIL SECTION START --}}
                             <div>
-                                <label class="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Email</label>
-                                <input name="email" type="email" value="{{ old('email', $user->email) }}" class="mt-1 w-full bg-gray-50 border-transparent focus:border-red-500 focus:bg-white focus:ring-0 rounded-xl px-4 py-3 text-sm font-medium transition-colors">
+                                <label class="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Corporate Email</label>
+                                <div class="relative flex items-center mt-1">
+                                    {{-- Username Input (Editable) --}}
+                                    <input 
+                                        name="email_username" 
+                                        type="text" 
+                                        value="{{ old('email_username', explode('@', $user->email)[0]) }}" 
+                                        class="w-full bg-gray-50 border-transparent focus:border-red-500 focus:bg-white focus:ring-0 rounded-l-xl px-4 py-3 text-sm font-medium transition-colors"
+                                        placeholder="username"
+                                    >
+                                    
+                                    {{-- Fixed Domain Label (Greyed Out) --}}
+                                    <span class="inline-flex items-center px-4 py-3 rounded-r-xl border border-l-0 border-transparent bg-gray-200 text-gray-600 font-bold text-sm tracking-wide">
+                                        @hasta.com
+                                    </span>
+                                </div>
                                 @error('email') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                             </div>
+                            {{-- UPDATED EMAIL SECTION END --}}
 
                             <div>
                                 <label class="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Position</label>
@@ -116,7 +132,6 @@
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Relation</label>
-                                        {{-- Data List --}}
                                         <input list="relations" name="emerelation" type="text" value="{{ old('emerelation', $user->emerelation) }}" class="mt-1 w-full bg-gray-50 border-transparent focus:border-red-500 focus:bg-white focus:ring-0 rounded-xl px-4 py-3 text-sm font-medium transition-colors" placeholder="Select or type">
                                         <datalist id="relations">
                                             <option value="Parent">
@@ -214,7 +229,6 @@
                         </div>
 
                         <div class="pt-2">
-                            {{-- CHANGED: Button Color to match Save Profile --}}
                             <button type="submit" class="w-full bg-[#bb1419] hover:bg-red-800 text-white font-bold py-3 rounded-xl shadow-md transition transform active:scale-95 text-sm">
                                 Update Password
                             </button>

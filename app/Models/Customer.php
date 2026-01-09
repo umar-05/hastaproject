@@ -55,4 +55,58 @@ class Customer extends Authenticatable
     {
         return 'matricNum';
     }
+
+    public function calculateStamps()
+    {
+        // Count only approved bookings
+        $approvedBookings = $this->bookings()
+            ->where('bookingStatus', 'Approved') // or whatever status means "approved"
+            ->count();
+
+        return $approvedBookings;
+    }
+
+    /**
+     * Get current available stamps (total earned - total spent)
+     */
+    public function getAvailableStampsAttribute()
+    {
+        $totalEarned = $this->calculateStamps();
+        $totalSpent = $this->redemptions()->sum('reward.rewardPoints');
+        
+        return max(0, $totalEarned - $totalSpent);
+    }
+
+    /**
+     * Get active (unused) vouchers
+     */
+    public function getActiveVouchersAttribute()
+    {
+        return $this->redemptions()
+            ->where('status', 'Active')
+            ->whereNull('bookingID')
+            ->with('reward')
+            ->get();
+    }
+
+    /**
+     * Get used vouchers
+     */
+    public function getUsedVouchersAttribute()
+    {
+        return $this->redemptions()
+            ->where('status', 'Used')
+            ->whereNotNull('bookingID')
+            ->with('reward', 'booking')
+            ->get();
+    }
+
+    /**
+     * Check if customer can claim a reward
+     */
+    public function canClaimReward(Reward $reward)
+    {
+        return $this->available_stamps >= $reward->rewardPoints;
+    }
+    
 }

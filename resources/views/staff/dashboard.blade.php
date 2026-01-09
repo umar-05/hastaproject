@@ -3,11 +3,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
-    <div class="py-8 bg-[#f8f9fc] min-h-screen">
+    <div class="py-4 bg-[#f8f9fc] min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {{-- INTERACTIVE METRIC BUTTONS --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <a href="{{ route('staff.pickup-return') }}" class="group block bg-white p-6 rounded-3xl border-2 border-transparent shadow-sm hover:shadow-xl hover:border-blue-500 hover:-translate-y-1 transition-all duration-300">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
@@ -44,9 +44,10 @@
             </div>
 
             {{-- RECENT BOOKINGS SECTION --}}
-            <div class="mb-10">
+            <div class="mb-6">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-xl text-gray-800 uppercase tracking-tight">Recent Bookings</h3>
+                    {{-- Changed from font-black to font-bold --}}
+                    <h3 class="font-bold text-2xl text-gray-800 uppercase tracking-tight">RECENT BOOKINGS</h3>
                     <a href="{{ route('staff.bookingmanagement') }}" class="inline-flex items-center px-5 py-2 bg-red-50 text-red-600 font-bold text-[10px] uppercase tracking-widest rounded-full hover:bg-red-600 hover:text-white shadow-sm transition-all duration-200">
                         View All
                         <svg class="ml-2 w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -83,10 +84,11 @@
             </div>
 
             {{-- PIE CHART SECTION --}}
-            <div class="mb-10">
+            <div class="mb-6">
                 <div class="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
                     <div class="flex justify-between items-center mb-8">
-                        <h3 class="font-bold text-xl text-gray-800 uppercase tracking-tight">Customer Distribution by College</h3>
+                        {{-- Changed from font-black to font-bold --}}
+                        <h3 class="font-bold text-2xl text-gray-800 uppercase tracking-tight">Customer Distribution by College</h3>
                         <div class="flex items-center space-x-2">
                              <span class="relative flex h-3 w-3">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>

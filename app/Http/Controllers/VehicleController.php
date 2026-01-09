@@ -7,32 +7,22 @@ use App\Models\Fleet;
 
 class VehicleController extends Controller
 {
-    /**
-     * Display the Public Welcome/Home Page with Featured Vehicles
-     */
     public function welcome()
     {
-        // Fetch 3 latest available vehicles
         $featuredVehicles = Fleet::latest()
                                  ->take(3)
                                  ->get()
                                  ->map(function ($fleet) {
-                                     // Reuse the existing formatting logic
                                      $data = $this->formatVehicleData($fleet);
-                                     // Convert array to Object to match home.blade.php syntax ($vehicle->name)
                                      return (object) $data;
                                  });
 
-        // Pass null for activeBooking since guests don't have one
         return view('home', [
             'featuredVehicles' => $featuredVehicles,
             'activeBooking' => null 
         ]);
     }
 
-    /**
-     * Display a listing of the vehicles.
-     */
     public function index()
     {
         $fleets = Fleet::where('status', 'available')
@@ -58,20 +48,23 @@ class VehicleController extends Controller
         return $this->index();
     }
 
-    /**
-     * Helper: Format Fleet model into a standardized array.
-     */
     private function formatVehicleData($fleet)
     {
         $specs = $this->resolveSpecs($fleet->modelName, $fleet->year);
 
         return [
             'id'           => $fleet->plateNumber,
-            'plateNumber'  => $fleet->plateNumber, // Ensure this exists for the route key
+            'plateNumber'  => $fleet->plateNumber,
             'name'         => $fleet->modelName . ' ' . $fleet->year,
+            // keep original model name for views that expect this property
+            'modelName'    => $fleet->modelName,
             'type'         => $specs['type'],
-            'price'        => $specs['price'],
-            'image'        => $fleet->photos ?? $specs['image'],
+            
+            // legacy/view-friendly price key
+            'price'        => $fleet->price,
+            'pricePerDay'  => $fleet->price,
+
+            'image'        => $fleet->photo1 ?? $specs['image'], 
             'transmission' => 'Automatic',
             'fuel'         => 'RON 95',
             'ac'           => true,
@@ -86,23 +79,21 @@ class VehicleController extends Controller
         $model = strtolower($modelName);
         
         $configs = [
-            'axia'     => ['type' => 'Hatchback', 'price' => 120, 'image' => 'axia-2018.png', 'seats' => 5, 'luggage' => 2],
-            'bezza'    => ['type' => 'Sedan',     'price' => 140, 'image' => 'bezza-2018.png', 'seats' => 5, 'luggage' => 3],
-            'myvi'     => ['type' => 'Hatchback', 'price' => 130, 'image' => 'myvi-2015.png', 'seats' => 5, 'luggage' => 2],
-            'saga'     => ['type' => 'Sedan',     'price' => 120, 'image' => 'saga-2017.png', 'seats' => 5, 'luggage' => 3],
-            'alza'     => ['type' => 'MPV',       'price' => 200, 'image' => 'alza-2019.png', 'seats' => 7, 'luggage' => 4],
-            'aruz'     => ['type' => 'SUV',       'price' => 180, 'image' => 'aruz-2020.png', 'seats' => 7, 'luggage' => 5],
-            'vellfire' => ['type' => 'MPV',       'price' => 500, 'image' => 'vellfire-2020.png','seats' => 7, 'luggage' => 6],
-            'x50'      => ['type' => 'SUV',       'price' => 250, 'image' => 'x50-2024.png', 'seats' => 5, 'luggage' => 4],
-            'y15'      => ['type' => 'Motorcycle','price' => 50,  'image' => 'y15zr-2023.png','seats' => 2, 'luggage' => 0],
+            'axia'     => ['type' => 'Hatchback', 'image' => 'axia-2018.png', 'seats' => 5, 'luggage' => 2],
+            'bezza'    => ['type' => 'Sedan',     'image' => 'bezza-2018.png', 'seats' => 5, 'luggage' => 3],
+            'myvi'     => ['type' => 'Hatchback', 'image' => 'myvi-2015.png', 'seats' => 5, 'luggage' => 2],
+            'saga'     => ['type' => 'Sedan',     'image' => 'saga-2017.png', 'seats' => 5, 'luggage' => 3],
+            'alza'     => ['type' => 'MPV',       'image' => 'alza-2019.png', 'seats' => 7, 'luggage' => 4],
+            'aruz'     => ['type' => 'SUV',       'image' => 'aruz-2020.png', 'seats' => 7, 'luggage' => 5],
+            'vellfire' => ['type' => 'MPV',       'image' => 'vellfire-2020.png','seats' => 7, 'luggage' => 6],
+            'x50'      => ['type' => 'SUV',       'image' => 'x50-2024.png', 'seats' => 5, 'luggage' => 4],
+            'y15'      => ['type' => 'Motorcycle','image' => 'y15zr-2023.png','seats' => 2, 'luggage' => 0],
         ];
 
         if (str_contains($model, 'myvi') && $year >= 2020) {
-            $configs['myvi']['price'] = 150;
             $configs['myvi']['image'] = 'myvi-2020.png';
         }
         if (str_contains($model, 'axia') && $year >= 2023) {
-            $configs['axia']['price'] = 130;
             $configs['axia']['image'] = 'axia-2024.png';
         }
 
@@ -112,9 +103,9 @@ class VehicleController extends Controller
             }
         }
 
+        // Fallback
         return [
             'type'    => 'Sedan',
-            'price'   => 150,
             'image'   => 'default-car.png',
             'seats'   => 5,
             'luggage' => 2

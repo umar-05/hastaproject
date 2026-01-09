@@ -30,26 +30,22 @@ Route::post('/register/process-matric-card', [RegisteredUserController::class, '
     ->name('register.process-matric-card')
     ->middleware('guest');
 
-Route::post('/bookings/validate-voucher', [BookingController::class, 'validateVoucher'])
-    ->name('bookings.validateVoucher');
 
-
-// ==============================
-// 2. SHARED ROUTES (Customer OR Staff)
-// ==============================
-// These routes need to be accessible by both Staff (for the modal) and Customers.
-Route::middleware(['auth:customer,staff', 'prevent-back'])->group(function () {
-    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
-    Route::post('/bookings/{booking}/forms', [BookingController::class, 'uploadForms'])->name('bookings.upload-forms');
-});
 
 
 // ==============================
-// 3. CUSTOMER ROUTES (Guard: customer)
+// 2. CUSTOMER ROUTES (Guard: customer)
 // ==============================
+// MOVED UP: Customer routes must be defined BEFORE the generic 'bookings/{booking}' wildcard
 Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function () {
 
     Route::get('/home', [CustomerController::class, 'dashboard'])->name('home');
+
+    // --- Profile Management ---
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/documents', [ProfileController::class, 'storeDocuments'])->name('profile.documents.store');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // === RESTRICTED ROUTES (Blacklisted users cannot access these) ===
     Route::middleware(['not.blacklisted'])->group(function () {
@@ -60,74 +56,86 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
 
         // 2. Rewards Store
         Route::get('/rewards', [RewardController::class, 'index'])->name('reward.index');
-        Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('reward.claimed');
+        Route::get('/rewards/my-claimed', [RewardController::class, 'claimed'])->name('rewards.claimed');
         Route::post('/rewards/claim', [RewardController::class, 'claim'])->name('rewards.claim');
 
         // 3. Booking Management
         Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+        Route::post('/bookings/validate-voucher', [BookingController::class, 'validateVoucher'])
+        ->name('bookings.validateVoucher');
+        // Creation & Logic
         Route::get('/bookings/create/{fleet}', [BookingController::class, 'create'])->name('bookings.create');
         Route::match(['get','post'],'/bookings/payment', [BookingController::class, 'payment'])->name('bookings.payment');
         Route::post('/bookings/store', [BookingController::class, 'store'])->name('bookings.store');
-        
-        // Note: You might want to allow them to CANCEL existing bookings even if blacklisted, 
-        // but if not, keep it inside this group.
-        Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
         Route::post('/voucher/validate', [BookingController::class, 'validateVoucher'])->name('voucher.validate');
-    });
-    // =================================================================
+        
+        // Actions
+        Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 
-    // Profile Management (Usually kept accessible so they can see their status/logout)
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::post('/profile/documents', [ProfileController::class, 'storeDocuments'])->name('profile.documents.store');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        // Vehicle Inspection Forms
+        Route::get('/bookings/{booking}/pickup-inspection', [BookingController::class, 'showPickupForm'])->name('bookings.pickup-form');
+        Route::get('/bookings/{booking}/return-inspection', [BookingController::class, 'showReturnForm'])->name('bookings.return-form');
+        Route::post('/bookings/{booking}/inspection', [BookingController::class, 'storeInspection'])->name('bookings.store-inspection');
+    });
 });
 
+
 // ==============================
-// 4. STAFF ROUTES (Guard: staff)
+// 3. STAFF ROUTES (Guard: staff)
 // ==============================
 Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.')->group(function () {
 
-    // Dashboard -> /staff/dashboard
+    // --- Dashboard & Main Operations ---
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
-
+    Route::get('/booking-details/{bookingID}', [StaffController::class, 'showBooking'])->name('bookings.show');
+    
     Route::resource('mission', MissionController::class);
     Route::get('/fleet/check', [StaffController::class, 'checkAvailability'])->name('fleet.check');
-    
-    Route::get('/pickup-return', function () {
-        return view('staff.pickup-return');
-    })->name('pickup-return');
+    Route::get('/pickup-return', [StaffController::class, 'pickupReturnSchedule'])->name('pickup-return');
 
-    // Fleet management (Staff)
+    // --- Fleet Management ---
     Route::prefix('fleet')->name('fleet.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Staff\FleetController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\Staff\FleetController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\Staff\FleetController::class, 'store'])->name('store');
+        
+        // Specific Vehicle Routes
         Route::get('/{plateNumber}/edit', [\App\Http\Controllers\Staff\FleetController::class, 'edit'])->name('edit');
         Route::match(['put','patch'],'/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'update'])->name('update');
         Route::delete('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'destroy'])->name('destroy');
         Route::get('/{plateNumber}', [\App\Http\Controllers\Staff\FleetController::class, 'show'])->name('show');
+
+        // Tabs
+        Route::get('/{plateNumber}/overview', [\App\Http\Controllers\Staff\FleetController::class, 'overview'])->name('tabs.overview');
+        Route::get('/{plateNumber}/bookings', [\App\Http\Controllers\Staff\FleetController::class, 'bookings'])->name('tabs.bookings');
+        Route::get('/{plateNumber}/maintenance', [\App\Http\Controllers\Staff\FleetController::class, 'maintenance'])->name('tabs.maintenance');
+        Route::post('/{plateNumber}/maintenance', [\App\Http\Controllers\Staff\FleetController::class, 'storeMaintenance'])->name('maintenance.store');
+        Route::get('/{plateNumber}/owner', [\App\Http\Controllers\Staff\FleetController::class, 'owner'])->name('tabs.owner');
         
-        // Approve / Cancel Bookings
+        // Approve / Cancel Bookings (Fleet Context)
         Route::post('/bookings/{id}/approve', [BookingController::class, 'approve'])->name('bookings.approve');
         Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     });
 
-    // Reward Management
-    Route::get('/dashboard/reward', [RewardController::class, 'index'])->name('rewards');
-    Route::post('/dashboard/reward', [RewardController::class, 'store'])->name('rewards.store');
-    Route::delete('/dashboard/reward/{id}', [RewardController::class, 'destroy'])->name('rewards.destroy');
+    // --- Reward Management ---
     
+    // 1. FIX: Restore 'staff.rewards' for Sidebar compatibility
+    Route::get('/rewards-dashboard', [RewardController::class, 'staffIndex'])->name('rewards');
+
+    // 2. CRUD Group
+    Route::group(['middleware' => ['auth:staff']], function () {
+    Route::get('/receipt/{id}', [BookingController::class, 'viewReceipt'])->name('staff.receipt.view');
+});
 
     // Profile Management
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
-
-    Route::get('/reports/daily-income', function () {
-        return view('staff.reports.dailyincome.index');
-    })->name('report.daily-income');
-
+    
+    //Daily-Income Report
+    Route::get('/reports/daily-income', [StaffController::class, 'dailyIncome'])->name('report.daily-income');
+    //Monthly-Income Report
+    Route::get('/reports/monthly-income', [StaffController::class, 'monthlyIncome'])->name('report.monthly-income');
     // Staff User Management
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
     Route::post('/store', [StaffController::class, 'store'])->name('store');
@@ -140,8 +148,11 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
     Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
     
+    Route::get('/rewards-dashboard', [StaffController::class, 'rewards'])->name('rewards');
     Route::prefix('rewards')->name('reward.')->group(function() {
-        Route::get('/', [StaffController::class, 'rewards'])->name('index');
+        // Point this to staffIndex in RewardController
+        Route::get('/', [RewardController::class, 'staffIndex'])->name('index'); 
+        
         Route::get('/create', [RewardController::class, 'create'])->name('create');
         Route::post('/', [RewardController::class, 'store'])->name('store');
         Route::get('/{reward}/edit', [RewardController::class, 'edit'])->name('edit');
@@ -149,27 +160,60 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
         Route::delete('/{reward}', [RewardController::class, 'destroy'])->name('destroy');
     });
 
-    // Blacklist Management
+    /*// --- Reports ---
+    Route::get('/reports', [StaffController::class, 'reports'])->name('report');
+    Route::get('/reports/daily-income', function () {
+        return view('staff.reports.dailyincome.index');
+    })->name('report.daily-income');
+    */
+    Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses'])->name('reports.incomeExpenses');
+
+    // Blacklist
     Route::get('/reports/blacklist', [StaffController::class, 'blacklistIndex'])->name('blacklist.index');
     Route::post('/reports/blacklist', [StaffController::class, 'addToBlacklist'])->name('blacklist.store');
     Route::delete('/reports/blacklist/{matricNum}', [StaffController::class, 'destroyBlacklist'])->name('blacklist.destroy');
     Route::get('/reports/customer-search/{matric}', [StaffController::class, 'searchCustomer'])->name('customer.search');
     Route::post('/staff/blacklist/store', [StaffController::class, 'storeBlacklist'])->name('staff.blacklist.store');
 
-    // Income & Expenses
-    Route::get('/reports/incomeexpenses', [StaffController::class, 'incomeExpenses'])
-        ->name('reports.incomeExpenses');
 
-    // Customer Management
+    // --- Customer Management ---
     Route::get('/dashboard/customermanagement', [CustomerController::class, 'index'])->name('customermanagement');
     Route::resource('customermanagement-crud', CustomerController::class)
             ->parameters(['customermanagement-crud' => 'matricNum']);
 
-    // Mission Management
+    // --- Staff Profile Management ---
+    Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
+    Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
+
+    Route::get('/api/get-owner', [App\Http\Controllers\Staff\FleetController::class, 'getOwnerByIc'])->name('api.owner');
+
+    // --- Staff User Management ---
+    Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
+    Route::post('/store', [StaffController::class, 'store'])->name('store');
+    Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
+    
+    // Edit specific staff
+    Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
+    Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
+    Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
+
+    // --- Mission Management Actions ---
     Route::get('/mission', [StaffController::class, 'missionsIndex'])->name('missions.index');
     Route::post('/mission/store', [StaffController::class, 'missionStore'])->name('missions.store');
     Route::post('/mission/{id}/accept', [StaffController::class, 'missionAccept'])->name('missions.accept');
     Route::post('/mission/{id}/complete', [StaffController::class, 'missionComplete'])->name('missions.complete');
+
+}); 
+
+
+// ==============================
+// 4. SHARED ROUTES (Customer OR Staff)
+// ==============================
+// MOVED DOWN: This wildcard route matches /bookings/{booking}
+// It must come AFTER specific routes like /bookings/payment or /bookings/create
+Route::middleware(['auth:customer,staff', 'prevent-back'])->group(function () {
+    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::post('/bookings/{booking}/forms', [BookingController::class, 'uploadForms'])->name('bookings.upload-forms');
 });
 
 
@@ -178,11 +222,12 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
 // ==============================
 require __DIR__.'/auth.php';
 
-// Fallback for default Laravel redirects
+// Fallback Redirect
 Route::get('/dashboard', function () {
     return redirect()->route('staff.dashboard');
 })->middleware(['auth:staff', 'prevent-back'])->name('dashboard');
 
+// Auth Check API
 Route::get('/api/auth-check', function () {
     return Auth::guard('staff')->check() || Auth::guard('customer')->check()
         ? response()->json(['authenticated' => true])
