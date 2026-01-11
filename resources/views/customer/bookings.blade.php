@@ -184,7 +184,7 @@
                                             </div>
                                             <div>
                                                 <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider">Total</p>
-                                                <p class="font-bold text-hasta-red text-lg">RM{{ number_format($booking->totalPrice ?? $booking->total_price ?? 0, 2) }}</p>
+                                                <p class="font-bold text-hasta-red text-lg">RM{{ number_format($booking->totalPrice + 15 ?? $booking->total_price ?? 0, 2) }}</p>
                                                 
                                                 {{-- 
                                                     CONDITION: ONLY Show the text "Pending" (or payment status) 

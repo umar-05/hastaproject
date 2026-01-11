@@ -274,14 +274,32 @@
                             <h2 class="text-2xl font-bold mb-6 border-b border-red-500/50 pb-4">Order Summary</h2>
                             
                             <div class="space-y-3 text-base text-red-50 mb-8">
-                                <div class="flex justify-between">
-                                    <span>Rental Charges + Deposit</span> 
-                                    <span class="font-mono text-white tracking-wide">RM <span x-text="formatMoney(fullAmount)"></span></span>
+                                {{-- Row 1: Rental Charges (Calculated: Total - Deposit - Delivery) --}}
+                                <div class="flex justify-between items-center">
+                                    <span>Rental Charges</span> 
+                                    <span class="font-mono text-white tracking-wide">
+                                        RM <span x-text="formatMoney(fullAmount - {{ $deposit_amount }} - 15)"></span>
+                                    </span>
+                                </div>
+
+                                {{-- Row 2: Delivery Charges --}}
+                                <div class="flex justify-between items-center">
+                                    <span>Delivery Charges</span> 
+                                    <span class="font-mono text-white tracking-wide">RM 15.00</span>
+                                </div>
+
+                                {{-- Row 3: Deposit --}}
+                                <div class="flex justify-between items-center">
+                                    <span>Deposit</span> 
+                                    <span class="font-mono text-white tracking-wide">
+                                        RM {{ number_format($deposit_amount, 2) }}
+                                    </span>
                                 </div>
                                 
+                                {{-- Discount Row (Hidden unless active) --}}
                                 <div x-show="discountAmount > 0" 
-                                     x-transition 
-                                     class="flex justify-between items-center text-yellow-300 font-bold bg-black/20 p-2 rounded-lg mt-2">
+                                    x-transition 
+                                    class="flex justify-between items-center text-yellow-300 font-bold bg-black/20 p-2 rounded-lg mt-2">
                                     <div class="flex items-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
                                         <span>Discount (<span x-text="appliedVoucherCode"></span>)</span>
@@ -290,13 +308,13 @@
                                 </div>
                             </div>
 
-                            {{-- VOUCHER --}}
+                            {{-- VOUCHER INPUT SECTION --}}
                             <div class="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 mb-8">
                                 <label class="block text-xs font-bold text-red-100 uppercase tracking-widest mb-2">Have a Promo Code?</label>
                                 <div class="flex gap-2">
                                     <input type="text" x-model="voucherInput" @keydown.enter.prevent="applyVoucher" 
-                                           class="flex-1 bg-white border-none rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-yellow-400 font-bold uppercase text-sm py-3 px-4 shadow-sm" 
-                                           placeholder="CODE">
+                                        class="flex-1 bg-white border-none rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-yellow-400 font-bold uppercase text-sm py-3 px-4 shadow-sm" 
+                                        placeholder="CODE">
                                     <button type="button" @click="applyVoucher" :disabled="loading || !voucherInput" 
                                             class="bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-black transition shadow-lg disabled:opacity-50">
                                         <span x-show="!loading">APPLY</span>
@@ -304,10 +322,11 @@
                                     </button>
                                 </div>
                                 <p x-text="voucherMessage" 
-                                   :class="voucherSuccess ? 'text-green-300' : 'text-yellow-300'" 
-                                   class="text-xs font-bold mt-2 h-4"></p>
+                                :class="voucherSuccess ? 'text-green-300' : 'text-yellow-300'" 
+                                class="text-xs font-bold mt-2 h-4"></p>
                             </div>
 
+                            {{-- TOTAL PAYABLE --}}
                             <div class="flex justify-between items-end pt-4 border-t border-red-500/50">
                                 <span class="text-sm font-medium text-red-200 uppercase tracking-wide">Total Payable</span>
                                 <span class="text-4xl font-bold tracking-tight text-white drop-shadow-md">
@@ -315,9 +334,9 @@
                                 </span>
                             </div>
                             
+                            {{-- Hidden inputs for form submission --}}
                             <input type="hidden" name="total_amount" :value="totalPayable">
                             <input type="hidden" name="deposit_amount" value="{{ $deposit_amount }}">
-                            <input type="hidden" name="price_per_day" value="{{ $full_amount / max(1, ( (isset($booking_data['end_date']) && isset($booking_data['start_date'])) ? ( (new \DateTime($booking_data['end_date']))->diff(new \DateTime($booking_data['start_date']))->days ?: 1 ) : 1 )) }}">
                         </div>
                     </div>
 
