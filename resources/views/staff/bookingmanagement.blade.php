@@ -76,7 +76,6 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50 sticky top-0 z-10">
                             <tr>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Booking ID</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Customer</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Car</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Pickup</th>
@@ -89,12 +88,9 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($bookings as $booking)
                                 <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {{ $booking->bookingID }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        {{ $booking->customer->name ?? $booking->matricNum }}
-                                    </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                            {{ $booking->customer->name ?? $booking->matricNum }}
+                                        </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                         {{ $booking->fleet->modelName ?? 'N/A' }}
                                         <br>
@@ -140,24 +136,13 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                                 </svg>
                                             </button>
-
-                                            {{-- 2. APPROVE (Only if pending) --}}
-                                            @if($status === 'pending')
-                                                <form action="{{ route('staff.fleet.bookings.approve', $booking->bookingID) }}" method="POST" class="inline-block">
-                                                    @csrf
-                                                    <button type="submit" onclick="return confirm('Approve this booking?')" class="p-1.5 hover:bg-green-50 text-gray-400 hover:text-green-600 rounded-md transition" title="Approve">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                            @endif                                            
+                                            {{-- Only View Details shown here; actions inside modal --}}
                                         </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                                    <td colspan="7" class="px-6 py-12 text-center text-gray-500">
                                         <div class="flex flex-col items-center justify-center">
                                             <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                                             <span class="text-lg font-medium">No bookings found</span>

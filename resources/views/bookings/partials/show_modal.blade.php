@@ -166,6 +166,104 @@
     </div>
 
     {{-- 4. FOOTER: Action Bar --}}
+    {{-- CUSTOMER DOCS & INSPECTIONS --}}
+    <div class="p-6 border-t border-gray-100 bg-gray-50">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-lg border border-gray-100">
+                <h4 class="text-sm font-bold mb-2">Customer</h4>
+                <p class="text-sm text-gray-700 font-bold">{{ $booking->customer->name ?? $booking->matricNum }}</p>
+                <p class="text-xs text-gray-500">{{ $booking->customer->email ?? 'N/A' }}</p>
+                <p class="text-xs text-gray-500">{{ $booking->customer->phoneNum ?? 'N/A' }}</p>
+
+                <div class="mt-3">
+                    <p class="text-xs font-bold text-gray-400 uppercase">Documents</p>
+                    <div class="mt-2 flex flex-col gap-2">
+                        @if(!empty($booking->customer->doc_ic_passport))
+                            <a target="_blank" href="{{ asset('storage/' . $booking->customer->doc_ic_passport) }}" class="text-xs text-blue-600 hover:underline">View IC / Passport</a>
+                        @endif
+                        @if(!empty($booking->customer->doc_matric))
+                            <a target="_blank" href="{{ asset('storage/' . $booking->customer->doc_matric) }}" class="text-xs text-blue-600 hover:underline">View Matric Card</a>
+                        @endif
+                        @if(!empty($booking->customer->doc_license))
+                            <a target="_blank" href="{{ asset('storage/' . $booking->customer->doc_license) }}" class="text-xs text-blue-600 hover:underline">View Driving License</a>
+                        @endif
+                        @if(empty($booking->customer->doc_ic_passport) && empty($booking->customer->doc_matric) && empty($booking->customer->doc_license))
+                            <div class="text-xs text-gray-400">No documents uploaded</div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-lg border border-gray-100">
+                <h4 class="text-sm font-bold mb-2">Inspections</h4>
+                @php
+                    $pickup = $booking->inspections->firstWhere('type', 'pickup') ?? null;
+                    $return = $booking->inspections->firstWhere('type', 'return') ?? null;
+                @endphp
+                <div class="space-y-3 text-sm text-gray-700">
+                    <div>
+                        <div class="font-bold">Pickup</div>
+                        @if($pickup)
+                            <div class="mt-2">
+                                @if(!empty($pickup->fuelImage))
+                                    <a target="_blank" href="{{ asset('storage/' . $pickup->fuelImage) }}">
+                                        <img src="{{ asset('storage/' . $pickup->fuelImage) }}" alt="pickup-fuel" class="w-32 h-20 object-contain border rounded" />
+                                    </a>
+                                @endif
+                                @if(!empty($pickup->signature))
+                                    <div class="mt-2">
+                                        <p class="text-xs text-gray-400">Signature</p>
+                                        <img src="{{ asset('storage/' . $pickup->signature) }}" alt="pickup-signature" class="w-48 h-28 object-contain border rounded mt-1">
+                                    </div>
+                                @endif
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    @foreach(['frontViewImage','backViewImage','leftViewImage','rightViewImage'] as $img)
+                                        @if(!empty($pickup->$img))
+                                            <a target="_blank" href="{{ asset('storage/' . $pickup->$img) }}">
+                                                <img src="{{ asset('storage/' . $pickup->$img) }}" alt="{{ $img }}" class="w-24 h-16 object-contain border rounded" />
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <div class="text-xs text-gray-400 mt-1">No pickup form submitted</div>
+                        @endif
+                    </div>
+
+                    <div>
+                        <div class="font-bold">Return</div>
+                        @if($return)
+                            <div class="mt-2">
+                                @if(!empty($return->fuelImage))
+                                    <a target="_blank" href="{{ asset('storage/' . $return->fuelImage) }}">
+                                        <img src="{{ asset('storage/' . $return->fuelImage) }}" alt="return-fuel" class="w-32 h-20 object-contain border rounded" />
+                                    </a>
+                                @endif
+                                @if(!empty($return->signature))
+                                    <div class="mt-2">
+                                        <p class="text-xs text-gray-400">Signature</p>
+                                        <img src="{{ asset('storage/' . $return->signature) }}" alt="return-signature" class="w-48 h-28 object-contain border rounded mt-1">
+                                    </div>
+                                @endif
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    @foreach(['frontViewImage','backViewImage','leftViewImage','rightViewImage'] as $img)
+                                        @if(!empty($return->$img))
+                                            <a target="_blank" href="{{ asset('storage/' . $return->$img) }}">
+                                                <img src="{{ asset('storage/' . $return->$img) }}" alt="{{ $img }}" class="w-24 h-16 object-contain border rounded" />
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <div class="text-xs text-gray-400 mt-1">No return form submitted</div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="bg-gray-50 border-t border-gray-100 p-6 flex flex-col md:flex-row justify-between items-center gap-4">
         
         {{-- Price Display --}}

@@ -334,7 +334,7 @@ class BookingController extends Controller
     public function show($bookingId)
     {
         try {
-            $booking = Booking::with(['fleet', 'reward', 'customer']) 
+            $booking = Booking::with(['fleet', 'reward', 'customer', 'inspections']) 
                 ->where('bookingID', $bookingId)
                 ->firstOrFail();
             

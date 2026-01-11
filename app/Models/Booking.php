@@ -87,4 +87,9 @@ class Booking extends Model
         return $this->hasOne(Payment::class, 'bookingID', 'bookingID');
     }
 
+    public function inspections()
+    {
+        return $this->hasMany(\App\Models\Inspection::class, 'bookingID', 'bookingID');
+    }
+
 }
