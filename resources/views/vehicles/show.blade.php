@@ -1,4 +1,28 @@
 <x-app-layout>
+    {{-- Check Profile Completeness --}}
+    @php
+        $user = Auth::guard('customer')->user();
+        
+        // Define fields that must be filled
+        $requiredFields = [
+            'phoneNum', 'icNum_passport', 'faculty', // Personal
+            'address', 'city', 'state', 'postcode', // Address
+            'eme_name', 'emephoneNum', 'emerelation', // Emergency
+            'bankName', 'accountNum' // Financial
+        ];
+
+        $isProfileComplete = true;
+
+        if ($user) {
+            foreach ($requiredFields as $field) {
+                if (empty($user->$field)) {
+                    $isProfileComplete = false;
+                    break;
+                }
+            }
+        }
+    @endphp
+
     {{-- Custom Animations & Styles --}}
     <style>
         @keyframes fadeUp {
@@ -28,7 +52,8 @@
 
             {{-- Breadcrumb / Back --}}
             <div class="mb-8 animate-fade-up">
-                <a href="{{ route('vehicles.index') }}" class="inline-flex items-center text-sm font-bold text-gray-500 hover:text-hasta-red transition-colors group">
+                {{-- Pass query params back to index as well --}}
+                <a href="{{ route('vehicles.index', request()->query()) }}" class="inline-flex items-center text-sm font-bold text-gray-500 hover:text-hasta-red transition-colors group">
                     <div class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center mr-3 group-hover:border-hasta-red transition-colors shadow-sm">
                         <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -68,7 +93,7 @@
                             {{ $vehicle['name'] }}
                         </h1>
                         
-                        {{-- Moved Tag Below Name --}}
+                        {{-- Tag --}}
                         <div class="mb-5">
                             <span class="inline-block bg-gray-100 text-gray-600 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider border border-gray-200">
                                 {{ $vehicle['type'] }}
@@ -146,14 +171,54 @@
 
                     {{-- Action Button --}}
                     <div class="pt-6 animate-fade-up delay-300">
-                        <a href="{{ route('bookings.create', $vehicle['id']) }}" class="block w-full group">
-                            <button class="w-full bg-hasta-red text-white font-bold text-lg py-5 rounded-xl shadow-lg shadow-red-200 transition-all duration-300 hover:bg-red-700 hover:shadow-red-300 transform hover:-translate-y-1 flex items-center justify-center gap-3">
+                        @if($isProfileComplete)
+                            {{-- Standard Booking Flow (Merged query params) --}}
+                            <a href="{{ route('bookings.create', array_merge([$vehicle['id']], request()->query())) }}" class="block w-full group">
+                                <button class="w-full bg-hasta-red text-white font-bold text-lg py-5 rounded-xl shadow-lg shadow-red-200 transition-all duration-300 hover:bg-red-700 hover:shadow-red-300 transform hover:-translate-y-1 flex items-center justify-center gap-3">
+                                    Book This Vehicle
+                                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                </button>
+                            </a>
+                        @else
+                            {{-- Incomplete Profile Interception --}}
+                            <button type="button" onclick="showIncompleteProfileAlert()" class="w-full bg-hasta-red text-white font-bold text-lg py-5 rounded-xl shadow-lg shadow-red-200 transition-all duration-300 hover:bg-red-700 hover:shadow-red-300 transform hover:-translate-y-1 flex items-center justify-center gap-3">
                                 Book This Vehicle
-                                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                             </button>
-                        </a>
+
+                            {{-- SweetAlert2 Script --}}
+                            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                            <script>
+                                function showIncompleteProfileAlert() {
+                                    Swal.fire({
+                                        title: '<strong>Profile Incomplete</strong>',
+                                        html: "You need to complete your <b>Personal</b>, <b>Address</b>, and <b>Emergency</b> details before booking.",
+                                        icon: 'warning',
+                                        iconColor: '#bb1419', // Matches Hasta Red
+                                        showCancelButton: true,
+                                        focusConfirm: false,
+                                        confirmButtonText: 'Update Profile',
+                                        confirmButtonColor: '#bb1419', // Matches Hasta Red
+                                        cancelButtonText: 'Later',
+                                        cancelButtonColor: '#9ca3af',
+                                        reverseButtons: true,
+                                        customClass: {
+                                            popup: 'rounded-2xl shadow-xl',
+                                            title: 'text-gray-900',
+                                            htmlContainer: 'text-gray-600'
+                                        }
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            window.location.href = "{{ route('profile.edit') }}";
+                                        }
+                                    });
+                                }
+                            </script>
+                        @endif
                     </div>
 
                 </div>
@@ -161,20 +226,20 @@
         </main>
 
         <footer class="bg-hasta-red text-white py-10 px-8 mt-16">
-        <div class="max-w-7xl mx-auto flex flex-col items-center justify-center text-center">
-            <div class="mb-4">
-                <img src="{{ asset('images/HASTALOGO.svg') }}" 
-                     alt="HASTA Travel & Tours" 
-                     class="h-12 w-auto object-contain">
-            </div>
+            <div class="max-w-7xl mx-auto flex flex-col items-center justify-center text-center">
+                <div class="mb-4">
+                    <img src="{{ asset('images/HASTALOGO.svg') }}" 
+                        alt="HASTA Travel & Tours" 
+                        class="h-12 w-auto object-contain">
+                </div>
 
-            <div class="space-y-2">
-                <p class="text-sm font-medium">HASTA Travel & Tours</p>
-                <p class="text-xs opacity-75">
-                    &copy; {{ date('Y') }} All rights reserved.
-                </p>
+                <div class="space-y-2">
+                    <p class="text-sm font-medium">HASTA Travel & Tours</p>
+                    <p class="text-xs opacity-75">
+                        &copy; {{ date('Y') }} All rights reserved.
+                    </p>
+                </div>
             </div>
-        </div>
-    </footer>
+        </footer>
     </div>
 </x-app-layout>

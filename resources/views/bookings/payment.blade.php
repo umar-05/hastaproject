@@ -40,7 +40,6 @@
             <p class="text-lg text-gray-500 mt-1">Complete your booking for <span class="font-bold text-gray-800">{{ $car->modelName }}</span>.</p>
         </div>
 
-                {{-- ADD THIS TO SEE WHY THE PAGE IS REFRESHING --}}
         @if ($errors->any())
             <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md shadow-sm animate-fade-up">
                 <div class="flex">
@@ -61,12 +60,11 @@
             </div>
         @endif
 
-        {{-- Also display Session Errors (like "Vehicle not found") --}}
         @if (session('error'))
             <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md shadow-sm">
                 <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
             </div>
-@endif
+        @endif
 
         <form action="{{ route('bookings.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -87,15 +85,15 @@
                         if (isset($car)) {
                             $model = strtolower($car->modelName);
                             $year = $car->year;
-                            if (str_contains($model, 'axia')) $vehicleImage = ($year >= 2023) ? 'axia-2024.png' : 'axia-2018.png';
-                            elseif (str_contains($model, 'bezza')) $vehicleImage = 'bezza-2018.png';
-                            elseif (str_contains($model, 'myvi')) $vehicleImage = ($year >= 2020) ? 'myvi-2020.png' : 'myvi-2015.png';
-                            elseif (str_contains($model, 'alza')) $vehicleImage = 'alza-2019.png';
-                            elseif (str_contains($model, 'vellfire')) $vehicleImage = 'vellfire-2020.png';
-                            elseif (str_contains($model, 'aruz')) $vehicleImage = 'aruz-2020.png';
-                            elseif (str_contains($model, 'saga')) $vehicleImage = 'saga-2017.png';
-                            elseif (str_contains($model, 'x50')) $vehicleImage = 'x50-2024.png';
-                            elseif (str_contains($model, 'y15')) $vehicleImage = 'y15zr-2023.png';
+                            if (str_contains($model, 'axia')) { $vehicleImage = ($year >= 2023) ? 'axia-2024.png' : 'axia-2018.png'; }
+                            elseif (str_contains($model, 'bezza')) { $vehicleImage = 'bezza-2018.png'; }
+                            elseif (str_contains($model, 'myvi')) { $vehicleImage = ($year >= 2020) ? 'myvi-2020.png' : 'myvi-2015.png'; }
+                            elseif (str_contains($model, 'alza')) { $vehicleImage = 'alza-2019.png'; }
+                            elseif (str_contains($model, 'vellfire')) { $vehicleImage = 'vellfire-2020.png'; }
+                            elseif (str_contains($model, 'aruz')) { $vehicleImage = 'aruz-2020.png'; }
+                            elseif (str_contains($model, 'saga')) { $vehicleImage = 'saga-2017.png'; }
+                            elseif (str_contains($model, 'x50')) { $vehicleImage = 'x50-2024.png'; }
+                            elseif (str_contains($model, 'y15')) { $vehicleImage = 'y15zr-2023.png'; }
                         }
                     @endphp
                     <div class="bg-white rounded-3xl p-6 shadow-md border border-gray-100 flex flex-col sm:flex-row items-center gap-8">
@@ -163,17 +161,23 @@
                                 <template x-if="!hasIdentity || changeIdentity">
                                     <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 transition-all duration-300">
                                         <div class="flex gap-4 mb-4">
-                                            <label class="cursor-pointer flex-1 text-center py-2 px-4 border rounded-lg text-sm font-bold transition-all peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 bg-white text-gray-600 hover:bg-gray-100">
-                                                <input type="radio" name="id_type" value="ic" class="hidden peer" x-model="idType"> IC / Passport
+                                            {{-- MODIFIED: Added dynamic classes for highlighting selection --}}
+                                            <label class="cursor-pointer flex-1 text-center py-2 px-4 border rounded-lg text-sm font-bold transition-all"
+                                                :class="idType === 'ic' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'">
+                                                <input type="radio" name="id_type" value="ic" class="hidden" x-model="idType"> 
+                                                IC / Passport
                                             </label>
-                                            <label class="cursor-pointer flex-1 text-center py-2 px-4 border rounded-lg text-sm font-bold transition-all peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 bg-white text-gray-600 hover:bg-gray-100">
-                                                <input type="radio" name="id_type" value="matric" class="hidden peer" x-model="idType"> Matric Card
+                                            
+                                            <label class="cursor-pointer flex-1 text-center py-2 px-4 border rounded-lg text-sm font-bold transition-all"
+                                                :class="idType === 'matric' ? 'bg-red-600 text-white border-red-600 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'">
+                                                <input type="radio" name="id_type" value="matric" class="hidden" x-model="idType"> 
+                                                Matric Card
                                             </label>
                                         </div>
                                         
+                                        {{-- File Input: Sends 'identity_document' to database --}}
                                         <input type="file" name="identity_document" accept="image/*,application/pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-gray-800 file:text-white hover:file:bg-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-white" :required="!hasIdentity">
                                         
-                                        {{-- CANCEL BUTTON FOR ID --}}
                                         <template x-if="changeIdentity">
                                             <div class="mt-3 text-right">
                                                 <button type="button" @click="changeIdentity = false" class="text-xs font-bold text-gray-500 hover:text-gray-800 underline">Cancel Update</button>
@@ -187,7 +191,6 @@
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Driver's License</label>
                                 
-                                {{-- View Mode --}}
                                 <template x-if="hasLicense && !changeLicense">
                                     <div class="flex justify-between items-center bg-green-50 p-4 rounded-xl border border-green-200">
                                         <div class="flex items-center gap-3">
@@ -198,12 +201,11 @@
                                     </div>
                                 </template>
 
-                                {{-- Edit/Upload Mode --}}
                                 <template x-if="!hasLicense || changeLicense">
                                     <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 transition-all duration-300">
+                                        {{-- File Input: Sends 'driving_license' to database --}}
                                         <input type="file" name="driving_license" accept="image/*,application/pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-gray-800 file:text-white hover:file:bg-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-white" :required="!hasLicense">
                                         
-                                        {{-- CANCEL BUTTON FOR LICENSE --}}
                                         <template x-if="changeLicense">
                                             <div class="mt-3 text-right">
                                                 <button type="button" @click="changeLicense = false" class="text-xs font-bold text-gray-500 hover:text-gray-800 underline">Cancel Update</button>
@@ -274,7 +276,6 @@
                             <h2 class="text-2xl font-bold mb-6 border-b border-red-500/50 pb-4">Order Summary</h2>
                             
                             <div class="space-y-3 text-base text-red-50 mb-8">
-                                {{-- Row 1: Rental Charges (Calculated: Total - Deposit - Delivery) --}}
                                 <div class="flex justify-between items-center">
                                     <span>Rental Charges</span> 
                                     <span class="font-mono text-white tracking-wide">
@@ -282,13 +283,11 @@
                                     </span>
                                 </div>
 
-                                {{-- Row 2: Delivery Charges --}}
                                 <div class="flex justify-between items-center">
                                     <span>Delivery Charges</span> 
                                     <span class="font-mono text-white tracking-wide">RM 15.00</span>
                                 </div>
 
-                                {{-- Row 3: Deposit --}}
                                 <div class="flex justify-between items-center">
                                     <span>Deposit</span> 
                                     <span class="font-mono text-white tracking-wide">
@@ -296,10 +295,9 @@
                                     </span>
                                 </div>
                                 
-                                {{-- Discount Row (Hidden unless active) --}}
                                 <div x-show="discountAmount > 0" 
-                                    x-transition 
-                                    class="flex justify-between items-center text-yellow-300 font-bold bg-black/20 p-2 rounded-lg mt-2">
+                                     x-transition 
+                                     class="flex justify-between items-center text-yellow-300 font-bold bg-black/20 p-2 rounded-lg mt-2">
                                     <div class="flex items-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
                                         <span>Discount (<span x-text="appliedVoucherCode"></span>)</span>
@@ -313,8 +311,8 @@
                                 <label class="block text-xs font-bold text-red-100 uppercase tracking-widest mb-2">Have a Promo Code?</label>
                                 <div class="flex gap-2">
                                     <input type="text" x-model="voucherInput" @keydown.enter.prevent="applyVoucher" 
-                                        class="flex-1 bg-white border-none rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-yellow-400 font-bold uppercase text-sm py-3 px-4 shadow-sm" 
-                                        placeholder="CODE">
+                                           class="flex-1 bg-white border-none rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-yellow-400 font-bold uppercase text-sm py-3 px-4 shadow-sm" 
+                                           placeholder="CODE">
                                     <button type="button" @click="applyVoucher" :disabled="loading || !voucherInput" 
                                             class="bg-gray-900 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-black transition shadow-lg disabled:opacity-50">
                                         <span x-show="!loading">APPLY</span>
@@ -322,8 +320,8 @@
                                     </button>
                                 </div>
                                 <p x-text="voucherMessage" 
-                                :class="voucherSuccess ? 'text-green-300' : 'text-yellow-300'" 
-                                class="text-xs font-bold mt-2 h-4"></p>
+                                   :class="voucherSuccess ? 'text-green-300' : 'text-yellow-300'" 
+                                   class="text-xs font-bold mt-2 h-4"></p>
                             </div>
 
                             {{-- TOTAL PAYABLE --}}
@@ -334,7 +332,6 @@
                                 </span>
                             </div>
                             
-                            {{-- Hidden inputs for form submission --}}
                             <input type="hidden" name="total_amount" :value="totalPayable">
                             <input type="hidden" name="deposit_amount" value="{{ $deposit_amount }}">
                         </div>

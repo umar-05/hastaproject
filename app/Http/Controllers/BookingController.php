@@ -80,28 +80,53 @@ class BookingController extends Controller
         }
 
         $validated = $request->validate([
-            'plateNumber'     => 'required|exists:fleet,plateNumber',
-            'start_date'      => 'required|date',
-            'start_time'      => 'required',
-            'end_date'        => 'required|date',
-            'end_time'        => 'required',
-            'pickup_location' => 'required|string|max:255',
-            'return_location' => 'required|string|max:255',
-            'redemption_id'   => 'nullable|exists:rewardredemption,id',
-            'payment_method'  => 'required|string',
-            'payer_bank'      => 'nullable|string|max:255',
-            'payer_account'   => 'nullable|string|max:255',
-            'receipt'         => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120',
-            'total_amount'    => 'required|numeric',
-            'deposit_amount'  => 'nullable|numeric',
+            'plateNumber'       => 'required|exists:fleet,plateNumber',
+            'start_date'        => 'required|date',
+            'start_time'        => 'required',
+            'end_date'          => 'required|date',
+            'end_time'          => 'required',
+            'pickup_location'   => 'required|string|max:255',
+            'return_location'   => 'required|string|max:255',
+            'redemption_id'     => 'nullable|exists:rewardredemption,id',
+            'payment_method'    => 'required|string',
+            'payer_bank'        => 'nullable|string|max:255',
+            'payer_account'     => 'nullable|string|max:255',
+            'receipt'           => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'total_amount'      => 'required|numeric',
+            'deposit_amount'    => 'nullable|numeric',
+            // New Validation Rules
+            'identity_document' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'id_type'           => 'nullable|in:ic,matric',
+            'driving_license'   => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
         ]);
 
         DB::beginTransaction();
 
         try {
-            // 1. Save Bank Info if provided
+            // 1. Update Customer Documents & Bank Info
+            
+            // Handle Identity Document (IC/Passport or Matric)
+            if ($request->hasFile('identity_document')) {
+                $path = $request->file('identity_document')->store('documents', 'public');
+                
+                if ($request->id_type === 'ic') {
+                    $customer->doc_ic_passport = $path;
+                } elseif ($request->id_type === 'matric') {
+                    $customer->doc_matric = $path;
+                }
+            }
+
+            // Handle Driving License
+            if ($request->hasFile('driving_license')) {
+                $path = $request->file('driving_license')->store('documents', 'public');
+                $customer->doc_license = $path;
+            }
+
+            // Handle Bank Info
             if ($request->filled('payer_bank')) $customer->bankName = $request->payer_bank;
             if ($request->filled('payer_account')) $customer->accountNum = preg_replace('/[^0-9]/', '', $request->payer_account);
+            
+            // Save updates to customer profile
             if ($customer->isDirty()) $customer->save();
 
             // 2. Fetch Fleet

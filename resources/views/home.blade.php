@@ -1,22 +1,3 @@
-@php
-    // Define location options here to keep the HTML clean
-    $colleges = [
-        'Kolej Perdana', 'Kolej 9', 'Kolej 10', 'Kolej Datin Seri Endon',
-        'Kolej Rahman Putra', 'Kolej Tun Fatimah', 'Kolej Tun Razak',
-        'Kolej Tun Hussein Onn', 'Kolej Tunku Canselor',
-        'Kolej Tun Dr Ismail', 'Kolej Dato Onn Jaafar'
-    ];
-
-    $faculties = [
-        'Fakulti Komputeran' => 'Fakulti Komputeran (FC)',
-        'Fakulti Kejuruteraan Elektrik' => 'Fakulti Kejuruteraan Elektrik (FKE)',
-        'Fakulti Pengurusan' => 'Fakulti Pengurusan (FM)'
-    ];
-    
-    // Return locations seem restricted in your original code, so we define them separately
-    $returnLocations = ['Student Mall', 'Kolej Perdana', 'Kolej 9', 'Kolej 10'];
-@endphp
-
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -74,6 +55,9 @@
             background-position: right 0.75rem center;
             background-size: 1rem;
         }
+        
+        /* Hide scrollbar for clean dropdowns */
+        [x-cloak] { display: none !important; }
     </style>
 </head>
 <body class="font-sans antialiased text-gray-900 bg-gray-50">
@@ -92,35 +76,118 @@
                 </h1>
 
                 <div class="bg-white/95 backdrop-blur-md p-3 rounded-[2.5rem] shadow-2xl animate-fade-up delay-100">
-                    <form action="{{ route('vehicles.index') }}" method="GET" id="searchForm" class="bg-white p-6 md:p-8 rounded-[2rem] grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    <form action="{{ route('vehicles.index') }}" method="GET" id="searchForm" class="bg-white p-6 md:p-8 rounded-[2rem] grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                         
-                        {{-- Pick-up Location --}}
-                        <div class="md:col-span-3 text-left">
-                            <label class="label-visible">Pick-up Location</label>
-                            <select name="pickup_location" required class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none">
-                                <option value="Student Mall">Student Mall</option>
-                                <optgroup label="Kolej">
-                                    @foreach($colleges as $kolej)
-                                        <option value="{{ $kolej }}">{{ $kolej }}</option>
-                                    @endforeach
-                                </optgroup>
-                                <optgroup label="Fakulti">
-                                    @foreach($faculties as $value => $label)
-                                        <option value="{{ $value }}">{{ $label }}</option>
-                                    @endforeach
-                                </optgroup>
-                            </select>
-                        </div>
+                        {{-- SHARED DATA FOR LOCATIONS --}}
+                        <div x-data="{
+                            colleges: [
+                                'Kolej Datin Seri Endon', 'Kolej Dato Onn Jaafar', 'Kolej Tuanku Canselor', 
+                                'Kolej Tun Dr Ismail', 'Kolej Tun Fatimah', 'Kolej Tun Hussein Onn', 
+                                'Kolej Tun Razak', 'Kolej 9', 'Kolej 10'
+                            ],
+                            faculties: [
+                                'FAKULTI ALAM BINA & UKUR',
+                                'FAKULTI KECERDASAN BUATAN',
+                                'FAKULTI KEJURUTERAAN AWAM',
+                                'FAKULTI KEJURUTERAAN ELEKTRIK',
+                                'FAKULTI KEJURUTERAAN KIMIA DAN KEJURUTERAAN TENAGA',
+                                'FAKULTI KEJURUTERAAN MEKANIKAL',
+                                'FAKULTI KOMPUTERAN',
+                                'FAKULTI PENGURUSAN',
+                                'FAKULTI SAINS',
+                                'FAKULTI SAINS PENDIDIKAN DAN TEKNOLOGI',
+                                'FAKULTI SAINS SOSIAL DAN KEMANUSIAAN'
+                            ]
+                        }" class="contents">
 
-                        {{-- Return Location --}}
-                        <div class="md:col-span-3 text-left">
-                            <label class="label-visible">Return Location</label>
-                            <select name="return_location" required class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none">
-                                @foreach($returnLocations as $location)
-                                    <option value="{{ $location }}">{{ $location }}</option>
-                                @endforeach
-                            </select>
+                            {{-- Pick-up Location --}}
+                            <div class="md:col-span-3 text-left" x-data="{ category: '', location: '', specifics: '' }">
+                                <label class="label-visible">Pick-up Location</label>
+                                
+                                {{-- Main Category Dropdown --}}
+                                <select x-model="category" @change="location = (category === 'Student Mall' ? 'Student Mall' : '')" class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none mb-2">
+                                    <option value="" disabled selected>Select Category</option>
+                                    <option value="Student Mall">Student Mall</option>
+                                    <option value="College">College</option>
+                                    <option value="Faculty">Faculty</option>
+                                </select>
+
+                                {{-- Dynamic Sub-Dropdown & Specific Input --}}
+                                <div x-show="category === 'College' || category === 'Faculty'" x-cloak x-transition.opacity>
+                                    
+                                    {{-- Sub Dropdown --}}
+                                    <select x-model="location" class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-600 outline-none mb-2">
+                                        <option value="" disabled selected>Select Specific Location</option>
+                                        
+                                        {{-- College Options --}}
+                                        <template x-if="category === 'College'">
+                                            <template x-for="college in colleges">
+                                                <option :value="college" x-text="college"></option>
+                                            </template>
+                                        </template>
+
+                                        {{-- Faculty Options --}}
+                                        <template x-if="category === 'Faculty'">
+                                            <template x-for="faculty in faculties">
+                                                <option :value="faculty" x-text="faculty"></option>
+                                            </template>
+                                        </template>
+                                    </select>
+
+                                    {{-- Specific Input Field --}}
+                                    <input type="text" x-model="specifics" placeholder="e.g. Block A / Lobby" 
+                                        class="search-input-text w-full pl-4 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-600 outline-none placeholder-gray-400 text-sm">
+                                </div>
+
+                                {{-- Hidden input to send the combined value --}}
+                                <input type="hidden" name="pickup_location" :value="location + (specifics ? ' - ' + specifics : '')">
+                            </div>
+
+                            {{-- Return Location --}}
+                            <div class="md:col-span-3 text-left" x-data="{ category: '', location: '', specifics: '' }">
+                                <label class="label-visible">Return Location</label>
+                                
+                                {{-- Main Category Dropdown --}}
+                                <select x-model="category" @change="location = (category === 'Student Mall' ? 'Student Mall' : '')" class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none mb-2">
+                                    <option value="" disabled selected>Select Category</option>
+                                    <option value="Student Mall">Student Mall</option>
+                                    <option value="College">College</option>
+                                    <option value="Faculty">Faculty</option>
+                                </select>
+
+                                {{-- Dynamic Sub-Dropdown & Specific Input --}}
+                                <div x-show="category === 'College' || category === 'Faculty'" x-cloak x-transition.opacity>
+                                    
+                                    {{-- Sub Dropdown --}}
+                                    <select x-model="location" class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-600 outline-none mb-2">
+                                        <option value="" disabled selected>Select Specific Location</option>
+                                        
+                                        {{-- College Options --}}
+                                        <template x-if="category === 'College'">
+                                            <template x-for="college in colleges">
+                                                <option :value="college" x-text="college"></option>
+                                            </template>
+                                        </template>
+
+                                        {{-- Faculty Options --}}
+                                        <template x-if="category === 'Faculty'">
+                                            <template x-for="faculty in faculties">
+                                                <option :value="faculty" x-text="faculty"></option>
+                                            </template>
+                                        </template>
+                                    </select>
+
+                                    {{-- Specific Input Field --}}
+                                    <input type="text" x-model="specifics" placeholder="e.g. Block A / Lobby" 
+                                        class="search-input-text w-full pl-4 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-600 outline-none placeholder-gray-400 text-sm">
+                                </div>
+
+                                {{-- Hidden input to send the combined value --}}
+                                <input type="hidden" name="return_location" :value="location + (specifics ? ' - ' + specifics : '')">
+                            </div>
+
                         </div>
+                        {{-- END SHARED DATA --}}
 
                         {{-- Pick-up Date & Time --}}
                         <div class="md:col-span-2 text-left">
@@ -161,42 +228,6 @@
                         </div>
                     </form>
                 </div>
-            </div>
-        </section>
-
-        {{-- FEATURES GRID --}}
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24 animate-fade-up delay-200">
-            {{-- Feature 1 --}}
-            <div class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-2">
-                <div class="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-bold mb-3 text-gray-900">Instant Availability</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Real-time booking engine allowing you to secure your ideal ride in seconds, 24/7.</p>
-            </div>
-
-            {{-- Feature 2 --}}
-            <div class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-2">
-                <div class="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-bold mb-3 text-gray-900">Premium Comfort</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Every vehicle is sanitized and inspected to ensure a safe, pristine driving environment.</p>
-            </div>
-
-            {{-- Feature 3 --}}
-            <div class="group bg-white p-8 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-2">
-                <div class="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-bold mb-3 text-gray-900">Best Value</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Transparent pricing with no hidden fees. Luxury experience at competitive market rates.</p>
             </div>
         </section>
 
@@ -251,11 +282,20 @@
 
     </main>
 
-    <footer class="bg-red-600 text-white py-12 px-8 mt-16">
-        <div class="max-w-7xl mx-auto flex flex-col items-center text-center">
-            <img src="{{ asset('images/HASTALOGO.svg') }}" class="h-10 mb-6 brightness-0 invert" alt="Hasta Logo">
-            <p class="text-sm font-semibold mb-1">Hasta Travel & Tours</p>
-            <p class="text-xs opacity-60">&copy; {{ date('Y') }} All Rights Reserved</p>
+    <footer class="bg-hasta-red text-white py-10 px-8 mt-16">
+        <div class="max-w-7xl mx-auto flex flex-col items-center justify-center text-center">
+            <div class="mb-4">
+                <img src="{{ asset('images/HASTALOGO.svg') }}" 
+                     alt="HASTA Travel & Tours" 
+                     class="h-12 w-auto object-contain">
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-sm font-medium">HASTA Travel & Tours</p>
+                <p class="text-xs opacity-75">
+                    &copy; {{ date('Y') }} All rights reserved.
+                </p>
+            </div>
         </div>
     </footer>
 

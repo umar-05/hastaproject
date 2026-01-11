@@ -11,10 +11,38 @@
         $preReturnDate = request('return_date') ?? request('end_date') ?? date('Y-m-d', strtotime('+1 day'));
         $prePickupTime = request('pickup_time') ?? request('start_time') ?? '09:00';
         $preReturnTime = request('return_time') ?? request('end_time') ?? '09:00';
+        
         $prePickupLocRaw = request('pickup_location') ?? '';
         $preReturnLocRaw = request('return_location') ?? '';
 
-        // Vehicle Image Logic
+        // 2. Helper to Parse Location into [Category, LocationName, Specifics]
+        function parseLocationString($loc) {
+            if (empty($loc)) return ['cat' => '', 'val' => '', 'spec' => ''];
+            
+            // Split by " - " to separate the Main Location from Specifics
+            // limit to 2 parts in case specifics contain dashes
+            $parts = explode(' - ', $loc, 2); 
+            $main = $parts[0];
+            $specifics = $parts[1] ?? '';
+
+            $cat = '';
+            
+            // Determine Category based on Main Location
+            if ($main === 'Student Mall') {
+                $cat = 'Office';
+            } elseif (str_contains($main, 'Kolej')) {
+                $cat = 'Kolej';
+            } elseif (str_contains(strtoupper($main), 'FAKULTI') || str_contains(strtoupper($main), 'FACULTY')) {
+                $cat = 'Fakulti';
+            }
+
+            return ['cat' => $cat, 'val' => $main, 'spec' => $specifics];
+        }
+
+        $pickupData = parseLocationString($prePickupLocRaw);
+        $returnData = parseLocationString($preReturnLocRaw);
+
+        // 3. Vehicle Image Logic
         $vehicleImage = 'default-car.png'; 
         if (isset($car)) {
             $model = strtolower($car->modelName);
@@ -101,15 +129,40 @@
 
                     {{-- 
                         MASTER LOCATION SECTION (Merged x-data) 
+                        Logic Updated to handle Pre-Selection correctly
                     --}}
                     <div x-data="{
                         lists: {
-                            'College': ['Kolej Datin Seri Endon', 'Kolej Dato Onn Jaafar', 'Kolej Tuanku Canselor', 'Kolej Tun Dr Ismail', 'Kolej Tun Fatimah', 'Kolej Tun Hussein Onn', 'Kolej Tun Razak', 'Kolej 9', 'Kolej 10'],
-                            'Faculty': ['Faculty of Computing', 'Faculty of Science', 'Faculty of Engineering', 'Faculty of Built Environment', 'Faculty of Management'],
+                            'Kolej': [
+                                'Kolej Datin Seri Endon', 'Kolej Dato Onn Jaafar', 'Kolej Tuanku Canselor', 
+                                'Kolej Tun Dr Ismail', 'Kolej Tun Fatimah', 'Kolej Tun Hussein Onn', 
+                                'Kolej Tun Razak', 'Kolej 9', 'Kolej 10'
+                            ],
+                            'Fakulti': [
+                                'FAKULTI ALAM BINA & UKUR',
+                                'FAKULTI KECERDASAN BUATAN',
+                                'FAKULTI KEJURUTERAAN AWAM',
+                                'FAKULTI KEJURUTERAAN ELEKTRIK',
+                                'FAKULTI KEJURUTERAAN KIMIA DAN KEJURUTERAAN TENAGA',
+                                'FAKULTI KEJURUTERAAN MEKANIKAL',
+                                'FAKULTI KOMPUTERAN',
+                                'FAKULTI PENGURUSAN',
+                                'FAKULTI SAINS',
+                                'FAKULTI SAINS PENDIDIKAN DAN TEKNOLOGI',
+                                'FAKULTI SAINS SOSIAL DAN KEMANUSIAAN'
+                            ],
                             'Office': ['Student Mall']
                         },
-                        pickup: { category: '', location: '', specifics: '{{ $prePickupLocRaw }}' },
-                        dropoff: { category: '', location: '', specifics: '{{ $preReturnLocRaw }}' }
+                        pickup: { 
+                            category: '{{ $pickupData['cat'] }}', 
+                            location: '{{ $pickupData['val'] }}', 
+                            specifics: '{{ $pickupData['spec'] }}' 
+                        },
+                        dropoff: { 
+                            category: '{{ $returnData['cat'] }}', 
+                            location: '{{ $returnData['val'] }}', 
+                            specifics: '{{ $returnData['spec'] }}' 
+                        }
                     }" class="space-y-6">
 
                         {{-- 1. Pickup Location --}}
@@ -133,15 +186,18 @@
                                 <select x-model="pickup.location" class="w-full border-gray-200 rounded-lg py-2 px-3 text-sm bg-gray-50">
                                     <option value="" disabled selected>Select <span x-text="pickup.category"></span></option>
                                     <template x-for="item in lists[pickup.category]" :key="item">
-                                        <option :value="item" x-text="item"></option>
+                                        <option :value="item" x-text="item" :selected="item == pickup.location"></option>
                                     </template>
                                 </select>
                             </div>
 
                             {{-- Specifics --}}
-                            <input type="text" x-model="pickup.specifics" placeholder="Specific details (e.g. Lobby)" 
-                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500">
+                            <div x-show="pickup.location && pickup.location !== 'Student Mall'" x-transition>
+                                <input type="text" x-model="pickup.specifics" placeholder="Specific details (e.g. Block/Lobby)" 
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500">
+                            </div>
                             
+                            {{-- Hidden input constructs the final string: "Kolej 9 - Block A" --}}
                             <input type="hidden" name="pickup_location" :value="(pickup.location ? pickup.location : pickup.category) + (pickup.specifics ? ' - ' + pickup.specifics : '')">
                         </div>
 
@@ -166,14 +222,16 @@
                                 <select x-model="dropoff.location" class="w-full border-gray-200 rounded-lg py-2 px-3 text-sm bg-gray-50">
                                     <option value="" disabled selected>Select <span x-text="dropoff.category"></span></option>
                                     <template x-for="item in lists[dropoff.category]" :key="item">
-                                        <option :value="item" x-text="item"></option>
+                                        <option :value="item" x-text="item" :selected="item == dropoff.location"></option>
                                     </template>
                                 </select>
                             </div>
 
                             {{-- Specifics --}}
-                            <input type="text" x-model="dropoff.specifics" placeholder="Specific details (e.g. Car Park)" 
-                                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500">
+                            <div x-show="dropoff.location && dropoff.location !== 'Student Mall'" x-transition>
+                                <input type="text" x-model="dropoff.specifics" placeholder="Specific details (e.g. Block/Lobby)" 
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500">
+                            </div>
                             
                             <input type="hidden" name="return_location" :value="(dropoff.location ? dropoff.location : dropoff.category) + (dropoff.specifics ? ' - ' + dropoff.specifics : '')">
                         </div>

@@ -151,20 +151,7 @@
                                                         </svg>
                                                     </button>
                                                 </form>
-                                            @endif
-
-                                            {{-- 3. CANCEL (Unless already cancelled/completed) --}}
-                                            @if(!in_array($status, ['cancelled', 'completed']))
-                                                <form action="{{ route('staff.fleet.bookings.cancel', $booking->bookingID) }}" method="POST" class="inline-block">
-                                                    @csrf
-                                                    <button type="submit" onclick="return confirm('Cancel this booking?')" class="p-1.5 hover:bg-red-50 text-gray-400 hover:text-red-600 rounded-md transition" title="Cancel">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                            @endif
-                                            
+                                            @endif                                            
                                         </div>
                                     </td>
                                 </tr>
