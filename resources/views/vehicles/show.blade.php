@@ -52,7 +52,8 @@
 
             {{-- Breadcrumb / Back --}}
             <div class="mb-8 animate-fade-up">
-                <a href="{{ route('vehicles.index') }}" class="inline-flex items-center text-sm font-bold text-gray-500 hover:text-hasta-red transition-colors group">
+                {{-- Pass query params back to index as well --}}
+                <a href="{{ route('vehicles.index', request()->query()) }}" class="inline-flex items-center text-sm font-bold text-gray-500 hover:text-hasta-red transition-colors group">
                     <div class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center mr-3 group-hover:border-hasta-red transition-colors shadow-sm">
                         <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -171,8 +172,8 @@
                     {{-- Action Button --}}
                     <div class="pt-6 animate-fade-up delay-300">
                         @if($isProfileComplete)
-                            {{-- Standard Booking Flow --}}
-                            <a href="{{ route('bookings.create', $vehicle['id']) }}" class="block w-full group">
+                            {{-- Standard Booking Flow (Merged query params) --}}
+                            <a href="{{ route('bookings.create', array_merge([$vehicle['id']], request()->query())) }}" class="block w-full group">
                                 <button class="w-full bg-hasta-red text-white font-bold text-lg py-5 rounded-xl shadow-lg shadow-red-200 transition-all duration-300 hover:bg-red-700 hover:shadow-red-300 transform hover:-translate-y-1 flex items-center justify-center gap-3">
                                     Book This Vehicle
                                     <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">

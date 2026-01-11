@@ -108,9 +108,10 @@
                         @endif
                     </div>
 
-                    {{-- CTA Button --}}
+                    {{-- CTA Button (Updated to pass query params) --}}
                     <div class="mt-auto">
-                        <a href="{{ route('vehicles.show', $vehicle['id']) }}" class="block w-full">
+                        {{-- Merging route parameters with request query parameters --}}
+                        <a href="{{ route('vehicles.show', array_merge([$vehicle['id']], request()->query())) }}" class="block w-full">
                             <button class="w-full bg-hasta-red text-white font-bold py-3.5 rounded-xl transition-colors duration-200 hover:bg-red-700 hover:shadow-md flex items-center justify-center">
                                 View Details
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
