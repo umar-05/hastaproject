@@ -35,18 +35,9 @@ Route::post('/bookings/validate-voucher', [BookingController::class, 'validateVo
 
 
 // ==============================
-// 2. SHARED ROUTES (Customer OR Staff)
+// 2. CUSTOMER ROUTES (Guard: customer)
 // ==============================
-// Accessible by both Staff (for modals/views) and Customers.
-Route::middleware(['auth:customer,staff', 'prevent-back'])->group(function () {
-    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
-    Route::post('/bookings/{booking}/forms', [BookingController::class, 'uploadForms'])->name('bookings.upload-forms');
-});
-
-
-// ==============================
-// 3. CUSTOMER ROUTES (Guard: customer)
-// ==============================
+// MOVED UP: Customer routes must be defined BEFORE the generic 'bookings/{booking}' wildcard
 Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function () {
 
     Route::get('/home', [CustomerController::class, 'dashboard'])->name('home');
@@ -90,7 +81,7 @@ Route::middleware(['auth:customer', 'verified', 'prevent-back'])->group(function
 
 
 // ==============================
-// 4. STAFF ROUTES (Guard: staff)
+// 3. STAFF ROUTES (Guard: staff)
 // ==============================
 Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.')->group(function () {
 
@@ -128,34 +119,7 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     });
 
     // --- Reward Management ---
-    
-    // 1. FIX: Restore 'staff.rewards' for Sidebar compatibility
     Route::get('/rewards-dashboard', [StaffController::class, 'rewards'])->name('rewards');
-
-    Route::group(['middleware' => ['auth:staff']], function () {
-    Route::get('/receipt/{id}', [BookingController::class, 'viewReceipt'])->name('staff.receipt.view');
-});
-
-    // Profile Management
-    Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
-    Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
-    
-    //Daily-Income Report
-    Route::get('/reports/daily-income', [StaffController::class, 'dailyIncome'])->name('report.daily-income');
-    //Monthly-Income Report
-    Route::get('/reports/monthly-income', [StaffController::class, 'monthlyIncome'])->name('report.monthly-income');
-    // Staff User Management
-    Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
-    Route::post('/store', [StaffController::class, 'store'])->name('store');
-
-    Route::get('/reports', [StaffController::class, 'reports'])->name('report');
-    Route::get('/add-functioning', [StaffController::class, 'createFunctioning'])->name('add-stafffunctioning');
-    
-    Route::get('/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
-    Route::put('/{staffID}', [StaffController::class, 'update'])->name('update-staff');
-    Route::delete('/{staffID}', [StaffController::class, 'destroy'])->name('destroy-staff');
-    Route::get('/staff/{staffID}/edit', [StaffController::class, 'edit'])->name('edit-staff');
-    
     Route::prefix('rewards')->name('reward.')->group(function() {
         Route::get('/', [StaffController::class, 'rewards'])->name('index');
         Route::get('/create', [RewardController::class, 'create'])->name('create');
@@ -190,6 +154,8 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
 
+    Route::get('/api/get-owner', [App\Http\Controllers\Staff\FleetController::class, 'getOwnerByIc'])->name('api.owner');
+
     // --- Staff User Management ---
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
     Route::post('/store', [StaffController::class, 'store'])->name('store');
@@ -206,7 +172,18 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::post('/mission/{id}/accept', [StaffController::class, 'missionAccept'])->name('missions.accept');
     Route::post('/mission/{id}/complete', [StaffController::class, 'missionComplete'])->name('missions.complete');
 
-}); // End Staff Middleware Group
+}); 
+
+
+// ==============================
+// 4. SHARED ROUTES (Customer OR Staff)
+// ==============================
+// MOVED DOWN: This wildcard route matches /bookings/{booking}
+// It must come AFTER specific routes like /bookings/payment or /bookings/create
+Route::middleware(['auth:customer,staff', 'prevent-back'])->group(function () {
+    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::post('/bookings/{booking}/forms', [BookingController::class, 'uploadForms'])->name('bookings.upload-forms');
+});
 
 
 // ==============================

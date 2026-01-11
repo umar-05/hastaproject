@@ -24,6 +24,7 @@
         @csrf
         @method('patch')
 
+        {{-- Personal Details --}}
         <div class="mb-10">
             <div class="flex items-center mb-6">
                 <div class="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center text-[#bb1419] mr-3">
@@ -83,6 +84,7 @@
 
         <hr class="border-gray-100 mb-10">
 
+        {{-- Address Information --}}
         <div class="mb-10">
             <div class="flex items-center mb-6">
                 <div class="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center text-[#bb1419] mr-3">
@@ -109,28 +111,48 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label for="city" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">City</label>
-                        <x-text-input id="city" name="city" type="text" class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20" :value="old('city', $user->city)" />
-                    </div>
-                    <div>
-                        <label for="postcode" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Postcode</label>
-                        <x-text-input id="postcode" name="postcode" type="text" class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20" :value="old('postcode', $user->postcode)" />
-                    </div>
+                    {{-- State Dropdown --}}
                     <div>
                         <label for="state" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">State</label>
                         <div class="relative">
-                            <select id="state" name="state" 
-                                class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20 appearance-none">
+                            <select id="stateSelect" name="state" 
+                                class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20 appearance-none cursor-pointer pr-10"
+                                onchange="updateCities()">
                                 <option value="" disabled {{ old('state', $user->state) ? '' : 'selected' }}>Select State</option>
-                                @foreach(['JOHOR', 'KEDAH', 'KELANTAN', 'MELAKA', 'NEGERI SEMBILAN', 'PAHANG', 'PERAK', 'PERLIS', 'PULAU PINANG', 'SABAH', 'SARAWAK', 'SELANGOR', 'TERENGGANU', 'W.P. KUALA LUMPUR', 'W.P. LABUAN', 'W.P. PUTRAJAYA'] as $state)
-                                    <option value="{{ $state }}" {{ old('state', $user->state) === $state ? 'selected' : '' }}>{{ $state }}</option>
+                                @foreach(['JOHOR', 'KEDAH', 'KELANTAN', 'MELAKA', 'NEGERI SEMBILAN', 'PAHANG', 'PENANG (PULAU PINANG)', 'PERAK', 'PERLIS', 'SABAH', 'SARAWAK', 'SELANGOR', 'TERENGGANU', 'W.P. KUALA LUMPUR', 'W.P. LABUAN', 'W.P. PUTRAJAYA'] as $stateOption)
+                                    <option value="{{ $stateOption }}" {{ old('state', $user->state) === $stateOption ? 'selected' : '' }}>{{ $stateOption }}</option>
                                 @endforeach
                             </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            {{-- Custom Arrow SVG --}}
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
                             </div>
                         </div>
+                    </div>
+
+                    {{-- Dependent City Dropdown --}}
+                    <div>
+                        <label for="city" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">City</label>
+                        <div class="relative">
+                            <select id="citySelect" name="city" 
+                                class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20 appearance-none cursor-pointer pr-10">
+                                <option value="">Select City</option>
+                            </select>
+                            {{-- Custom Arrow SVG --}}
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Postcode --}}
+                    <div>
+                        <label for="postcode" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Postcode</label>
+                        <x-text-input id="postcode" name="postcode" type="text" class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20" :value="old('postcode', $user->postcode)" placeholder="e.g. 81310" />
                     </div>
                 </div>
             </div>
@@ -138,8 +160,8 @@
 
         <hr class="border-gray-100 mb-10">
 
+        {{-- Emergency & Financial Details --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-            
             <div>
                  <div class="flex items-center mb-6">
                     <div class="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center text-[#bb1419] mr-3">
@@ -152,17 +174,13 @@
                         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Contact Name</label>
                         <x-text-input id="eme_name" name="eme_name" type="text" class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20" :value="old('eme_name', $user->eme_name)" />
                      </div>
-                     
                      <div>
                         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Phone Number</label>
                         <x-text-input id="emephoneNum" name="emephoneNum" type="text" class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20" :value="old('emephoneNum', $user->emephoneNum)" />
                      </div>
-                     
                      <div>
                         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Relationship</label>
-                        <input list="relationships" id="emerelation" name="emerelation" 
-                            class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20" 
-                            value="{{ old('emerelation', $user->emerelation) }}">
+                        <input list="relationships" id="emerelation" name="emerelation" class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20" value="{{ old('emerelation', $user->emerelation) }}">
                         <datalist id="relationships">
                             @foreach(['FATHER', 'MOTHER', 'SIBLING', 'BROTHER', 'SISTER', 'GRANDPARENT', 'UNCLE', 'AUNT', 'GUARDIAN', 'SPOUSE', 'COUSIN'] as $rel)
                                 <option value="{{ $rel }}">
@@ -183,19 +201,20 @@
                      <div>
                         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Bank Name</label>
                         <div class="relative">
-                            <select id="bankName" name="bankName" 
-                                class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20 appearance-none">
+                            <select id="bankName" name="bankName" class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20 appearance-none cursor-pointer pr-10">
                                 <option value="" disabled {{ old('bankName', $user->bankName) ? '' : 'selected' }}>Select Bank</option>
                                 @foreach(['MAYBANK', 'CIMB BANK', 'PUBLIC BANK', 'RHB BANK', 'HONG LEONG BANK', 'AMBANK', 'UOB MALAYSIA', 'BANK RAKYAT', 'OCBC BANK', 'HSBC BANK', 'BANK ISLAM', 'AFFIN BANK', 'ALLIANCE BANK', 'AGROBANK'] as $bank)
                                     <option value="{{ $bank }}" {{ old('bankName', $user->bankName) === $bank ? 'selected' : '' }}>{{ $bank }}</option>
                                 @endforeach
                             </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            {{-- Custom Arrow SVG --}}
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
                             </div>
                         </div>
                      </div>
-
                      <div>
                         <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Account Number</label>
                         <x-text-input id="accountNum" name="accountNum" type="text" class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20" :value="old('accountNum', $user->accountNum)" />
@@ -211,10 +230,67 @@
                     {{ __('Saved Successfully') }}
                 </p>
             @endif
-
             <button type="submit" class="bg-[#bb1419] hover:bg-red-800 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transform transition hover:-translate-y-0.5 duration-200">
                 {{ __('SAVE CHANGES') }}
             </button>
         </div>
     </form>
+
+    <style>
+        /* Force remove default browser arrows in all browsers */
+        select {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+        }
+        /* IE specific */
+        select::-ms-expand {
+            display: none !important;
+        }
+    </style>
+
+    <script>
+        const stateData = {
+            "JOHOR": ["Johor Bahru", "Iskandar Puteri", "Pasir Gudang", "Kulai", "Batu Pahat", "Kluang", "Muar", "Segamat", "Pontian", "Kota Tinggi", "Tangkak", "Yong Peng", "Pekan Nenas", "Parit Raja", "Ulu Tiram"],
+            "KEDAH": ["Alor Setar", "Sungai Petani", "Kulim", "Kuah (Langkawi)", "Jitra", "Pendang", "Yan", "Baling", "Sik", "Kuala Nerang", "Pokok Sena", "Bedong", "Gurun"],
+            "KELANTAN": ["Kota Bharu", "Pasir Mas", "Tumpat", "Bachok", "Machang", "Tanah Merah", "Kuala Krai", "Gua Musang", "Pasir Puteh", "Jeli", "Dabong"],
+            "MELAKA": ["Melaka City (Bandaraya Melaka)", "Alor Gajah", "Jasin", "Masjid Tanah", "Merlimau"],
+            "NEGERI SEMBILAN": ["Seremban", "Port Dickson", "Nilai", "Bahau", "Tampin", "Kuala Pilah", "Rembau", "Gemas"],
+            "PAHANG": ["Kuantan", "Temerloh", "Bentong", "Pekan", "Raub", "Jerantut", "Kuala Lipis", "Mentakab", "Maran", "Muadzam Shah", "Tanah Rata", "Brinchang"],
+            "PENANG (PULAU PINANG)": ["George Town", "Balik Pulau", "Butterworth", "Bukit Mertajam", "Perai", "Kepala Batas", "Nibong Tebal", "Jawi"],
+            "PERAK": ["Ipoh", "Taiping", "Teluk Intan", "Batu Gajah", "Kampar", "Kuala Kangsar", "Seri Manjung", "Sitiawan", "Lumut", "Parit Buntar", "Tapah", "Gerik", "Bagan Serai", "Tanjung Malim"],
+            "PERLIS": ["Kangar", "Arau", "Kuala Perlis", "Padang Besar"],
+            "SABAH": ["Kota Kinabalu", "Sandakan", "Tawau", "Lahad Datu", "Keningau", "Semporna", "Kudat", "Ranau", "Beaufort", "Papar", "Kota Belud", "Tuaran", "Putatan", "Penampang"],
+            "SARAWAK": ["Kuching", "Samarahan", "Serian", "Bau", "Lundu", "Miri", "Bintulu", "Sibu", "Mukah", "Kapit", "Sri Aman", "Betong", "Sarikei", "Limbang", "Lawas", "Marudi"],
+            "SELANGOR": ["Shah Alam", "Petaling Jaya", "Subang Jaya", "Klang", "Kajang", "Ampang Jaya", "Selayang", "Gombak", "Puchong", "Cyberjaya", "Putrayaja", "Sepang", "Dengkil", "Rawang", "Kuala Selangor", "Sabak Bernam", "Banting", "Jenjarom", "Hulu Selangor"],
+            "TERENGGANU": ["Kuala Terengganu", "Dungun", "Kemaman", "Chukai", "Marang", "Besut", "Setiu", "Kuala Berang"],
+            "W.P. KUALA LUMPUR": ["Kuala Lumpur", "Cheras", "Setiawangsa", "Kepong", "Bangsar"],
+            "W.P. LABUAN": ["Labuan"],
+            "W.P. PUTRAJAYA": ["Putrayaja"]
+        };
+
+        const currentCity = "{{ old('city', $user->city) }}";
+
+        function updateCities() {
+            const stateSelect = document.getElementById('stateSelect');
+            const citySelect = document.getElementById('citySelect');
+            const selectedState = stateSelect.value;
+
+            citySelect.innerHTML = '<option value="">Select City</option>';
+
+            if (selectedState && stateData[selectedState]) {
+                stateData[selectedState].forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.text = city;
+                    if (city === currentCity) option.selected = true;
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCities();
+        });
+    </script>
 </section>
