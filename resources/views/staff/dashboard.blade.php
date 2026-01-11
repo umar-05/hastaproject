@@ -1,102 +1,113 @@
 <x-staff-layout>
-    {{-- Include Chart.js and the Datalabels Plugin --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
-    <div class="py-4 bg-[#f8f9fc] min-h-screen">
+    <div class="py-6 bg-[#f8f9fc] min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- INTERACTIVE METRIC BUTTONS --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <a href="{{ route('staff.pickup-return') }}" class="group block bg-white p-6 rounded-3xl border-2 border-transparent shadow-sm hover:shadow-xl hover:border-blue-500 hover:-translate-y-1 transition-all duration-300">
+            {{-- TOP METRICS --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
                     <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="p-3 rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300 mr-4">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 rounded-xl bg-blue-50 text-blue-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
                             <div>
-                                <span class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.15em]">Action Required</span>
-                                <h3 class="text-gray-900 font-bold text-lg uppercase leading-tight">Pickup today</h3>
+                                <p class="text-gray-400 font-semibold text-[10px] uppercase">Action Required</p>
+                                <h3 class="text-gray-800 font-bold text-base uppercase">Pickup today</h3>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <span class="text-4xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{ $pickupsToday }}</span>
-                        </div>
+                        <span class="text-3xl font-bold text-gray-900">{{ $pickupsToday }}</span>
                     </div>
-                </a>
-
-                <a href="{{ route('staff.pickup-return') }}" class="group block bg-white p-6 rounded-3xl border-2 border-transparent shadow-sm hover:shadow-xl hover:border-green-500 hover:-translate-y-1 transition-all duration-300">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="p-3 rounded-2xl bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors duration-300 mr-4">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                            </div>
-                            <div>
-                                <span class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.15em]">Active Status</span>
-                                <h3 class="text-gray-900 font-bold text-lg uppercase leading-tight">Return today</h3>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-4xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">{{ $returnsToday }}</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            {{-- RECENT BOOKINGS SECTION --}}
-            <div class="mb-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-2xl text-gray-800 uppercase tracking-tight">RECENT BOOKINGS</h3>
-                    <a href="{{ route('staff.bookingmanagement') }}" class="inline-flex items-center px-5 py-2 bg-red-50 text-red-600 font-bold text-[10px] uppercase tracking-widest rounded-full hover:bg-red-600 hover:text-white shadow-sm transition-all duration-200">
-                        View All
-                        <svg class="ml-2 w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </a>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    @forelse($recentBookings as $index => $booking)
-                        @if($index == 0)
-                            <div class="lg:col-span-2 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-3xl p-8 relative overflow-hidden text-white shadow-lg">
-                                <div class="relative z-10">
-                                    <h4 class="text-2xl font-bold mb-1 uppercase">{{ $booking->modelName }}</h4>
-                                    <p class="text-blue-50 font-medium mb-4 tracking-wider uppercase">{{ $booking->plateNumber }}</p>
-                                    <div class="text-4xl font-bold mb-6">MYR {{ number_format($booking->totalPrice, 2) }}</div>
-                                    <span class="bg-white/20 px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest">{{ $booking->paymentStat ?? 'Paid' }}</span>
-                                </div>
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 rounded-xl bg-green-50 text-green-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
+                            <div>
+                                <p class="text-gray-400 font-semibold text-[10px] uppercase">Active Status</p>
+                                <h3 class="text-gray-800 font-bold text-base uppercase">Return today</h3>
                             </div>
-                        @else
-                            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4">
-                                <div class="w-14 h-14 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
-                                    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" /><path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H11.05a2.5 2.5 0 014.9 0H17a1 1 0 001-1V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0011.586 3H4a1 1 0 00-1 1zm1 1h6.586L15 9.414V14H4V5z" /></svg>
-                                </div>
-                                <div>
-                                    <h5 class="font-bold text-gray-800 text-sm leading-tight uppercase">{{ $booking->modelName }}</h5>
-                                    <p class="text-gray-400 text-[10px] font-bold mb-1 uppercase">{{ $booking->plateNumber }}</p>
-                                    <span class="text-[9px] font-bold text-green-500 bg-green-50 px-2 py-0.5 rounded uppercase">PAID</span>
-                                </div>
+                        </div>
+                        <span class="text-3xl font-bold text-gray-900">{{ $returnsToday }}</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 rounded-xl bg-purple-50 text-purple-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                            <div>
+                                <p class="text-gray-400 font-semibold text-[10px] uppercase">Fleet Status</p>
+                                <h3 class="text-gray-800 font-bold text-base uppercase">Available</h3>
                             </div>
-                        @endif
-                    @empty
-                        <div class="lg:col-span-3 text-center py-10 bg-white rounded-3xl text-gray-400 border-2 border-dashed border-gray-100 italic font-medium">No recent bookings found.</div>
-                    @endforelse
+                        </div>
+                        <span class="text-3xl font-bold text-gray-900">{{ $availableCarsCount }}</span>
+                    </div>
                 </div>
             </div>
 
-            {{-- HORIZONTAL BAR CHART SECTION --}}
-            <div class="mb-6">
-                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-8">
-                        <h3 class="font-bold text-2xl text-gray-800 uppercase tracking-tight">Customer Distribution by College</h3>
-                        <div class="flex items-center space-x-2">
-                             <span class="relative flex h-3 w-3">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                             </span>
-                             <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Live Data</span>
+            {{-- AVAILABILITY TABLE --}}
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+                <h3 class="font-bold text-lg text-gray-800 mb-6">Daily Car Availability</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-gray-400 text-[11px] uppercase">
+                                <th class="pb-4 font-semibold">Vehicle</th>
+                                @foreach($weekDates as $day)
+                                    <th class="pb-4 text-center">
+                                        <span class="block {{ $day['is_today'] ? 'text-red-500' : 'text-gray-500' }} font-bold text-xs">{{ $day['name'] }}</span>
+                                        <span class="block text-gray-800 text-sm">{{ $day['date'] }}</span>
+                                    </th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            @foreach($fleetAvailability as $car)
+                            <tr>
+                                <td class="py-4">
+                                    <h4 class="font-semibold text-gray-800 text-xs">{{ $car['modelName'] }}</h4>
+                                    <p class="text-[10px] text-gray-400">{{ $car['plateNumber'] }}</p>
+                                </td>
+                                @foreach($car['schedule'] as $status)
+                                <td class="py-4 text-center">
+                                    <div class="inline-flex items-center justify-center w-8 h-8 rounded-lg {{ $status['is_today'] ? 'ring-1 ring-red-400' : '' }} {{ $status['available'] ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-400' }}">
+                                        @if($status['available'])
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
+                                        @else
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                                        @endif
+                                    </div>
+                                </td>
+                                @endforeach
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- RECENT BOOKINGS & CHART --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-lg text-gray-800 mb-6 uppercase">Recent Bookings</h3>
+                    <div class="space-y-4">
+                        @foreach($recentBookings as $booking)
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                            <div>
+                                <p class="text-xs font-bold text-gray-800">{{ $booking->modelName }}</p>
+                                <p class="text-[10px] text-gray-400">{{ $booking->plateNumber }}</p>
+                            </div>
+                            <span class="text-xs font-bold text-gray-900">MYR {{ number_format($booking->totalPrice, 2) }}</span>
                         </div>
+                        @endforeach
                     </div>
-                    
-                    <div class="relative w-full" style="height: 550px;">
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-lg text-gray-800 mb-6 uppercase">Customer Distribution</h3>
+                    <div class="relative w-full" style="height: 250px;">
                         <canvas id="collegeBarChart"></canvas>
                     </div>
                 </div>
@@ -104,110 +115,36 @@
         </div>
     </div>
 
-    {{-- CHART SCRIPT --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             Chart.register(ChartDataLabels);
             const ctx = document.getElementById('collegeBarChart').getContext('2d');
-            
-            // Updated college names based on abbreviations provided
-            const collegeLabels = [
-                'KRP', 
-                'KTF', 
-                'KTR', 
-                'KTHO', 
-                'KTDI', 
-                'KTC', 
-                'KP', 
-                'K9', 
-                'K10', 
-                'KDSE', 
-                'KDOJ', 
-                'OTHERS'
-            ];
-
-            const collegeData = @json($collegeDistribution);
-            
-            // Map the data to the labels
-            const dataValues = collegeLabels.map(label => collegeData[label] || 0);
-
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: collegeLabels,
+                    labels: @json(array_keys($collegeDistribution)),
                     datasets: [{
-                        label: 'Customers',
-                        data: dataValues, 
-                        backgroundColor: [
-                            '#e5e7eb', // KRP
-                            '#06b6d4', // KTF (Cyan)
-                            '#fbbf24', // KTR (Yellow)
-                            '#e5e7eb', // KTHO
-                            '#e5e7eb', // KTDI
-                            '#e5e7eb', // KTC
-                            '#e5e7eb', // KP
-                            '#e5e7eb', // K9
-                            '#e5e7eb', // K10
-                            '#e5e7eb', // KDSE
-                            '#e5e7eb', // KDOJ
-                            '#e5e7eb'  // OTHERS
-                        ],
-                        borderRadius: 8,
-                        borderWidth: 0,
-                        barThickness: 20 
+                        data: @json(array_values($collegeDistribution)),
+                        backgroundColor: '#06b6d4',
+                        borderRadius: 4,
+                        barThickness: 10
                     }]
                 },
                 options: {
-                    indexAxis: 'y', 
+                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
-                        },
+                        legend: { display: false },
                         datalabels: {
-                            anchor: 'end',
-                            align: 'right',
-                            color: '#1f2937',
-                            formatter: (value) => value + '%',
-                            font: { 
-                                weight: '700', 
-                                size: 11,
-                                family: 'Inter' 
-                            },
-                            offset: 8
+                            anchor: 'end', align: 'right', color: '#9ca3af',
+                            font: { size: 9, weight: '600' },
+                            formatter: (v) => v + '%'
                         }
                     },
                     scales: {
-                        x: {
-                            beginAtZero: true,
-                            max: 100, 
-                            grid: {
-                                color: '#f1f5f9',
-                                borderDash: [5, 5]
-                            },
-                            ticks: {
-                                font: { family: 'Inter', size: 11 },
-                                callback: function(value) { return value + '%'; }
-                            }
-                        },
-                        y: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: { 
-                                    family: 'Inter', 
-                                    weight: '600', 
-                                    size: 11 
-                                }
-                            }
-                        }
-                    },
-                    layout: {
-                        padding: {
-                            right: 40 
-                        }
+                        x: { display: false, max: 100 },
+                        y: { grid: { display: false }, ticks: { font: { size: 9, weight: '600' } } }
                     }
                 }
             });
