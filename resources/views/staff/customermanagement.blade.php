@@ -113,4 +113,87 @@
             </div>
         </div>
     </div>
+
+    <div id="detailsModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeDetailsModal()"></div>
+
+        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                    <h3 class="text-xl font-bold text-gray-900">Customer Details</h3>
+                    <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="modalContent" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase">Matric Number</p>
+                            <p id="det-matric" class="text-base text-gray-900 font-medium"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase">IC/Passport</p>
+                            <p id="det-ic" class="text-base text-gray-900 font-medium"></p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-xs font-bold text-gray-400 uppercase">Full Name</p>
+                            <p id="det-name" class="text-base text-gray-900 font-medium capitalize"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase">Email</p>
+                            <p id="det-email" class="text-base text-gray-900 font-medium"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase">Phone Number</p>
+                            <p id="det-phone" class="text-base text-gray-900 font-medium"></p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-xs font-bold text-gray-400 uppercase">College Address</p>
+                            <p id="det-address" class="text-base text-gray-400 font-normal italic"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button type="button" onclick="closeDetailsModal()" class="w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openDetailsModal(matricNum) {
+    // Show loading state or clear previous data
+    const modal = document.getElementById('detailsModal');
+    
+    // Fetch data from the show API route
+    fetch(`/staff/customermanagement-crud/${matricNum}`)
+        .then(response => response.json())
+        .then(data => {
+            // Inject data into modal elements
+            document.getElementById('det-matric').innerText = data.matricNum;
+            document.getElementById('det-ic').innerText = data.icNum_passport || 'N/A';
+            document.getElementById('det-name').innerText = data.name.toLowerCase();
+            document.getElementById('det-email').innerText = data.email;
+            document.getElementById('det-phone').innerText = data.phoneNum || 'N/A';
+            document.getElementById('det-address').innerText = data.collegeAddress || 'N/A';
+            
+            // Show the modal
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scroll
+        })
+        .catch(error => {
+            console.error('Error fetching customer details:', error);
+            alert('Failed to load customer details.');
+        });
+}
+
+function closeDetailsModal() {
+    document.getElementById('detailsModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+</script>
 </x-layouts.staff>

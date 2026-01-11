@@ -61,10 +61,17 @@ class CustomerController extends Controller
                             ->with('success', 'Customer added successfully!');
     }
 
-    public function destroy($matricNum) {
-        Customer::where('matricNum', $matricNum)->delete();
-        return redirect()->back()->with('success', 'Customer deleted successfully');
-    }
+   // In your CustomerController destroy method
+public function destroy($matricNum)
+{
+    // 1. Delete or handle related bookings first
+    \App\Models\Booking::where('matricNum', $matricNum)->delete();
+
+    // 2. Now delete the customer
+    \App\Models\Customer::where('matricNum', $matricNum)->delete();
+
+    return back()->with('success', 'Customer and associated bookings deleted.');
+}
 
     public function show($matricNum)
     {

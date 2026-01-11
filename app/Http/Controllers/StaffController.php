@@ -188,6 +188,39 @@ public function updateProfile(Request $request): RedirectResponse
         return Redirect::route('staff.profile.edit')->with('status', 'profile-updated');
     }
 
+    /**
+ * Show the form for editing the specified staff member.
+ */
+public function edit($staffID): \Illuminate\View\View
+{
+    // Find the staff member by their custom ID
+    $staff = Staff::where('staffID', $staffID)->firstOrFail();
+
+    // Return the view (ensure this view file exists)
+    return view('staff.add-stafffunctioning', compact('staff'));
+}
+
+/**
+ * Remove the specified staff member from storage.
+ */
+public function destroy($staffID): \Illuminate\Http\RedirectResponse
+{
+    // 1. Find the staff member
+    $staff = Staff::where('staffID', $staffID)->firstOrFail();
+
+    // 2. Prevent self-deletion if necessary
+    if (Auth::guard('staff')->user()->staffID === $staff->staffID) {
+        return back()->with('error', 'You cannot delete your own account.');
+    }
+
+    // 3. Delete the record
+    $staff->delete();
+
+    // 4. Redirect back to the staff list
+    return redirect()->route('staff.add-staff')
+        ->with('status', "Staff member $staffID has been successfully removed.");
+}
+
 public function update(Request $request, $staffID): \Illuminate\Http\RedirectResponse
     {
         // 1. Find the staff member
