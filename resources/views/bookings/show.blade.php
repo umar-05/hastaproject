@@ -113,9 +113,13 @@
                             <span class="font-semibold">RM{{ number_format($booking->deposit, 2) }}</span>
                         </div>
                         @endif
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Delivery</span>
+                            <span class="font-semibold">RM{{ number_format(15, 2) }}</span>
+                        </div>
                         <div class="border-t pt-4 flex justify-between items-center">
                             <span class="text-lg font-bold">Total Amount</span>
-                            <span class="text-2xl font-bold text-red-600">RM{{ number_format(((float)($booking->totalPrice ?? 0)), 2) }}</span>
+                            <span class="text-2xl font-bold text-red-600">RM{{ number_format(((float)($booking->totalPrice + 15 ?? 0)), 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Payment Status</span>
