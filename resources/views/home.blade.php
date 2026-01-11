@@ -215,11 +215,20 @@
 
     </main>
 
-    <footer class="bg-red-600 text-white py-12 px-8 mt-16">
-        <div class="max-w-7xl mx-auto flex flex-col items-center text-center">
-            <img src="{{ asset('images/HASTALOGO.svg') }}" class="h-10 mb-6 brightness-0 invert" alt="Hasta Logo">
-            <p class="text-sm font-semibold mb-1">Hasta Travel & Tours</p>
-            <p class="text-xs opacity-60">&copy; {{ date('Y') }} All Rights Reserved</p>
+    <footer class="bg-hasta-red text-white py-10 px-8 mt-16">
+        <div class="max-w-7xl mx-auto flex flex-col items-center justify-center text-center">
+            <div class="mb-4">
+                <img src="{{ asset('images/HASTALOGO.svg') }}" 
+                     alt="HASTA Travel & Tours" 
+                     class="h-12 w-auto object-contain">
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-sm font-medium">HASTA Travel & Tours</p>
+                <p class="text-xs opacity-75">
+                    &copy; {{ date('Y') }} All rights reserved.
+                </p>
+            </div>
         </div>
     </footer>
 
