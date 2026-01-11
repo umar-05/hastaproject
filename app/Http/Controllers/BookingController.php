@@ -117,8 +117,11 @@ class BookingController extends Controller
             $pricePerDay = $fleet->price; 
             $deposit = $request->input('deposit_amount', 50); // Default to 50 if not sent
 
-            // Calculate Base Price
-            $basePrice = ($days * $pricePerDay) + $deposit;
+            // Delivery fee (fixed)
+            $deliveryFee = 15;
+
+            // Calculate Base Price (include delivery fee)
+            $basePrice = ($days * $pricePerDay) + $deposit + $deliveryFee;
             
             $discountAmount = 0;
             $appliedRewardId = null;
@@ -183,7 +186,7 @@ class BookingController extends Controller
                 'paymentStatus'   => 'pending',
                 'method'          => $request->payment_method,
                 'paymentDate'     => now(),
-                'amount'          => $basePrice,
+                'amount'          => $basePrice, // includes delivery + deposit
                 'discountedPrice' => $discountAmount,
                 'grandTotal'      => $finalPrice,
                 'receipt_path'    => $receiptPath 
@@ -412,6 +415,8 @@ class BookingController extends Controller
         $total_with_deposit = 0;
         $pricePerDay = 0;
 
+        $deliveryFee = 15; // fixed delivery fee for display
+
         $data = $request->isMethod('post') ? $request->all() : session()->getOldInput();
         $customer = Auth::guard('customer')->user();
 
@@ -443,21 +448,32 @@ class BookingController extends Controller
         $requestedDeposit = $data['deposit_amount'] ?? null;
 
         if (!is_null($requestedTotal) && $requestedTotal !== '') {
+            // The form may send a pre-calculated grand total (rental + deposit + delivery)
+            // Respect that value for display (avoid double-counting deposit)
             $full_amount = (float) $requestedTotal;
+
+            $deposit_amount = !is_null($requestedDeposit) && $requestedDeposit !== ''
+                ? (float) $requestedDeposit
+                : ($car->deposit ?? 200.00);
+
+            // If the total already includes deposit, total_with_deposit should be same as full_amount
+            $total_with_deposit = $full_amount;
         } else {
             if (!is_null($requestedPricePerDay) && $requestedPricePerDay !== '') {
                 $pricePerDay = (float) $requestedPricePerDay;
             } else {
                 $pricePerDay = $car->price; 
             }
-            $full_amount = $days * $pricePerDay;
+
+            // full_amount here is rental subtotal + delivery
+            $full_amount = ($days * $pricePerDay) + $deliveryFee;
+
+            $deposit_amount = !is_null($requestedDeposit) && $requestedDeposit !== ''
+                ? (float) $requestedDeposit
+                : ($car->deposit ?? 200.00);
+
+            $total_with_deposit = $full_amount + $deposit_amount;
         }
-
-        $deposit_amount = !is_null($requestedDeposit) && $requestedDeposit !== ''
-            ? (float) $requestedDeposit
-            : ($car->deposit ?? 200.00);
-
-        $total_with_deposit = $full_amount + $deposit_amount;
 
         return view('bookings.payment', [
             'booking_data' => $data,
