@@ -33,7 +33,7 @@ return new class extends Migration
             $table->foreign('plateNumber')->references('plateNumber')->on('fleet');
 
             $table->string('matricNum')->nullable();
-            $table->foreign('matricNum')->references('matricNum')->on('customer');
+            $table->foreign('matricNum')->references('matricNum')->on('customer')->onDelete('cascade');
             
             $table->string('rewardID')->nullable();
             $table->foreign('rewardID')->references('rewardID')->on('reward');
