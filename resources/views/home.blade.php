@@ -1,22 +1,3 @@
-@php
-    // Define location options here to keep the HTML clean
-    $colleges = [
-        'Kolej Perdana', 'Kolej 9', 'Kolej 10', 'Kolej Datin Seri Endon',
-        'Kolej Rahman Putra', 'Kolej Tun Fatimah', 'Kolej Tun Razak',
-        'Kolej Tun Hussein Onn', 'Kolej Tunku Canselor',
-        'Kolej Tun Dr Ismail', 'Kolej Dato Onn Jaafar'
-    ];
-
-    $faculties = [
-        'Fakulti Komputeran' => 'Fakulti Komputeran (FC)',
-        'Fakulti Kejuruteraan Elektrik' => 'Fakulti Kejuruteraan Elektrik (FKE)',
-        'Fakulti Pengurusan' => 'Fakulti Pengurusan (FM)'
-    ];
-    
-    // Return locations seem restricted in your original code, so we define them separately
-    $returnLocations = ['Student Mall', 'Kolej Perdana', 'Kolej 9', 'Kolej 10'];
-@endphp
-
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -74,6 +55,9 @@
             background-position: right 0.75rem center;
             background-size: 1rem;
         }
+        
+        /* Hide scrollbar for clean dropdowns */
+        [x-cloak] { display: none !important; }
     </style>
 </head>
 <body class="font-sans antialiased text-gray-900 bg-gray-50">
@@ -92,35 +76,118 @@
                 </h1>
 
                 <div class="bg-white/95 backdrop-blur-md p-3 rounded-[2.5rem] shadow-2xl animate-fade-up delay-100">
-                    <form action="{{ route('vehicles.index') }}" method="GET" id="searchForm" class="bg-white p-6 md:p-8 rounded-[2rem] grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    <form action="{{ route('vehicles.index') }}" method="GET" id="searchForm" class="bg-white p-6 md:p-8 rounded-[2rem] grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                         
-                        {{-- Pick-up Location --}}
-                        <div class="md:col-span-3 text-left">
-                            <label class="label-visible">Pick-up Location</label>
-                            <select name="pickup_location" required class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none">
-                                <option value="Student Mall">Student Mall</option>
-                                <optgroup label="Kolej">
-                                    @foreach($colleges as $kolej)
-                                        <option value="{{ $kolej }}">{{ $kolej }}</option>
-                                    @endforeach
-                                </optgroup>
-                                <optgroup label="Fakulti">
-                                    @foreach($faculties as $value => $label)
-                                        <option value="{{ $value }}">{{ $label }}</option>
-                                    @endforeach
-                                </optgroup>
-                            </select>
-                        </div>
+                        {{-- SHARED DATA FOR LOCATIONS --}}
+                        <div x-data="{
+                            colleges: [
+                                'Kolej Datin Seri Endon', 'Kolej Dato Onn Jaafar', 'Kolej Tuanku Canselor', 
+                                'Kolej Tun Dr Ismail', 'Kolej Tun Fatimah', 'Kolej Tun Hussein Onn', 
+                                'Kolej Tun Razak', 'Kolej 9', 'Kolej 10'
+                            ],
+                            faculties: [
+                                'FAKULTI ALAM BINA & UKUR',
+                                'FAKULTI KECERDASAN BUATAN',
+                                'FAKULTI KEJURUTERAAN AWAM',
+                                'FAKULTI KEJURUTERAAN ELEKTRIK',
+                                'FAKULTI KEJURUTERAAN KIMIA DAN KEJURUTERAAN TENAGA',
+                                'FAKULTI KEJURUTERAAN MEKANIKAL',
+                                'FAKULTI KOMPUTERAN',
+                                'FAKULTI PENGURUSAN',
+                                'FAKULTI SAINS',
+                                'FAKULTI SAINS PENDIDIKAN DAN TEKNOLOGI',
+                                'FAKULTI SAINS SOSIAL DAN KEMANUSIAAN'
+                            ]
+                        }" class="contents">
 
-                        {{-- Return Location --}}
-                        <div class="md:col-span-3 text-left">
-                            <label class="label-visible">Return Location</label>
-                            <select name="return_location" required class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none">
-                                @foreach($returnLocations as $location)
-                                    <option value="{{ $location }}">{{ $location }}</option>
-                                @endforeach
-                            </select>
+                            {{-- Pick-up Location --}}
+                            <div class="md:col-span-3 text-left" x-data="{ category: '', location: '', specifics: '' }">
+                                <label class="label-visible">Pick-up Location</label>
+                                
+                                {{-- Main Category Dropdown --}}
+                                <select x-model="category" @change="location = (category === 'Student Mall' ? 'Student Mall' : '')" class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none mb-2">
+                                    <option value="" disabled selected>Select Category</option>
+                                    <option value="Student Mall">Student Mall</option>
+                                    <option value="College">College</option>
+                                    <option value="Faculty">Faculty</option>
+                                </select>
+
+                                {{-- Dynamic Sub-Dropdown & Specific Input --}}
+                                <div x-show="category === 'College' || category === 'Faculty'" x-cloak x-transition.opacity>
+                                    
+                                    {{-- Sub Dropdown --}}
+                                    <select x-model="location" class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-600 outline-none mb-2">
+                                        <option value="" disabled selected>Select Specific Location</option>
+                                        
+                                        {{-- College Options --}}
+                                        <template x-if="category === 'College'">
+                                            <template x-for="college in colleges">
+                                                <option :value="college" x-text="college"></option>
+                                            </template>
+                                        </template>
+
+                                        {{-- Faculty Options --}}
+                                        <template x-if="category === 'Faculty'">
+                                            <template x-for="faculty in faculties">
+                                                <option :value="faculty" x-text="faculty"></option>
+                                            </template>
+                                        </template>
+                                    </select>
+
+                                    {{-- Specific Input Field --}}
+                                    <input type="text" x-model="specifics" placeholder="e.g. Block A / Lobby" 
+                                        class="search-input-text w-full pl-4 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-600 outline-none placeholder-gray-400 text-sm">
+                                </div>
+
+                                {{-- Hidden input to send the combined value --}}
+                                <input type="hidden" name="pickup_location" :value="location + (specifics ? ' - ' + specifics : '')">
+                            </div>
+
+                            {{-- Return Location --}}
+                            <div class="md:col-span-3 text-left" x-data="{ category: '', location: '', specifics: '' }">
+                                <label class="label-visible">Return Location</label>
+                                
+                                {{-- Main Category Dropdown --}}
+                                <select x-model="category" @change="location = (category === 'Student Mall' ? 'Student Mall' : '')" class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-red-600 outline-none mb-2">
+                                    <option value="" disabled selected>Select Category</option>
+                                    <option value="Student Mall">Student Mall</option>
+                                    <option value="College">College</option>
+                                    <option value="Faculty">Faculty</option>
+                                </select>
+
+                                {{-- Dynamic Sub-Dropdown & Specific Input --}}
+                                <div x-show="category === 'College' || category === 'Faculty'" x-cloak x-transition.opacity>
+                                    
+                                    {{-- Sub Dropdown --}}
+                                    <select x-model="location" class="search-input-text search-select-icon w-full pl-4 pr-10 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-600 outline-none mb-2">
+                                        <option value="" disabled selected>Select Specific Location</option>
+                                        
+                                        {{-- College Options --}}
+                                        <template x-if="category === 'College'">
+                                            <template x-for="college in colleges">
+                                                <option :value="college" x-text="college"></option>
+                                            </template>
+                                        </template>
+
+                                        {{-- Faculty Options --}}
+                                        <template x-if="category === 'Faculty'">
+                                            <template x-for="faculty in faculties">
+                                                <option :value="faculty" x-text="faculty"></option>
+                                            </template>
+                                        </template>
+                                    </select>
+
+                                    {{-- Specific Input Field --}}
+                                    <input type="text" x-model="specifics" placeholder="e.g. Block A / Lobby" 
+                                        class="search-input-text w-full pl-4 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-red-600 outline-none placeholder-gray-400 text-sm">
+                                </div>
+
+                                {{-- Hidden input to send the combined value --}}
+                                <input type="hidden" name="return_location" :value="location + (specifics ? ' - ' + specifics : '')">
+                            </div>
+
                         </div>
+                        {{-- END SHARED DATA --}}
 
                         {{-- Pick-up Date & Time --}}
                         <div class="md:col-span-2 text-left">
