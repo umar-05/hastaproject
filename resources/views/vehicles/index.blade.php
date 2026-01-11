@@ -31,22 +31,6 @@
     @endif
 
     <main class="max-w-7xl mx-auto px-6 py-10">
-
-        {{-- Hero Section --}}
-        <section class="relative rounded-3xl overflow-hidden mb-12 bg-gradient-to-r from-hasta-red to-red-800 text-white shadow-xl animate-fade-up">
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-yellow-400 opacity-20 rounded-full blur-3xl"></div>
-            
-            <div class="relative z-10 px-8 py-12 md:px-12 md:py-16">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-                    Find Your Perfect Drive
-                </h1>
-                <p class="text-red-100 text-lg md:text-2xl max-w-2xl font-light">
-                    Browse our premium fleet. From compact city cars to spacious SUVs, we have the keys to your next journey.
-                </p>
-            </div>
-        </section>
-
         {{-- Filter Bar --}}
         <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 animate-fade-up delay-100">
             <div class="flex flex-wrap gap-2">

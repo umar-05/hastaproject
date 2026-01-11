@@ -103,15 +103,36 @@
                         >{{ old('address', $user->address) }}</textarea>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{-- Logic to separate College Name and Block --}}
+                @php
+                    $fullCollegeAddress = old('collegeAddress', $user->collegeAddress);
+                    $parts = explode(', ', $fullCollegeAddress ?? '');
+                    $currentCollege = $parts[0] ?? '';
+                    $currentBlock = $parts[1] ?? '';
+                @endphp
+
+                {{-- Alpine Component to Merge Inputs --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" 
+                     x-data="{ 
+                        college: '{{ $currentCollege }}', 
+                        block: '{{ $currentBlock }}',
+                        updateCombined() {
+                            this.$refs.hiddenInput.value = this.college + (this.block ? ', ' + this.block : '');
+                        }
+                     }"
+                >
+                    {{-- The Actual Input sent to Server --}}
+                    <input type="hidden" name="collegeAddress" x-ref="hiddenInput" value="{{ $fullCollegeAddress }}">
+
                     <div>
-                        <label for="collegeAddress" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">College</label>
+                        <label for="collegeSelect" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">College</label>
                         <div class="relative">
-                            <select id="collegeAddress" name="collegeAddress" 
+                            {{-- Note: No 'name' attribute here, data handled by Alpine --}}
+                            <select id="collegeSelect" x-model="college" @change="updateCombined()"
                                 class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 text-base focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20 appearance-none cursor-pointer pr-10">
-                                <option value="" disabled {{ old('collegeAddress', $user->collegeAddress) ? '' : 'selected' }}>Select College</option>
+                                <option value="" disabled>Select College</option>
                                 @foreach(['KTDI', 'KTHO', 'K9', 'K10', 'KTR', 'KTC', 'KRP', 'KTF', 'KP', 'KDSE', 'KDOJ', 'Others'] as $college)
-                                    <option value="{{ $college }}" {{ old('collegeAddress', $user->collegeAddress) === $college ? 'selected' : '' }}>{{ $college }}</option>
+                                    <option value="{{ $college }}">{{ $college }}</option>
                                 @endforeach
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
@@ -121,10 +142,11 @@
                     </div>
 
                     <div>
-                        <label for="collegeBlock" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">College Block / Specifics</label>
-                        <x-text-input id="collegeBlock" name="collegeBlock" type="text" 
+                        <label for="collegeBlockInput" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">College Block / Specifics</label>
+                        {{-- Note: No 'name' attribute here, data handled by Alpine --}}
+                        <input id="collegeBlockInput" type="text" x-model="block" @input="updateCombined()"
                             class="block w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-gray-700 text-base focus:border-[#bb1419] focus:ring-2 focus:ring-[#bb1419]/20" 
-                            :value="old('collegeBlock', $user->collegeBlock ?? '')" placeholder="e.g. Block A, Room 101" />
+                            placeholder="e.g. MA1" />
                     </div>
                 </div>
 
