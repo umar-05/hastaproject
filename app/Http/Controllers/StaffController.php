@@ -58,9 +58,9 @@ class StaffController extends Controller
         // 4. College Trends (The 10 UTM Colleges)
         $totalCustomers = Customer::count();
         $utmColleges = [
-            'KOLEJ RAHMAN PUTRA', 'KOLEJ TUN FATIMAH', 'KOLEJ TUN RAZAK', 
-            'KOLEJ TUN HUSSEIN ONN', 'KOLEJ TUN DR ISMAIL', 'KOLEJ DATO SERI ENDON', 
-            'KOLEJ DATO ONN JAAFAR', 'KOLEJ TUNKU CANSELOR', 'KOLEJ 9', 'KOLEJ 10'
+            'KRP', 'KTF', 'KTR', 
+            'KTHO', 'KTDI', 'KDSE', 
+            'KDOJ', 'KTC', 'K9', 'K10', 'OTHER'
         ];
 
         $actualData = Customer::select('collegeAddress', DB::raw('count(*) as count'))

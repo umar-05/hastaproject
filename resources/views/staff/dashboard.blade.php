@@ -96,7 +96,7 @@
                         </div>
                     </div>
                     
-                    <div class="relative w-full" style="height: 500px;">
+                    <div class="relative w-full" style="height: 550px;">
                         <canvas id="collegeBarChart"></canvas>
                     </div>
                 </div>
@@ -110,26 +110,55 @@
             Chart.register(ChartDataLabels);
             const ctx = document.getElementById('collegeBarChart').getContext('2d');
             
+            // Updated college names based on abbreviations provided
+            const collegeLabels = [
+                'KRP', 
+                'KTF', 
+                'KTR', 
+                'KTHO', 
+                'KTDI', 
+                'KTC', 
+                'KP', 
+                'K9', 
+                'K10', 
+                'KDSE', 
+                'KDOJ', 
+                'OTHERS'
+            ];
+
             const collegeData = @json($collegeDistribution);
             
+            // Map the data to the labels
+            const dataValues = collegeLabels.map(label => collegeData[label] || 0);
+
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(collegeData),
+                    labels: collegeLabels,
                     datasets: [{
                         label: 'Customers',
-                        data: Object.values(collegeData), 
+                        data: dataValues, 
                         backgroundColor: [
-                            '#3b82f6', '#06b6d4', '#fbbf24', '#10b981', '#8b5cf6',
-                            '#f97316', '#0ea5e9', '#64748b', '#22c55e', '#f59e0b'
+                            '#e5e7eb', // KRP
+                            '#06b6d4', // KTF (Cyan)
+                            '#fbbf24', // KTR (Yellow)
+                            '#e5e7eb', // KTHO
+                            '#e5e7eb', // KTDI
+                            '#e5e7eb', // KTC
+                            '#e5e7eb', // KP
+                            '#e5e7eb', // K9
+                            '#e5e7eb', // K10
+                            '#e5e7eb', // KDSE
+                            '#e5e7eb', // KDOJ
+                            '#e5e7eb'  // OTHERS
                         ],
                         borderRadius: 8,
                         borderWidth: 0,
-                        barThickness: 25 // Adjusted for better horizontal spacing
+                        barThickness: 20 
                     }]
                 },
                 options: {
-                    indexAxis: 'y', // THIS MAKES IT HORIZONTAL
+                    indexAxis: 'y', 
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
@@ -152,7 +181,7 @@
                     scales: {
                         x: {
                             beginAtZero: true,
-                            max: 100, // Assuming percentage
+                            max: 100, 
                             grid: {
                                 color: '#f1f5f9',
                                 borderDash: [5, 5]
@@ -177,7 +206,7 @@
                     },
                     layout: {
                         padding: {
-                            right: 40 // Space for the percentage labels
+                            right: 40 
                         }
                     }
                 }
