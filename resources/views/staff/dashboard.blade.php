@@ -16,12 +16,10 @@
                             </div>
                             <div>
                                 <span class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.15em]">Action Required</span>
-                                {{-- Changed from font-black to font-bold --}}
                                 <h3 class="text-gray-900 font-bold text-lg uppercase leading-tight">Pickup today</h3>
                             </div>
                         </div>
                         <div class="text-right">
-                            {{-- Kept count prominent but changed to font-bold --}}
                             <span class="text-4xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{ $pickupsToday }}</span>
                         </div>
                     </div>
@@ -35,7 +33,6 @@
                             </div>
                             <div>
                                 <span class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.15em]">Active Status</span>
-                                {{-- Changed from font-black to font-bold --}}
                                 <h3 class="text-gray-900 font-bold text-lg uppercase leading-tight">Return today</h3>
                             </div>
                         </div>
@@ -49,7 +46,6 @@
             {{-- RECENT BOOKINGS SECTION --}}
             <div class="mb-6">
                 <div class="flex justify-between items-center mb-6">
-                    {{-- Changed from font-black to font-bold --}}
                     <h3 class="font-bold text-2xl text-gray-800 uppercase tracking-tight">RECENT BOOKINGS</h3>
                     <a href="{{ route('staff.bookingmanagement') }}" class="inline-flex items-center px-5 py-2 bg-red-50 text-red-600 font-bold text-[10px] uppercase tracking-widest rounded-full hover:bg-red-600 hover:text-white shadow-sm transition-all duration-200">
                         View All
@@ -86,11 +82,10 @@
                 </div>
             </div>
 
-            {{-- PIE CHART SECTION --}}
+            {{-- HORIZONTAL BAR CHART SECTION --}}
             <div class="mb-6">
-                <div class="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
                     <div class="flex justify-between items-center mb-8">
-                        {{-- Changed from font-black to font-bold --}}
                         <h3 class="font-bold text-2xl text-gray-800 uppercase tracking-tight">Customer Distribution by College</h3>
                         <div class="flex items-center space-x-2">
                              <span class="relative flex h-3 w-3">
@@ -101,8 +96,8 @@
                         </div>
                     </div>
                     
-                    <div class="relative w-full flex justify-center" style="height: 500px;">
-                        <canvas id="collegePieChart"></canvas>
+                    <div class="relative w-full" style="height: 500px;">
+                        <canvas id="collegeBarChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -113,43 +108,76 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             Chart.register(ChartDataLabels);
-            const ctx = document.getElementById('collegePieChart').getContext('2d');
+            const ctx = document.getElementById('collegeBarChart').getContext('2d');
+            
             const collegeData = @json($collegeDistribution);
             
             new Chart(ctx, {
-                type: 'pie',
+                type: 'bar',
                 data: {
                     labels: Object.keys(collegeData),
                     datasets: [{
-                        data: Object.values(collegeData),
+                        label: 'Customers',
+                        data: Object.values(collegeData), 
                         backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                            '#FF9F40', '#00D1FF', '#4D5360', '#2ecc71', '#e67e22'
+                            '#3b82f6', '#06b6d4', '#fbbf24', '#10b981', '#8b5cf6',
+                            '#f97316', '#0ea5e9', '#64748b', '#22c55e', '#f59e0b'
                         ],
-                        hoverOffset: 30,
-                        borderWidth: 4,
-                        borderColor: '#ffffff'
+                        borderRadius: 8,
+                        borderWidth: 0,
+                        barThickness: 25 // Adjusted for better horizontal spacing
                     }]
                 },
                 options: {
+                    indexAxis: 'y', // THIS MAKES IT HORIZONTAL
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'right',
-                            labels: {
-                                padding: 30,
-                                usePointStyle: true,
-                                font: { weight: 'bold', size: 12, family: 'Inter' }
-                            }
+                            display: false
                         },
                         datalabels: {
-                            color: '#fff',
-                            formatter: (value) => value > 3 ? value + '%' : '',
-                            {{-- Changed datalabels font to font-bold (700) instead of 900 --}}
-                            font: { weight: '700', size: 14 },
-                            textShadowColor: 'rgba(0,0,0,0.3)',
-                            textShadowBlur: 4
+                            anchor: 'end',
+                            align: 'right',
+                            color: '#1f2937',
+                            formatter: (value) => value + '%',
+                            font: { 
+                                weight: '700', 
+                                size: 11,
+                                family: 'Inter' 
+                            },
+                            offset: 8
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100, // Assuming percentage
+                            grid: {
+                                color: '#f1f5f9',
+                                borderDash: [5, 5]
+                            },
+                            ticks: {
+                                font: { family: 'Inter', size: 11 },
+                                callback: function(value) { return value + '%'; }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { 
+                                    family: 'Inter', 
+                                    weight: '600', 
+                                    size: 11 
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            right: 40 // Space for the percentage labels
                         }
                     }
                 }
