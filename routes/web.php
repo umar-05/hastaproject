@@ -89,6 +89,10 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/dashboard', [StaffController::class, 'index'])->name('dashboard');
     Route::get('/booking-management', [StaffController::class, 'bookingManagement'])->name('bookingmanagement');
     Route::get('/booking-details/{bookingID}', [StaffController::class, 'showBooking'])->name('bookings.show');
+    Route::get('/staff/bookingmanagement', [StaffController::class, 'bookingManagement'])
+        ->name('staff.bookingmanagement');
+    Route::put('/staff/bookingmanagement/{id}', [StaffController::class, 'updateBooking'])
+        ->name('staff.bookingmanagement.update');
     
     Route::resource('mission', MissionController::class);
     Route::get('/fleet/check', [StaffController::class, 'checkAvailability'])->name('fleet.check');
@@ -175,7 +179,6 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/reports/customer-search/{matric}', [StaffController::class, 'searchCustomer'])->name('customer.search');
     Route::post('/staff/blacklist/store', [StaffController::class, 'storeBlacklist'])->name('staff.blacklist.store');
 
-
     // --- Customer Management ---
     Route::get('/dashboard/customermanagement', [CustomerController::class, 'index'])->name('customermanagement');
     Route::resource('customermanagement-crud', CustomerController::class)
@@ -184,8 +187,6 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     // --- Staff Profile Management ---
     Route::get('/profile', [StaffController::class, 'editProfile'])->name('profile.edit');
     Route::patch('/profile', [StaffController::class, 'updateProfile'])->name('profile.update');
-
-    Route::get('/api/get-owner', [App\Http\Controllers\Staff\FleetController::class, 'getOwnerByIc'])->name('api.owner');
 
     // --- Staff User Management ---
     Route::get('/add', [StaffController::class, 'create'])->name('add-staff');
@@ -202,6 +203,7 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::post('/mission/store', [StaffController::class, 'missionStore'])->name('missions.store');
     Route::post('/mission/{id}/accept', [StaffController::class, 'missionAccept'])->name('missions.accept');
     Route::post('/mission/{id}/complete', [StaffController::class, 'missionComplete'])->name('missions.complete');
+    
 
 }); 
 
