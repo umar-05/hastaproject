@@ -1,4 +1,7 @@
 <x-staff-layout>
+    {{-- Add SheetJS Library --}}
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
     <div class="py-8 bg-gray-50 min-h-screen font-sans">
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -37,7 +40,7 @@
                 </form>
 
                 <div class="flex items-center gap-3">
-                    <button class="inline-flex items-center px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm">
+                    <button onclick="exportBookingsToExcel()" class="inline-flex items-center px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm">
                         <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
@@ -251,6 +254,143 @@
 
         function closeBookingModal() {
             document.getElementById('bookingModal').classList.add('hidden');
+        }
+
+        // Excel Export Function
+        function exportBookingsToExcel() {
+            // Get statistics
+            const totalBookings = {{ $totalBookings ?? 0 }};
+            const approvedCount = {{ $approvedCount ?? 0 }};
+            const pendingCount = {{ $pendingCount ?? 0 }};
+            const completedCount = {{ $completedCount ?? 0 }};
+            const cancelledCount = {{ $cancelledCount ?? 0 }};
+            
+            // Get bookings data
+            const bookingsData = @json($bookings->items());
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Sheet 1: Summary
+            const summaryData = [
+                ['Bookings Management Report'],
+                ['Generated on:', new Date().toLocaleString('en-MY', { timeZone: 'Asia/Kuala_Lumpur' })],
+                ['Search Filter:', '{{ request("search") ?? "All" }}'],
+                ['Status Filter:', '{{ request("status") ? ucfirst(request("status")) : "All Status" }}'],
+                [],
+                ['Metric', 'Count'],
+                ['Total Bookings', totalBookings],
+                ['Confirmed', approvedCount],
+                ['Pending', pendingCount],
+                ['Completed', completedCount],
+                ['Cancelled', cancelledCount]
+            ];
+            
+            const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+            ws1['!cols'] = [
+                { wch: 20 },
+                { wch: 25 }
+            ];
+            XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
+            
+            // Sheet 2: All Bookings
+            const bookingsTableData = [
+                ['Booking ID', 'Customer', 'Matric Number', 'Car Model', 'Plate Number', 'Pickup Date', 'Pickup Time', 'Return Date', 'Return Time', 'Amount (RM)', 'Status']
+            ];
+            
+            bookingsData.forEach(booking => {
+                const pickupDate = new Date(booking.pickupDate);
+                const returnDate = new Date(booking.returnDate);
+                
+                bookingsTableData.push([
+                    booking.bookingID || '',
+                    booking.customer?.name || booking.matricNum || '',
+                    booking.matricNum || '',
+                    booking.fleet?.modelName || 'N/A',
+                    booking.fleet?.plateNumber || booking.plateNumber || '',
+                    pickupDate.toLocaleDateString('en-MY'),
+                    pickupDate.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit' }),
+                    returnDate.toLocaleDateString('en-MY'),
+                    returnDate.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit' }),
+                    parseFloat(booking.totalPrice).toFixed(2),
+                    (booking.bookingStat || '').charAt(0).toUpperCase() + (booking.bookingStat || '').slice(1).toLowerCase()
+                ]);
+            });
+            
+            const ws2 = XLSX.utils.aoa_to_sheet(bookingsTableData);
+            ws2['!cols'] = [
+                { wch: 12 },  // Booking ID
+                { wch: 20 },  // Customer
+                { wch: 15 },  // Matric
+                { wch: 18 },  // Car Model
+                { wch: 12 },  // Plate Number
+                { wch: 12 },  // Pickup Date
+                { wch: 10 },  // Pickup Time
+                { wch: 12 },  // Return Date
+                { wch: 10 },  // Return Time
+                { wch: 12 },  // Amount
+                { wch: 12 }   // Status
+            ];
+            XLSX.utils.book_append_sheet(wb, ws2, 'All Bookings');
+            
+            // Sheet 3: By Status
+            const statusGroups = {
+                'Approved': [],
+                'Pending': [],
+                'Completed': [],
+                'Cancelled': []
+            };
+            
+            bookingsData.forEach(booking => {
+                const status = (booking.bookingStat || '').charAt(0).toUpperCase() + (booking.bookingStat || '').slice(1).toLowerCase();
+                if (status === 'Confirmed') {
+                    statusGroups['Approved'].push(booking);
+                } else if (statusGroups[status]) {
+                    statusGroups[status].push(booking);
+                }
+            });
+            
+            Object.entries(statusGroups).forEach(([status, bookings]) => {
+                if (bookings.length > 0) {
+                    const statusData = [
+                        [`${status} Bookings`],
+                        [],
+                        ['Booking ID', 'Customer', 'Car Model', 'Pickup Date', 'Return Date', 'Amount (RM)']
+                    ];
+                    
+                    bookings.forEach(booking => {
+                        statusData.push([
+                            booking.bookingID || '',
+                            booking.customer?.name || booking.matricNum || '',
+                            booking.fleet?.modelName || 'N/A',
+                            new Date(booking.pickupDate).toLocaleDateString('en-MY'),
+                            new Date(booking.returnDate).toLocaleDateString('en-MY'),
+                            parseFloat(booking.totalPrice).toFixed(2)
+                        ]);
+                    });
+                    
+                    const ws = XLSX.utils.aoa_to_sheet(statusData);
+                    ws['!cols'] = [
+                        { wch: 12 },
+                        { wch: 20 },
+                        { wch: 18 },
+                        { wch: 12 },
+                        { wch: 12 },
+                        { wch: 12 }
+                    ];
+                    XLSX.utils.book_append_sheet(wb, ws, status);
+                }
+            });
+            
+            // Generate filename with current date
+            const today = new Date();
+            const filename = `Bookings_Management_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.xlsx`;
+            
+            // Save file
+            XLSX.writeFile(wb, filename);
+            
+            // Show success message
+            alert('Excel file downloaded successfully!');
         }
     </script>
 </x-staff-layout>
