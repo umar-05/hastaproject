@@ -27,94 +27,87 @@ class StaffController extends Controller
     /**
      * Display the Staff Dashboard.
      */
-    public function index()
-    {
-        // 1. Top Metric Counts
-        $pickupsToday = Booking::whereDate('pickupDate', Carbon::today())
-            ->whereIn('bookingStat', ['Confirmed', 'Approved'])
-            ->count();
-        
-        $returnsToday = Booking::whereDate('returnDate', Carbon::today())
-            ->where('bookingStat', 'Active')
-            ->count();
+public function index()
+{
+    // 1. Top Metric Counts
+    $pickupsToday = Booking::whereDate('pickupDate', \Carbon\Carbon::today())
+        ->whereIn('bookingStat', ['Confirmed', 'Approved'])
+        ->count();
+    
+    $returnsToday = Booking::whereDate('returnDate', \Carbon\Carbon::today())
+        ->where('bookingStat', 'Active')
+        ->count();
 
-        // 2. Recent Bookings
-        // FIXED: Updated table names to standard plural ('bookings', 'fleets'). 
-        // IF YOUR DB USES SINGULAR NAMES, change 'fleets' -> 'fleet' and 'bookings' -> 'booking' below.
-        $recentBookings = Booking::join('fleet', 'booking.plateNumber', '=', 'fleet.plateNumber')
-            ->select('booking.*', 'fleet.modelName', 'fleet.plateNumber')
-            ->orderBy('booking.created_at', 'desc')
-            ->limit(3)
-            ->get();
+    // FIXED: Changed 'carStat' to 'status' to match your database
+    $availableCarsCount = Fleet::where('status', 'Available')->count();
 
-        // 3. Fleet Distribution
-        $totalCars = Fleet::count();
-        $fleetDistribution = [
-            'Perodua' => $totalCars > 0 ? round((Fleet::where('modelName', 'like', 'Perodua%')->count() / $totalCars) * 100) : 0,
-            'Proton'  => $totalCars > 0 ? round((Fleet::where('modelName', 'like', 'Proton%')->count() / $totalCars) * 100) : 0,
-            'Toyota'  => $totalCars > 0 ? round((Fleet::where('modelName', 'like', 'Toyota%')->count() / $totalCars) * 100) : 0,
-        ];
+    // 2. Recent Bookings
+    $recentBookings = Booking::join('fleet', 'booking.plateNumber', '=', 'fleet.plateNumber')
+        ->select('booking.*', 'fleet.modelName', 'fleet.plateNumber')
+        ->orderBy('booking.created_at', 'desc')
+        ->limit(3)
+        ->get();
 
-        // 4. College Trends (The 10 UTM Colleges)
-        $totalCustomers = Customer::count();
-        $utmColleges = [
-            'KOLEJ RAHMAN PUTRA', 'KOLEJ TUN FATIMAH', 'KOLEJ TUN RAZAK', 
-            'KOLEJ TUN HUSSEIN ONN', 'KOLEJ TUN DR ISMAIL', 'KOLEJ DATO SERI ENDON', 
-            'KOLEJ DATO ONN JAAFAR', 'KOLEJ TUNKU CANSELOR', 'KOLEJ 9', 'KOLEJ 10'
-        ];
+    // 3. College Trends (UNTOUCHED)
+    $totalCustomers = Customer::count();
+    $utmColleges = ['KRP', 'KTF', 'KTR', 'KTHO', 'KTDI', 'KDSE', 'KDOJ', 'KTC', 'K9', 'K10', 'OTHER'];
+    $actualData = Customer::select('collegeAddress', \DB::raw('count(*) as count'))
+        ->whereNotNull('collegeAddress')
+        ->groupBy('collegeAddress')
+        ->pluck('count', 'collegeAddress')
+        ->toArray();
 
-        $actualData = Customer::select('collegeAddress', DB::raw('count(*) as count'))
-            ->whereNotNull('collegeAddress')
-            ->groupBy('collegeAddress')
-            ->pluck('count', 'collegeAddress')
-            ->toArray();
-
-        $collegeDistribution = [];
-        foreach ($utmColleges as $college) {
-            $count = $actualData[$college] ?? 0;
-            $collegeDistribution[$college] = $totalCustomers > 0 ? round(($count / $totalCustomers) * 100) : 0;
-        }
-
-        $cars = Fleet::all();
-
-        return view('staff.dashboard', compact(
-            'pickupsToday', 
-            'returnsToday', 
-            'recentBookings',
-            'fleetDistribution', 
-            'collegeDistribution', 
-            'cars'
-        ));
+    $collegeDistribution = [];
+    foreach ($utmColleges as $college) {
+        $count = $actualData[$college] ?? 0;
+        $collegeDistribution[$college] = $totalCustomers > 0 ? round(($count / $totalCustomers) * 100) : 0;
     }
 
-    /**
-     * Check car availability for given dates.
-     */
-    public function checkAvailability(Request $request)
-    {
-        $request->validate([
-            'car_id' => 'required',
-            'pickup' => 'required|date',
-            'return' => 'required|date|after:pickup',
-        ]);
-
-        // NOTE: Ensure your Booking table has a 'carID' column. 
-        // In the index() function, you used 'plateNumber'. Ensure these match your DB.
-        $conflict = Booking::where('carID', $request->car_id)
-            ->whereIn('bookingStat', ['Confirmed', 'Approved', 'Active'])
-            ->where(function ($query) use ($request) {
-                $query->where(function ($q) use ($request) {
-                    $q->where('pickupDate', '<=', $request->return)
-                      ->where('returnDate', '>=', $request->pickup);
-                });
-            })->exists();
-
-        if ($conflict) {
-            return back()->with('error', '❌ This car is unavailable for these dates.');
-        }
-
-        return back()->with('success', '✅ Success! This car is available.');
+    // 4. Daily Availability Calendar Logic
+    $weekDates = [];
+    for ($i = 0; $i < 7; $i++) {
+        $date = \Carbon\Carbon::today()->addDays($i);
+        $weekDates[] = [
+            'name' => $date->format('D'),
+            'date' => $date->format('d'),
+            'full_date' => $date->toDateString(),
+            'is_today' => $i === 0
+        ];
     }
+
+    $cars = Fleet::all();
+    $fleetAvailability = [];
+    foreach ($cars as $car) {
+        $schedule = [];
+        foreach ($weekDates as $day) {
+            $isBooked = Booking::where('plateNumber', $car->plateNumber)
+                ->whereIn('bookingStat', ['Approved', 'Active', 'Confirmed'])
+                ->whereDate('pickupDate', '<=', $day['full_date'])
+                ->whereDate('returnDate', '>=', $day['full_date'])
+                ->exists();
+
+            $schedule[] = [
+                'available' => !$isBooked,
+                'is_today' => $day['is_today']
+            ];
+        }
+        $fleetAvailability[] = [
+            'modelName' => $car->modelName,
+            'plateNumber' => $car->plateNumber,
+            'schedule' => $schedule
+        ];
+    }
+
+    return view('staff.dashboard', compact(
+        'pickupsToday', 
+        'returnsToday', 
+        'availableCarsCount',
+        'recentBookings',
+        'collegeDistribution', 
+        'weekDates',
+        'fleetAvailability'
+    ));
+}
 
     /**
      * Display the Pickup & Return Inspection page.

@@ -1,155 +1,178 @@
 <x-staff-layout>
-    {{-- Include Chart.js and the Datalabels Plugin --}}
+    {{-- Chart Scripts --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
-    <div class="py-4 bg-[#f8f9fc] min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    {{-- Main Container: Set to 100% viewport height minus navbar (64px) --}}
+    <div class="h-[calc(100vh-64px)] bg-[#f8f9fc] p-4 flex flex-col overflow-hidden font-sans">
+        
+        {{-- TOP ROW: METRIC CARDS --}}
+        <div class="grid grid-cols-3 gap-4 mb-4">
+            {{-- Pickup Today --}}
+            <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 rounded-xl bg-blue-50 text-blue-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    </div>
+                    <h3 class="text-gray-800 font-bold text-xs uppercase tracking-tight">Pickup today</h3>
+                </div>
+                <span class="text-2xl font-bold text-gray-900">{{ $pickupsToday }}</span>
+            </div>
+
+            {{-- Return Today --}}
+            <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 rounded-xl bg-green-50 text-green-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    </div>
+                    <h3 class="text-gray-800 font-bold text-xs uppercase tracking-tight">Return today</h3>
+                </div>
+                <span class="text-2xl font-bold text-gray-900">{{ $returnsToday }}</span>
+            </div>
+
+            {{-- Available Cars --}}
+            <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 rounded-xl bg-purple-50 text-purple-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <h3 class="text-gray-800 font-bold text-xs uppercase tracking-tight">Available</h3>
+                </div>
+                <span class="text-2xl font-bold text-gray-900">{{ $availableCarsCount }}</span>
+            </div>
+        </div>
+
+        {{-- MAIN CONTENT AREA (Flex Grow) --}}
+        <div class="flex-1 flex gap-4 min-h-0">
             
-            {{-- INTERACTIVE METRIC BUTTONS --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <a href="{{ route('staff.pickup-return') }}" class="group block bg-white p-6 rounded-3xl border-2 border-transparent shadow-sm hover:shadow-xl hover:border-blue-500 hover:-translate-y-1 transition-all duration-300">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="p-3 rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300 mr-4">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            </div>
-                            <div>
-                                <span class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.15em]">Action Required</span>
-                                {{-- Changed from font-black to font-bold --}}
-                                <h3 class="text-gray-900 font-bold text-lg uppercase leading-tight">Pickup today</h3>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            {{-- Kept count prominent but changed to font-bold --}}
-                            <span class="text-4xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{{ $pickupsToday }}</span>
-                        </div>
+            {{-- LEFT COLUMN: DAILY CAR AVAILABILITY TABLE --}}
+            <div class="w-2/3 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col min-h-0">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-sm text-gray-800 uppercase tracking-wide">Daily Car Availability</h3>
+                    <div class="flex items-center space-x-4 text-[10px] text-gray-400">
+                        <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-green-500 mr-1"></span> Available</span>
+                        <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-red-400 mr-1"></span> Booked</span>
                     </div>
-                </a>
-
-                <a href="{{ route('staff.pickup-return') }}" class="group block bg-white p-6 rounded-3xl border-2 border-transparent shadow-sm hover:shadow-xl hover:border-green-500 hover:-translate-y-1 transition-all duration-300">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="p-3 rounded-2xl bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors duration-300 mr-4">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                            </div>
-                            <div>
-                                <span class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.15em]">Active Status</span>
-                                {{-- Changed from font-black to font-bold --}}
-                                <h3 class="text-gray-900 font-bold text-lg uppercase leading-tight">Return today</h3>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-4xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">{{ $returnsToday }}</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            {{-- RECENT BOOKINGS SECTION --}}
-            <div class="mb-6">
-                <div class="flex justify-between items-center mb-6">
-                    {{-- Changed from font-black to font-bold --}}
-                    <h3 class="font-bold text-2xl text-gray-800 uppercase tracking-tight">RECENT BOOKINGS</h3>
-                    <a href="{{ route('staff.bookingmanagement') }}" class="inline-flex items-center px-5 py-2 bg-red-50 text-red-600 font-bold text-[10px] uppercase tracking-widest rounded-full hover:bg-red-600 hover:text-white shadow-sm transition-all duration-200">
-                        View All
-                        <svg class="ml-2 w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </a>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    @forelse($recentBookings as $index => $booking)
-                        @if($index == 0)
-                            <div class="lg:col-span-2 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-3xl p-8 relative overflow-hidden text-white shadow-lg">
-                                <div class="relative z-10">
-                                    <h4 class="text-2xl font-bold mb-1 uppercase">{{ $booking->modelName }}</h4>
-                                    <p class="text-blue-50 font-medium mb-4 tracking-wider uppercase">{{ $booking->plateNumber }}</p>
-                                    <div class="text-4xl font-bold mb-6">MYR {{ number_format($booking->totalPrice, 2) }}</div>
-                                    <span class="bg-white/20 px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest">{{ $booking->paymentStat ?? 'Paid' }}</span>
-                                </div>
-                            </div>
-                        @else
-                            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4">
-                                <div class="w-14 h-14 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
-                                    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" /><path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H11.05a2.5 2.5 0 014.9 0H17a1 1 0 001-1V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0011.586 3H4a1 1 0 00-1 1zm1 1h6.586L15 9.414V14H4V5z" /></svg>
-                                </div>
-                                <div>
-                                    <h5 class="font-bold text-gray-800 text-sm leading-tight uppercase">{{ $booking->modelName }}</h5>
-                                    <p class="text-gray-400 text-[10px] font-bold mb-1 uppercase">{{ $booking->plateNumber }}</p>
-                                    <span class="text-[9px] font-bold text-green-500 bg-green-50 px-2 py-0.5 rounded uppercase">PAID</span>
-                                </div>
-                            </div>
-                        @endif
-                    @empty
-                        <div class="lg:col-span-3 text-center py-10 bg-white rounded-3xl text-gray-400 border-2 border-dashed border-gray-100 italic font-medium">No recent bookings found.</div>
-                    @endforelse
+                {{-- Scrollable Table Area --}}
+                <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                    <table class="w-full text-left">
+                        <thead class="sticky top-0 bg-white z-10">
+                            <tr class="text-gray-400 text-[10px] uppercase">
+                                <th class="pb-3 font-semibold">Vehicle</th>
+                                @foreach($weekDates as $day)
+                                    <th class="pb-3 text-center">
+                                        <span class="block {{ $day['is_today'] ? 'text-red-500' : 'text-gray-500' }} font-bold text-[10px]">{{ $day['name'] }}</span>
+                                        <span class="block text-gray-800 text-xs">{{ $day['date'] }}</span>
+                                    </th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            @foreach($fleetAvailability as $car)
+                            <tr>
+                                <td class="py-3">
+                                    <h4 class="font-bold text-gray-800 text-[11px]">{{ $car['modelName'] }}</h4>
+                                    <p class="text-[9px] text-gray-400 font-medium">{{ $car['plateNumber'] }}</p>
+                                </td>
+                                @foreach($car['schedule'] as $status)
+                                <td class="py-3 text-center">
+                                    <div class="inline-flex items-center justify-center w-7 h-7 rounded-lg {{ $status['is_today'] ? 'ring-1 ring-red-400' : '' }} {{ $status['available'] ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-400' }}">
+                                        @if($status['available'])
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
+                                        @else
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                                        @endif
+                                    </div>
+                                </td>
+                                @endforeach
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            {{-- PIE CHART SECTION --}}
-            <div class="mb-6">
-                <div class="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-8">
-                        {{-- Changed from font-black to font-bold --}}
-                        <h3 class="font-bold text-2xl text-gray-800 uppercase tracking-tight">Customer Distribution by College</h3>
-                        <div class="flex items-center space-x-2">
-                             <span class="relative flex h-3 w-3">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                             </span>
-                             <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Live Data</span>
-                        </div>
+            {{-- RIGHT COLUMN: SIDEBAR --}}
+            <div class="w-1/3 flex flex-col gap-4 min-h-0">
+                
+                {{-- RECENT BOOKINGS BOX --}}
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-xs text-gray-800 uppercase tracking-wide">Recent Bookings</h3>
+                        {{-- UPDATED BUTTON: Points exactly to /staff/bookingmanagement --}}
+                        <a href="{{ route('staff.bookingmanagement') }}" class="text-[10px] font-bold text-red-500 hover:text-red-600 transition-colors uppercase">View All &rarr;</a>
                     </div>
-                    
-                    <div class="relative w-full flex justify-center" style="height: 500px;">
-                        <canvas id="collegePieChart"></canvas>
+                    <div class="space-y-2">
+                        @forelse($recentBookings as $booking)
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-50">
+                            <div>
+                                <p class="text-[11px] font-bold text-gray-800 leading-tight">{{ $booking->modelName }}</p>
+                                <p class="text-[9px] text-gray-400 uppercase tracking-tight">{{ $booking->plateNumber }}</p>
+                            </div>
+                            <span class="text-[10px] font-bold text-gray-900">MYR {{ number_format($booking->totalPrice, 0) }}</span>
+                        </div>
+                        @empty
+                        <p class="text-[10px] text-gray-400 italic text-center py-2">No recent bookings</p>
+                        @endforelse
                     </div>
                 </div>
+
+                {{-- COLLEGE DISTRIBUTION BOX (Vertical stretch) --}}
+                <div class="flex-1 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col min-h-0">
+                    <h3 class="font-bold text-xs text-gray-800 mb-4 uppercase tracking-wide">College Distribution</h3>
+                    <div class="flex-1 min-h-0 relative">
+                        <canvas id="collegeBarChart"></canvas>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
-    {{-- CHART SCRIPT --}}
+    {{-- Styling for scollbar --}}
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+    </style>
+
+    {{-- Chart JS Logic --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             Chart.register(ChartDataLabels);
-            const ctx = document.getElementById('collegePieChart').getContext('2d');
-            const collegeData = @json($collegeDistribution);
+            const ctx = document.getElementById('collegeBarChart').getContext('2d');
             
             new Chart(ctx, {
-                type: 'pie',
+                type: 'bar',
                 data: {
-                    labels: Object.keys(collegeData),
+                    labels: @json(array_keys($collegeDistribution)),
                     datasets: [{
-                        data: Object.values(collegeData),
-                        backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                            '#FF9F40', '#00D1FF', '#4D5360', '#2ecc71', '#e67e22'
-                        ],
-                        hoverOffset: 30,
-                        borderWidth: 4,
-                        borderColor: '#ffffff'
+                        data: @json(array_values($collegeDistribution)),
+                        backgroundColor: '#06b6d4',
+                        borderRadius: 3,
+                        barThickness: 'flex',
+                        maxBarThickness: 14
                     }]
                 },
                 options: {
+                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                padding: 30,
-                                usePointStyle: true,
-                                font: { weight: 'bold', size: 12, family: 'Inter' }
-                            }
-                        },
+                        legend: { display: false },
                         datalabels: {
-                            color: '#fff',
-                            formatter: (value) => value > 3 ? value + '%' : '',
-                            {{-- Changed datalabels font to font-bold (700) instead of 900 --}}
-                            font: { weight: '700', size: 14 },
-                            textShadowColor: 'rgba(0,0,0,0.3)',
-                            textShadowBlur: 4
+                            anchor: 'end', align: 'right', color: '#9ca3af',
+                            font: { size: 9, weight: '600' },
+                            formatter: (v) => v > 0 ? v + '%' : '0%'
+                        }
+                    },
+                    scales: {
+                        x: { display: false, max: 100 },
+                        y: { 
+                            grid: { display: false }, 
+                            ticks: { font: { size: 9, weight: '600' }, color: '#4b5563' } 
                         }
                     }
                 }

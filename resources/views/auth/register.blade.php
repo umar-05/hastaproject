@@ -110,6 +110,12 @@
         .error-message { color: #dc2626; font-size: 11px; margin-top: 4px; font-weight: 500; }
         .hidden { display: none; }
 
+        .required-star {
+         color: #dc2626; /* red */
+         font-weight: 700;
+        }
+
+
         /* --- BUTTONS --- */
         .submit-btn {
             width: 100%; padding: 16px; margin-top: 10px;
@@ -166,37 +172,37 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="name">Full Name</label>
+                    <label for="name">Full Name <span class="required-star">*</span></label>
                     <input type="text" id="name" name="name" class="form-input" placeholder="Enter full name" value="{{ old('name') }}" required autofocus>
                     @error('name') <div class="error-message">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="matricNum" id="idLabel">Matric Number</label>
+                    <label for="matricNum" id="idLabel">Matric Number <span class="required-star">*</span></label>
                     <input type="text" id="matricNum" name="matricNum" class="form-input" placeholder="AXXCSXXXX" value="{{ old('matricNum') }}" required>
                     @error('matricNum') <div class="error-message">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="form-group" id="facultyGroup">
-                    <label for="faculty">Faculty</label>
+                    <label for="faculty">Faculty <span class="required-star">*</span></label>
                     <input type="text" id="faculty" name="faculty" class="form-input" placeholder="Computing" value="{{ old('faculty') }}">
                     @error('faculty') <div class="error-message">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email Address</label>
+                    <label for="email">Email Address <span class="required-star">*</span></label>
                     <input type="email" id="email" name="email" class="form-input" placeholder="student@graduate.utm.my" value="{{ old('email') }}" required>
                     @error('email') <div class="error-message">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password">Password <span class="required-star">*</span></label>
                     <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required autocomplete="new-password">
                     @error('password') <div class="error-message">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="password_confirmation">Confirm Password</label>
+                    <label for="password_confirmation">Confirm Password <span class="required-star">*</span></label>
                     <input type="password" id="password_confirmation" name="password_confirmation" class="form-input" placeholder="••••••••" required>
                 </div>
 
