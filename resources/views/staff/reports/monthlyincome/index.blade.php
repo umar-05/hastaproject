@@ -1,15 +1,23 @@
 @extends('layouts.staff') 
 
 @section('content')
-{{-- 1. Load Chart.js Library --}}
+{{-- Load Chart.js and SheetJS Libraries --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
 <div class="p-6 bg-gray-50 min-h-screen">
     
-    {{-- Page Title --}}
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Monthly Income</h1>
-        <p class="text-sm text-gray-500">Track monthly revenue and performance for the year {{ date('Y') }}</p>
+    {{-- Page Title with Excel Button --}}
+    <div class="mb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Monthly Income</h1>
+            <p class="text-sm text-gray-500">Track monthly revenue and performance for the year {{ date('Y') }}</p>
+        </div>
+        {{-- Excel Export Button --}}
+        <button onclick="exportToExcel()" class="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg shadow transition">
+            <span class="text-xl">📊</span>
+            <span>Excel</span>
+        </button>
     </div>
 
     {{-- Top Summary Cards --}}
@@ -217,6 +225,107 @@
         });
 
     });
+
+    // Excel Export Function
+    function exportToExcel() {
+        // Get data from PHP variables
+        const currentMonth = {{ $cards['current_month'] }};
+        const previousMonth = {{ $cards['previous_month'] }};
+        const averageMonthly = {{ $cards['average_monthly'] }};
+        const yearlyTotal = {{ $cards['yearly_total'] }};
+        const breakdown = @json($breakdown);
+        const paymentMethods = @json($paymentMethods);
+        const currentYear = '{{ date("Y") }}';
+        
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+        
+        // Sheet 1: Summary
+        const summaryData = [
+            ['Monthly Income Report'],
+            ['Year: ' + currentYear],
+            ['Generated on:', new Date().toLocaleString('en-MY', { timeZone: 'Asia/Kuala_Lumpur' })],
+            [],
+            ['Metric', 'Value'],
+            ['Current Month', 'RM ' + currentMonth.toFixed(2)],
+            ['Previous Month', 'RM ' + previousMonth.toFixed(2)],
+            ['Average Monthly', 'RM ' + averageMonthly.toFixed(2)],
+            ['Yearly Total', 'RM ' + yearlyTotal.toFixed(2)]
+        ];
+        
+        const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+        ws1['!cols'] = [
+            { wch: 20 },
+            { wch: 20 }
+        ];
+        XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
+        
+        // Sheet 2: Monthly Breakdown
+        const breakdownData = [
+            ['Month', 'Year', 'Total Income (RM)', 'Bookings', 'Avg Per Booking (RM)', 'Growth (%)'],
+            ...breakdown.map(row => [
+                row.month,
+                row.year,
+                parseFloat(row.income).toFixed(2),
+                row.bookings,
+                row.avg,
+                row.growth !== null ? (row.growth >= 0 ? '+' + row.growth.toFixed(1) : row.growth.toFixed(1)) : '-'
+            ])
+        ];
+        
+        const ws2 = XLSX.utils.aoa_to_sheet(breakdownData);
+        ws2['!cols'] = [
+            { wch: 12 },
+            { wch: 8 },
+            { wch: 18 },
+            { wch: 10 },
+            { wch: 20 },
+            { wch: 12 }
+        ];
+        XLSX.utils.book_append_sheet(wb, ws2, 'Monthly Breakdown');
+        
+        // Sheet 3: Payment Methods
+        const paymentData = [
+            ['Payment Method', 'Number of Transactions'],
+            ...Object.entries(paymentMethods).map(([method, count]) => [
+                method.charAt(0).toUpperCase() + method.slice(1),
+                count
+            ])
+        ];
+        
+        const ws3 = XLSX.utils.aoa_to_sheet(paymentData);
+        ws3['!cols'] = [
+            { wch: 20 },
+            { wch: 25 }
+        ];
+        XLSX.utils.book_append_sheet(wb, ws3, 'Payment Methods');
+        
+        // Sheet 4: Monthly Income Chart Data
+        const chartData = [
+            ['Month', 'Income (RM)'],
+            ...breakdown.map(row => [
+                row.month + ' ' + row.year,
+                parseFloat(row.income).toFixed(2)
+            ])
+        ];
+        
+        const ws4 = XLSX.utils.aoa_to_sheet(chartData);
+        ws4['!cols'] = [
+            { wch: 15 },
+            { wch: 15 }
+        ];
+        XLSX.utils.book_append_sheet(wb, ws4, 'Chart Data');
+        
+        // Generate filename with current date
+        const today = new Date();
+        const filename = `Monthly_Income_Report_${currentYear}_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.xlsx`;
+        
+        // Save file
+        XLSX.writeFile(wb, filename);
+        
+        // Optional: Show success message
+        alert('Excel file downloaded successfully!');
+    }
 </script>
 
 @endsection

@@ -35,7 +35,6 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 class="text-3xl font-bold mb-1">Booking Details</h1>
-                        <p class="text-red-100 opacity-90">Booking ID: <span class="font-mono font-bold">#{{ $booking->bookingID }}</span></p>
                     </div>
                     <span class="px-4 py-2 rounded-full text-sm font-bold shadow-sm bg-white
                         @if($booking->bookingStat === 'confirmed' || $booking->bookingStat === 'approved') text-green-700

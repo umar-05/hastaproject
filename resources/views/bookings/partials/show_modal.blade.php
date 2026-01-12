@@ -40,37 +40,20 @@
         }
     }
 
-    // Status Styling
-    $statusStyles = match($booking->bookingStat) {
-        'confirmed' => ['bg' => 'bg-green-500', 'text' => 'text-green-100', 'label' => 'Confirmed'],
-        'pending'   => ['bg' => 'bg-yellow-500', 'text' => 'text-yellow-100', 'label' => 'Pending Approval'],
-        'completed' => ['bg' => 'bg-blue-600', 'text' => 'text-blue-100', 'label' => 'Completed'],
-        'cancelled' => ['bg' => 'bg-red-500', 'text' => 'text-red-100', 'label' => 'Cancelled'],
-        default     => ['bg' => 'bg-gray-500', 'text' => 'text-white', 'label' => 'Unknown'],
+    // Status Styling (Updated for White Background)
+    $statusStyles = match(strtolower($booking->bookingStat)) {
+        'confirmed', 'approved' => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'label' => 'Confirmed'],
+        'pending'   => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'label' => 'Pending Approval'],
+        'completed' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-800', 'label' => 'Completed'],
+        'cancelled' => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'label' => 'Cancelled'],
+        'active'    => ['bg' => 'bg-purple-100', 'text' => 'text-purple-800', 'label' => 'Active'],
+        default     => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'label' => 'Unknown'],
     };
 @endphp
 
 <div class="relative bg-white font-sans text-gray-800 overflow-hidden">
     
-    {{-- 1. HEADER STRIP --}}
-    <div class="bg-gray-900 px-8 py-6 text-white flex justify-between items-center relative overflow-hidden">
-        {{-- Decorative accent --}}
-        <div class="absolute top-0 right-0 w-32 h-32 bg-red-600 rounded-full blur-3xl opacity-20 -mr-10 -mt-10"></div>
-        
-        <div class="relative z-10">
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Booking Reference</p>
-            <h2 class="text-3xl font-black tracking-tighter font-mono text-white">#{{ $booking->bookingID }}</h2>
-        </div>
-        
-        <div class="relative z-10 flex items-center gap-3">
-            <div class="px-4 py-1.5 rounded-full {{ $statusStyles['bg'] }} bg-opacity-20 border border-white/10 backdrop-blur-sm">
-                <div class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full {{ $statusStyles['bg'] }} animate-pulse"></span>
-                    <span class="text-xs font-bold {{ $statusStyles['text'] }} uppercase tracking-wider">{{ $statusStyles['label'] }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{-- HEADER STRIP REMOVED --}}
 
     <div class="p-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -78,10 +61,17 @@
             {{-- 2. LEFT COLUMN: Vehicle Spotlight (7 Cols) --}}
             <div class="lg:col-span-7 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-baseline justify-between border-b border-gray-100 pb-4 mb-6">
+                    {{-- Header with Status Tag --}}
+                    <div class="flex items-end justify-between border-b border-gray-100 pb-4 mb-6">
                         <div>
                             <p class="text-xs font-bold text-red-600 uppercase tracking-widest mb-1">Vehicle Selected</p>
-                            <h3 class="text-3xl font-black text-gray-900">{{ $vehicleName }}</h3>
+                            <div class="flex items-center gap-3">
+                                <h3 class="text-3xl font-black text-gray-900">{{ $vehicleName }}</h3>
+                                {{-- Status Tag --}}
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide {{ $statusStyles['bg'] }} {{ $statusStyles['text'] }}">
+                                    {{ $statusStyles['label'] }}
+                                </span>
+                            </div>
                         </div>
                         <span class="text-sm font-medium text-gray-400 bg-gray-50 px-3 py-1 rounded-lg border border-gray-100">{{ $vehicleType }}</span>
                     </div>
@@ -107,30 +97,16 @@
                 </div>
             </div>
 
-            {{-- 3. RIGHT COLUMN: Details & Timeline (5 Cols) --}}
-            <div class="lg:col-span-5 space-y-8">
+            {{-- 3. RIGHT COLUMN: Timeline (5 Cols) --}}
+            <div class="lg:col-span-5 flex items-center">
                 
-                {{-- Renter Info --}}
-                <div class="flex items-start gap-4">
-                    <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-600 border border-red-100 shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    </div>
-                    <div>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Rented By</p>
-                        <p class="text-lg font-bold text-gray-900 leading-tight">{{ $booking->customer->name ?? $booking->matricNum }}</p>
-                        <p class="text-xs text-gray-500 font-mono mt-0.5">{{ $booking->matricNum }}</p>
-                    </div>
-                </div>
-
-                <hr class="border-gray-100">
-
                 {{-- Vertical Timeline (BIGGER & BOLDER) --}}
-                <div class="relative pl-4 py-2">
+                <div class="relative pl-4 py-2 w-full">
                     {{-- Vertical Line --}}
                     <div class="absolute left-[22px] top-6 bottom-10 w-1 bg-gray-200"></div>
 
                     {{-- Pickup --}}
-                    <div class="relative flex items-start gap-6 mb-10 group">
+                    <div class="relative flex items-start gap-6 mb-16 group">
                         <div class="relative z-10 w-12 h-12 rounded-full border-4 border-white bg-gray-900 shadow-lg flex items-center justify-center group-hover:bg-red-600 transition-colors shrink-0">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </div>
@@ -169,26 +145,51 @@
     {{-- CUSTOMER DOCS & INSPECTIONS --}}
     <div class="p-6 border-t border-gray-100 bg-gray-50">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white p-4 rounded-lg border border-gray-100">
-                <h4 class="text-sm font-bold mb-2">Customer</h4>
-                <p class="text-sm text-gray-700 font-bold">{{ $booking->customer->name ?? $booking->matricNum }}</p>
-                <p class="text-xs text-gray-500">{{ $booking->customer->email ?? 'N/A' }}</p>
-                <p class="text-xs text-gray-500">{{ $booking->customer->phoneNum ?? 'N/A' }}</p>
+            {{-- Updated Customer Section with Larger Fonts --}}
+            <div class="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-red-50 rounded-lg text-red-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900">Customer Details</h4>
+                </div>
+                
+                <p class="text-3xl font-black text-gray-900 leading-tight mb-3">{{ $booking->customer->name ?? $booking->matricNum }}</p>
+                
+                <div class="space-y-2 mb-6">
+                    <div class="flex items-center gap-2 text-gray-600">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        <p class="text-lg font-medium">{{ $booking->customer->email ?? 'N/A' }}</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-600">
+                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                        <p class="text-lg font-medium">{{ $booking->customer->phoneNum ?? 'N/A' }}</p>
+                    </div>
+                </div>
 
-                <div class="mt-3">
-                    <p class="text-xs font-bold text-gray-400 uppercase">Documents</p>
-                    <div class="mt-2 flex flex-col gap-2">
+                <div class="pt-4 border-t border-gray-100">
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-wider">Uploaded Documents</p>
+                    <div class="flex flex-col gap-2">
                         @if(!empty($booking->customer->doc_ic_passport))
-                            <a target="_blank" href="{{ asset('storage/' . $booking->customer->doc_ic_passport) }}" class="text-xs text-blue-600 hover:underline">View IC / Passport</a>
+                            <a target="_blank" href="{{ asset('storage/' . $booking->customer->doc_ic_passport) }}" class="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                View IC / Passport
+                            </a>
                         @endif
                         @if(!empty($booking->customer->doc_matric))
-                            <a target="_blank" href="{{ asset('storage/' . $booking->customer->doc_matric) }}" class="text-xs text-blue-600 hover:underline">View Matric Card</a>
+                            <a target="_blank" href="{{ asset('storage/' . $booking->customer->doc_matric) }}" class="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                View Matric Card
+                            </a>
                         @endif
                         @if(!empty($booking->customer->doc_license))
-                            <a target="_blank" href="{{ asset('storage/' . $booking->customer->doc_license) }}" class="text-xs text-blue-600 hover:underline">View Driving License</a>
+                            <a target="_blank" href="{{ asset('storage/' . $booking->customer->doc_license) }}" class="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                View Driving License
+                            </a>
                         @endif
                         @if(empty($booking->customer->doc_ic_passport) && empty($booking->customer->doc_matric) && empty($booking->customer->doc_license))
-                            <div class="text-xs text-gray-400">No documents uploaded</div>
+                            <div class="text-sm text-gray-400 italic">No documents uploaded</div>
                         @endif
                     </div>
                 </div>
