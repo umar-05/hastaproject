@@ -76,7 +76,7 @@
 
             try {
                 // Use Query Parameter to handle special chars safely
-                const url = `{{ route('staff.api.owner') }}?ic=${encodeURIComponent(inputIc)}`;
+                
                 
                 const response = await fetch(url);
                 const result = await response.json();
