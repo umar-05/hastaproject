@@ -139,6 +139,16 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                                 </svg>
                                             </button>
+                                                {{-- 2. EDIT BUTTON (simple link to full details page for editing) --}}
+                                                {{-- Replace your current Edit button <a> tag with this --}}
+                                                <button onclick="openEditModal('{{ route('staff.bookings.edit', $booking->bookingID) }}')" 
+                                                        class="p-1.5 bg-yellow-50 text-yellow-700 rounded-md hover:bg-yellow-100 transition" 
+                                                        title="Edit Booking">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                                                        <path d="M2 15.25V18h2.75l8.414-8.414-2.75-2.75L2 15.25z" />
+                                                    </svg>
+                                                </button>
                                             {{-- Only View Details shown here; actions inside modal --}}
                                         </div>
                                     </td>
@@ -188,8 +198,43 @@
     </div>
 
     <script>
+
+    function openEditModal(url) {
+        const modal = document.getElementById('bookingModal');
+        const content = document.getElementById('modalContent');
+        const title = modal.querySelector('h3');
+        
+        // Update Modal Title
+        title.innerText = "Edit Booking";
+        modal.classList.remove('hidden');
+        
+        // Show Loading Spinner
+        content.innerHTML = `
+            <div class="flex flex-col justify-center items-center h-64">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-red-600"></div>
+                <p class="mt-4 text-gray-500 font-medium">Loading edit form...</p>
+            </div>
+        `;
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            content.innerHTML = html;
+        })
+        .catch(error => {
+            content.innerHTML = '<p class="text-center py-12 text-red-500">Error loading form.</p>';
+            console.error('Error:', error);
+        });
+    }
+
+
         function openBookingModal(url) {
             const modal = document.getElementById('bookingModal');
+            modal.querySelector('h3').innerText = "Booking Details";
             const content = document.getElementById('modalContent');
             
             modal.classList.remove('hidden');

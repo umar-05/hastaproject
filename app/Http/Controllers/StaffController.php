@@ -27,87 +27,87 @@ class StaffController extends Controller
     /**
      * Display the Staff Dashboard.
      */
-public function index()
-{
-    // 1. Top Metric Counts
-    $pickupsToday = Booking::whereDate('pickupDate', \Carbon\Carbon::today())
-        ->whereIn('bookingStat', ['Confirmed', 'Approved'])
-        ->count();
-    
-    $returnsToday = Booking::whereDate('returnDate', \Carbon\Carbon::today())
-        ->where('bookingStat', 'Active')
-        ->count();
+    public function index()
+    {
+        // 1. Top Metric Counts
+        $pickupsToday = Booking::whereDate('pickupDate', \Carbon\Carbon::today())
+            ->whereIn('bookingStat', ['Confirmed', 'Approved'])
+            ->count();
+        
+        $returnsToday = Booking::whereDate('returnDate', \Carbon\Carbon::today())
+            ->where('bookingStat', 'Active')
+            ->count();
 
-    // FIXED: Changed 'carStat' to 'status' to match your database
-    $availableCarsCount = Fleet::where('status', 'Available')->count();
+        // FIXED: Changed 'carStat' to 'status' to match your database
+        $availableCarsCount = Fleet::where('status', 'Available')->count();
 
-    // 2. Recent Bookings
-    $recentBookings = Booking::join('fleet', 'booking.plateNumber', '=', 'fleet.plateNumber')
-        ->select('booking.*', 'fleet.modelName', 'fleet.plateNumber')
-        ->orderBy('booking.created_at', 'desc')
-        ->limit(3)
-        ->get();
+        // 2. Recent Bookings
+        $recentBookings = Booking::join('fleet', 'booking.plateNumber', '=', 'fleet.plateNumber')
+            ->select('booking.*', 'fleet.modelName', 'fleet.plateNumber')
+            ->orderBy('booking.created_at', 'desc')
+            ->limit(3)
+            ->get();
 
-    // 3. College Trends (UNTOUCHED)
-    $totalCustomers = Customer::count();
-    $utmColleges = ['KRP', 'KTF', 'KTR', 'KTHO', 'KTDI', 'KDSE', 'KDOJ', 'KTC', 'K9', 'K10', 'OTHER'];
-    $actualData = Customer::select('collegeAddress', \DB::raw('count(*) as count'))
-        ->whereNotNull('collegeAddress')
-        ->groupBy('collegeAddress')
-        ->pluck('count', 'collegeAddress')
-        ->toArray();
+        // 3. College Trends (UNTOUCHED)
+        $totalCustomers = Customer::count();
+        $utmColleges = ['KRP', 'KTF', 'KTR', 'KTHO', 'KTDI', 'KDSE', 'KDOJ', 'KTC', 'K9', 'K10', 'OTHER'];
+        $actualData = Customer::select('collegeAddress', \DB::raw('count(*) as count'))
+            ->whereNotNull('collegeAddress')
+            ->groupBy('collegeAddress')
+            ->pluck('count', 'collegeAddress')
+            ->toArray();
 
-    $collegeDistribution = [];
-    foreach ($utmColleges as $college) {
-        $count = $actualData[$college] ?? 0;
-        $collegeDistribution[$college] = $totalCustomers > 0 ? round(($count / $totalCustomers) * 100) : 0;
-    }
+        $collegeDistribution = [];
+        foreach ($utmColleges as $college) {
+            $count = $actualData[$college] ?? 0;
+            $collegeDistribution[$college] = $totalCustomers > 0 ? round(($count / $totalCustomers) * 100) : 0;
+        }
 
-    // 4. Daily Availability Calendar Logic
-    $weekDates = [];
-    for ($i = 0; $i < 7; $i++) {
-        $date = \Carbon\Carbon::today()->addDays($i);
-        $weekDates[] = [
-            'name' => $date->format('D'),
-            'date' => $date->format('d'),
-            'full_date' => $date->toDateString(),
-            'is_today' => $i === 0
-        ];
-    }
-
-    $cars = Fleet::all();
-    $fleetAvailability = [];
-    foreach ($cars as $car) {
-        $schedule = [];
-        foreach ($weekDates as $day) {
-            $isBooked = Booking::where('plateNumber', $car->plateNumber)
-                ->whereIn('bookingStat', ['Approved', 'Active', 'Confirmed'])
-                ->whereDate('pickupDate', '<=', $day['full_date'])
-                ->whereDate('returnDate', '>=', $day['full_date'])
-                ->exists();
-
-            $schedule[] = [
-                'available' => !$isBooked,
-                'is_today' => $day['is_today']
+        // 4. Daily Availability Calendar Logic
+        $weekDates = [];
+        for ($i = 0; $i < 7; $i++) {
+            $date = \Carbon\Carbon::today()->addDays($i);
+            $weekDates[] = [
+                'name' => $date->format('D'),
+                'date' => $date->format('d'),
+                'full_date' => $date->toDateString(),
+                'is_today' => $i === 0
             ];
         }
-        $fleetAvailability[] = [
-            'modelName' => $car->modelName,
-            'plateNumber' => $car->plateNumber,
-            'schedule' => $schedule
-        ];
-    }
 
-    return view('staff.dashboard', compact(
-        'pickupsToday', 
-        'returnsToday', 
-        'availableCarsCount',
-        'recentBookings',
-        'collegeDistribution', 
-        'weekDates',
-        'fleetAvailability'
-    ));
-}
+        $cars = Fleet::all();
+        $fleetAvailability = [];
+        foreach ($cars as $car) {
+            $schedule = [];
+            foreach ($weekDates as $day) {
+                $isBooked = Booking::where('plateNumber', $car->plateNumber)
+                    ->whereIn('bookingStat', ['Approved', 'Active', 'Confirmed'])
+                    ->whereDate('pickupDate', '<=', $day['full_date'])
+                    ->whereDate('returnDate', '>=', $day['full_date'])
+                    ->exists();
+
+                $schedule[] = [
+                    'available' => !$isBooked,
+                    'is_today' => $day['is_today']
+                ];
+            }
+            $fleetAvailability[] = [
+                'modelName' => $car->modelName,
+                'plateNumber' => $car->plateNumber,
+                'schedule' => $schedule
+            ];
+        }
+
+        return view('staff.dashboard', compact(
+            'pickupsToday', 
+            'returnsToday', 
+            'availableCarsCount',
+            'recentBookings',
+            'collegeDistribution', 
+            'weekDates',
+            'fleetAvailability'
+        ));
+    }
 
     /**
      * Display the Pickup & Return Inspection page.
@@ -142,16 +142,13 @@ public function index()
     /**
      * Update the staff's profile information.
      */
-public function updateProfile(Request $request): RedirectResponse
+    public function updateProfile(Request $request): RedirectResponse
     {
-        // 1. Reconstruct the full email from the username input
-        // This takes the input "john" and turns it into "john@hasta.com"
         if ($request->filled('email_username')) {
             $fullEmail = $request->input('email_username') . '@hasta.com';
             $request->merge(['email' => $fullEmail]);
         }
 
-        // 2. Validate (The 'email' rule checks the reconstructed email above)
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('staff')->ignore($request->user('staff')->staffID, 'staffID')],
@@ -182,63 +179,48 @@ public function updateProfile(Request $request): RedirectResponse
     }
 
     /**
- * Show the form for editing the specified staff member.
- */
-public function edit($staffID): \Illuminate\View\View
-{
-    // Find the staff member by their custom ID
-    $staff = Staff::where('staffID', $staffID)->firstOrFail();
-
-    // Return the view (ensure this view file exists)
-    return view('staff.add-stafffunctioning', compact('staff'));
-}
-
-/**
- * Remove the specified staff member from storage.
- */
-public function destroy($staffID): \Illuminate\Http\RedirectResponse
-{
-    // 1. Find the staff member
-    $staff = Staff::where('staffID', $staffID)->firstOrFail();
-
-    // 2. Prevent self-deletion if necessary
-    if (Auth::guard('staff')->user()->staffID === $staff->staffID) {
-        return back()->with('error', 'You cannot delete your own account.');
+     * Show the form for editing the specified staff member.
+     */
+    public function edit($staffID): \Illuminate\View\View
+    {
+        $staff = Staff::where('staffID', $staffID)->firstOrFail();
+        return view('staff.add-stafffunctioning', compact('staff'));
     }
 
-    // 3. Delete the record
-    $staff->delete();
-
-    // 4. Redirect back to the staff list
-    return redirect()->route('staff.add-staff')
-        ->with('status', "Staff member $staffID has been successfully removed.");
-}
-
-public function update(Request $request, $staffID): \Illuminate\Http\RedirectResponse
+    /**
+     * Remove the specified staff member from storage.
+     */
+    public function destroy($staffID): \Illuminate\Http\RedirectResponse
     {
-        // 1. Find the staff member
         $staff = Staff::where('staffID', $staffID)->firstOrFail();
 
-        // 2. Reconstruct the full email address
-        // The form sends 'email_username' (e.g., "john"), so we merge 'email' ("john@hasta.com") into the request.
+        if (Auth::guard('staff')->user()->staffID === $staff->staffID) {
+            return back()->with('error', 'You cannot delete your own account.');
+        }
+
+        $staff->delete();
+
+        return redirect()->route('staff.add-staff')
+            ->with('status', "Staff member $staffID has been successfully removed.");
+    }
+
+    public function update(Request $request, $staffID): \Illuminate\Http\RedirectResponse
+    {
+        $staff = Staff::where('staffID', $staffID)->firstOrFail();
+
         if ($request->filled('email_username')) {
             $fullEmail = $request->input('email_username') . '@hasta.com';
             $request->merge(['email' => $fullEmail]);
         }
 
-        // 3. Validate
-        // Now 'email' exists in the request, so 'required' validation will pass.
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'position' => ['required', 'string', 'max:50'],
-            // We ignore the current staffID so it doesn't complain that the email is "already taken" by this user
             'email' => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique('staff')->ignore($staff->staffID, 'staffID')],
         ]);
 
-        // 4. Update the record
         $staff->update($validated);
 
-        // 5. Redirect
         return redirect()->route('staff.add-staff')
             ->with('status', "Staff member $staffID updated successfully!");
     }
@@ -246,17 +228,14 @@ public function update(Request $request, $staffID): \Illuminate\Http\RedirectRes
     /**
      * Show form to add new staff (and list existing staff).
      */
-public function create(Request $request): View
+    public function create(Request $request): View
     {
-        // 1. Auth Check
         if (!Auth::guard('staff')->check()) {
             return redirect()->route('login');
         }
 
-        // 2. Start Query
         $query = Staff::query();
 
-        // 3. Apply Search Filter (Name, ID, or Email)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -266,25 +245,18 @@ public function create(Request $request): View
             });
         }
 
-        // 4. Apply Position Filter
         if ($request->filled('position') && $request->position !== 'All Positions') {
             $query->where('position', $request->position);
         }
 
-        // 5. Get Filtered Results (Ordered by newest)
         $staffs = $query->orderBy('created_at', 'desc')->get();
 
-        // 6. Calculate Static Counts (We count ALL staff for the cards, regardless of filter)
-        // We use a separate query here so the cards don't change numbers when you search.
         $allStaff = Staff::all();
-        
         $totalStaffCount = $allStaff->count();
         $driverCount = $allStaff->where('position', 'Driver')->count();
-        // Combine Admin and IT Officer for the "Admin Staff" card
         $adminCount = $allStaff->whereIn('position', ['Administrator', 'IT Officer'])->count();
         $managerCount = $allStaff->where('position', 'Manager')->count();
 
-        // 7. Return View
         return view('staff.add-staff', compact(
             'staffs', 
             'totalStaffCount', 
@@ -294,9 +266,6 @@ public function create(Request $request): View
         ));
     }
 
-    /**
-     * Helper to show the 'functioning' creation view if needed.
-     */
     public function createFunctioning() 
     {
         if (!Auth::guard('staff')->check()) {
@@ -307,16 +276,13 @@ public function create(Request $request): View
 
     public function store(Request $request): RedirectResponse
     {
-        // 1. Ensure user is authenticated
         if (!Auth::guard('staff')->check()) {
             return redirect()->route('login');
         }
 
-        // 2. Pre-process Email
         $fullEmail = $request->input('email_username') . '@hasta.com';
         $request->merge(['email' => $fullEmail]);
 
-        // 3. Validate
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email_username' => ['required', 'string', 'max:50', 'alpha_dash'],
@@ -325,7 +291,6 @@ public function create(Request $request): View
             'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
         ]);
 
-        // 4. Auto-Generate Staff ID
         $latestStaff = \App\Models\Staff::orderBy('staffID', 'desc')->first();
         
         if (!$latestStaff) {
@@ -335,7 +300,6 @@ public function create(Request $request): View
             $newStaffID = 'STAFF' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
         }
 
-        // 5. Create Staff
         Staff::create([
             'name' => $request->name,
             'staffID' => $newStaffID,
@@ -344,7 +308,6 @@ public function create(Request $request): View
             'password' => Hash::make($request->password),
         ]);
 
-        // --- CHANGED THIS LINE BELOW ---
         return redirect()->route('staff.add-staff')
             ->with('status', 'Staff member ' . $newStaffID . ' added successfully!');
     }
@@ -451,279 +414,197 @@ public function create(Request $request): View
 
         return view('staff.rewards', compact('activeRewards', 'inactiveRewards', 'stats'));
     }
-/**
- * Display the Daily Income Report.
- * 
- * This method calculates income from PAID payments only,
- * fetches chart data, and prepares recent transactions.
- */
-public function dailyIncome(): \Illuminate\View\View
-{
-    // ========================================
-    // 1. TODAY'S INCOME
-    // ========================================
-    // Only count payments that are marked as 'paid' or 'completed'
-    $todayPayments = \App\Models\Payment::whereDate('paymentDate', \Carbon\Carbon::today())
-        ->where('paymentStatus', 'paid') // Adjust this if you use 'completed', 'success', etc.
-        ->get();
-    
-    $todayIncome = $todayPayments->sum('grandTotal'); // Using grandTotal as final income
-    $transactionCount = $todayPayments->count();
 
-    // ========================================
-    // 2. YESTERDAY'S INCOME (for Change %)
-    // ========================================
-    $yesterdayIncome = \App\Models\Payment::whereDate('paymentDate', \Carbon\Carbon::yesterday())
-        ->where('paymentStatus', 'paid')
-        ->sum('grandTotal');
-
-    // Calculate percentage change
-    $change = $yesterdayIncome > 0 
-        ? (($todayIncome - $yesterdayIncome) / $yesterdayIncome) * 100 
-        : ($todayIncome > 0 ? 100 : 0);
-
-    // ========================================
-    // 3. RECENT TRANSACTIONS (for the table)
-    // ========================================
-    $recentTransactionsRaw = \App\Models\Payment::with(['booking.customer'])
-        ->whereDate('paymentDate', \Carbon\Carbon::today())
-        ->where('paymentStatus', 'paid')
-        ->orderBy('paymentDate', 'desc')
-        ->limit(10)
-        ->get();
-
-    // Format for the blade view
-    $recentTransactions = $recentTransactionsRaw->map(function ($payment) {
-        return [
-            'booking_id' => $payment->bookingID ?? 'N/A',
-            'customer' => $payment->booking->customer->name ?? 'Unknown',
-            'amount' => $payment->grandTotal,
-            'date' => \Carbon\Carbon::parse($payment->paymentDate)->format('M d, Y'),
-            'time' => \Carbon\Carbon::parse($payment->paymentDate)->format('h:i A'),
-            'payment_method' => ucfirst($payment->method ?? 'N/A'),
-        ];
-    })->toArray();
-
-    // ========================================
-    // 4. DAILY INCOME CHART (Last 7 Days)
-    // ========================================
-    $dailyIncomeChart = [];
-    for ($i = 6; $i >= 0; $i--) {
-        $date = \Carbon\Carbon::today()->subDays($i);
+    /**
+     * Display the Daily Income Report.
+     */
+    public function dailyIncome(): \Illuminate\View\View
+    {
+        $todayPayments = \App\Models\Payment::whereDate('paymentDate', \Carbon\Carbon::today())
+            ->where('paymentStatus', 'paid') 
+            ->get();
         
-        $dayIncome = \App\Models\Payment::whereDate('paymentDate', $date)
+        $todayIncome = $todayPayments->sum('grandTotal');
+        $transactionCount = $todayPayments->count();
+
+        $yesterdayIncome = \App\Models\Payment::whereDate('paymentDate', \Carbon\Carbon::yesterday())
+            ->where('paymentStatus', 'paid')
+            ->sum('grandTotal');
+
+        $change = $yesterdayIncome > 0 
+            ? (($todayIncome - $yesterdayIncome) / $yesterdayIncome) * 100 
+            : ($todayIncome > 0 ? 100 : 0);
+
+        $recentTransactionsRaw = \App\Models\Payment::with(['booking.customer'])
+            ->whereDate('paymentDate', \Carbon\Carbon::today())
+            ->where('paymentStatus', 'paid')
+            ->orderBy('paymentDate', 'desc')
+            ->limit(10)
+            ->get();
+
+        $recentTransactions = $recentTransactionsRaw->map(function ($payment) {
+            return [
+                'booking_id' => $payment->bookingID ?? 'N/A',
+                'customer' => $payment->booking->customer->name ?? 'Unknown',
+                'amount' => $payment->grandTotal,
+                'date' => \Carbon\Carbon::parse($payment->paymentDate)->format('M d, Y'),
+                'time' => \Carbon\Carbon::parse($payment->paymentDate)->format('h:i A'),
+                'payment_method' => ucfirst($payment->method ?? 'N/A'),
+            ];
+        })->toArray();
+
+        $dailyIncomeChart = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = \Carbon\Carbon::today()->subDays($i);
+            $dayIncome = \App\Models\Payment::whereDate('paymentDate', $date)->where('paymentStatus', 'paid')->sum('grandTotal');
+            $dailyIncomeChart[] = [
+                'date' => $date->format('Y-m-d'),
+                'total' => round($dayIncome, 2)
+            ];
+        }
+
+        $bookingsTrend = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = \Carbon\Carbon::today()->subDays($i);
+            $bookingCount = \App\Models\Payment::whereDate('paymentDate', $date)->where('paymentStatus', 'paid')->count();
+            $bookingsTrend[] = [
+                'date' => $date->format('Y-m-d'),
+                'count' => $bookingCount
+            ];
+        }
+
+        return view('staff.reports.dailyincome.index', compact(
+            'todayIncome', 'yesterdayIncome', 'change', 'transactionCount', 'recentTransactions', 'dailyIncomeChart', 'bookingsTrend'
+        ));
+    }
+
+    /**
+     * Display the Monthly Income Report connected to the database.
+     */
+    public function monthlyIncome(): \Illuminate\View\View
+    {
+        $now = Carbon::now();
+        $currentYear = $now->year;
+
+        $currentMonthIncome = \App\Models\Payment::whereYear('paymentDate', $currentYear)
+            ->whereMonth('paymentDate', $now->month)
+            ->where('paymentStatus', 'paid')
+            ->sum('grandTotal');
+
+        $previousMonthIncome = \App\Models\Payment::whereYear('paymentDate', $now->copy()->subMonth()->year)
+            ->whereMonth('paymentDate', $now->copy()->subMonth()->month)
+            ->where('paymentStatus', 'paid')
+            ->sum('grandTotal');
+
+        $yearlyTotal = \App\Models\Payment::whereYear('paymentDate', $currentYear)
             ->where('paymentStatus', 'paid')
             ->sum('grandTotal');
         
-        $dailyIncomeChart[] = [
-            'date' => $date->format('Y-m-d'),
-            'total' => round($dayIncome, 2)
-        ];
-    }
+        $monthsPassedSoFar = $now->month;
+        $averageMonthly = $monthsPassedSoFar > 0 ? ($yearlyTotal / $monthsPassedSoFar) : 0;
 
-    // ========================================
-    // 5. BOOKINGS TREND CHART (Last 7 Days)
-    // ========================================
-    $bookingsTrend = [];
-    for ($i = 6; $i >= 0; $i--) {
-        $date = \Carbon\Carbon::today()->subDays($i);
-        
-        $bookingCount = \App\Models\Payment::whereDate('paymentDate', $date)
+        $cards = [
+            'current_month'   => $currentMonthIncome,
+            'previous_month'  => $previousMonthIncome,
+            'average_monthly' => $averageMonthly,
+            'yearly_total'    => $yearlyTotal,
+        ];
+
+        $paymentMethods = \App\Models\Payment::select('method', DB::raw('count(*) as count'))
             ->where('paymentStatus', 'paid')
-            ->count();
-        
-        $bookingsTrend[] = [
-            'date' => $date->format('Y-m-d'),
-            'count' => $bookingCount
-        ];
+            ->groupBy('method')
+            ->pluck('count', 'method')
+            ->toArray();
+
+        $monthlyStats = \App\Models\Payment::select(
+                DB::raw('MONTH(paymentDate) as month'),
+                DB::raw('SUM(grandTotal) as income'),
+                DB::raw('COUNT(paymentID) as bookings'),
+                DB::raw('AVG(grandTotal) as avg')
+            )
+            ->whereYear('paymentDate', $currentYear)
+            ->where('paymentStatus', 'paid') 
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $breakdown = [];
+        $prevIncome = 0;
+
+        for ($m = 1; $m <= 12; $m++) {
+            $monthData = $monthlyStats->get($m);
+            $income = $monthData ? (float)$monthData->income : 0;
+            $growth = ($prevIncome > 0) ? (($income - $prevIncome) / $prevIncome) * 100 : ($prevIncome == 0 && $income > 0 ? 100 : null);
+            $breakdown[] = [
+                'month'    => Carbon::create()->month($m)->format('F'),
+                'year'     => $currentYear,
+                'income'   => $income,
+                'bookings' => $monthData ? $monthData->bookings : 0,
+                'avg'      => $monthData ? number_format($monthData->avg, 2) : '0.00',
+                'growth'   => $growth !== null ? round($growth, 1) : null
+            ];
+            $prevIncome = $income;
+        }
+
+        return view('staff.reports.monthlyincome.index', compact('cards', 'paymentMethods', 'breakdown'));
     }
 
-    
-
-    // ========================================
-    // 6. RETURN VIEW WITH ALL DATA
-    // ========================================
-    return view('staff.reports.dailyincome.index', compact(
-        'todayIncome',
-        'yesterdayIncome',
-        'change',
-        'transactionCount',
-        'recentTransactions',
-        'dailyIncomeChart',
-        'bookingsTrend'
-    ));
-}
-/**
- * Display the Monthly Income Report connected to the database.
- */
-public function monthlyIncome(): \Illuminate\View\View
-{
-    $now = Carbon::now();
-    $currentYear = $now->year;
-
-    // 1. TOP CARDS DATA (Real Data)
-    $currentMonthIncome = \App\Models\Payment::whereYear('paymentDate', $currentYear)
-        ->whereMonth('paymentDate', $now->month)
-        ->where('paymentStatus', 'paid')
-        ->sum('grandTotal');
-
-    $previousMonthIncome = \App\Models\Payment::whereYear('paymentDate', $now->copy()->subMonth()->year)
-        ->whereMonth('paymentDate', $now->copy()->subMonth()->month)
-        ->where('paymentStatus', 'paid')
-        ->sum('grandTotal');
-
-    $yearlyTotal = \App\Models\Payment::whereYear('paymentDate', $currentYear)
-        ->where('paymentStatus', 'paid')
-        ->sum('grandTotal');
-    
-    // Average Monthly based on months passed so far this year
-    $monthsPassedSoFar = $now->month;
-    $averageMonthly = $monthsPassedSoFar > 0 ? ($yearlyTotal / $monthsPassedSoFar) : 0;
-
-    $cards = [
-        'current_month'   => $currentMonthIncome,
-        'previous_month'  => $previousMonthIncome,
-        'average_monthly' => $averageMonthly,
-        'yearly_total'    => $yearlyTotal,
-    ];
-
-    // 2. PAYMENT METHODS (Dynamic counts for Donut Chart)
-    // Pulls from 'method' column in payment table
-    $paymentMethods = \App\Models\Payment::select('method', DB::raw('count(*) as count'))
-        ->where('paymentStatus', 'paid')
-        ->groupBy('method')
-        ->pluck('count', 'method')
-        ->toArray();
-
-    // 3. MONTHLY BREAKDOWN (Dynamic for Table and Bar Chart)
-    $monthlyStats = \App\Models\Payment::select(
-            DB::raw('MONTH(paymentDate) as month'),
-            DB::raw('SUM(grandTotal) as income'),
-            DB::raw('COUNT(paymentID) as bookings'),
-            DB::raw('AVG(grandTotal) as avg')
-        )
-        ->whereYear('paymentDate', $currentYear)
-        ->where('paymentStatus', 'paid') 
-        ->groupBy('month')
-        ->orderBy('month')
-        ->get()
-        ->keyBy('month');
-
-    $breakdown = [];
-    $prevIncome = 0;
-
-    // Loop through all 12 months to ensure even months with 0 income show up
-    for ($m = 1; $m <= 12; $m++) {
-        $monthData = $monthlyStats->get($m);
-        $income = $monthData ? (float)$monthData->income : 0;
-        
-        // Calculate Growth % compared to the previous month in the loop
-        $growth = ($prevIncome > 0) ? (($income - $prevIncome) / $prevIncome) * 100 : ($prevIncome == 0 && $income > 0 ? 100 : null);
-
-        $breakdown[] = [
-            'month'    => Carbon::create()->month($m)->format('F'),
-            'year'     => $currentYear,
-            'income'   => $income,
-            'bookings' => $monthData ? $monthData->bookings : 0,
-            'avg'      => $monthData ? number_format($monthData->avg, 2) : '0.00',
-            'growth'   => $growth !== null ? round($growth, 1) : null
-        ];
-        
-        $prevIncome = $income;
-    }
-
-    return view('staff.reports.monthlyincome.index', compact(
-        'cards',
-        'paymentMethods',
-        'breakdown'
-    ));
-}
     // ==========================================
     // BLACKLIST MANAGEMENT SECTION
     // ==========================================
 
-    /**
-     * Display Blacklist Page
-     */
     public function blacklistIndex(): View
     {
         $blacklisted = Customer::where('accStatus', 'LIKE', 'blacklisted%')->get();
         $count = $blacklisted->count();
-
         return view('staff.blacklist', compact('blacklisted', 'count'));
     }
 
-    /**
-     * Add Customer to Blacklist
-     */
     public function addToBlacklist(Request $request) 
     {
         $customer = Customer::where('matricNum', $request->matricNum)->first();
-        
         if ($customer) {
             $customer->accStatus = 'blacklisted'; 
             $customer->blacklistReason = $request->reason;
             $customer->save();
-            
             return back()->with('success', 'Customer blacklisted successfully.');
         }
         return back()->with('error', 'Customer not found.');
     }
 
-    /**
-     * Store Blacklist (Alternative Method)
-     */
     public function storeBlacklist(Request $request)
     {
-        $request->validate([
-            'matricNum' => 'required|string',
-            'reason' => 'required|string|max:255',
-        ]);
-
+        $request->validate(['matricNum' => 'required|string', 'reason' => 'required|string|max:255']);
         $customer = Customer::where('matricNum', $request->matricNum)->first();
-
         if ($customer) {
             $customer->accStatus = 'blacklisted'; 
             $customer->blacklistReason = $request->reason;
             $customer->save();
-
-            return redirect()->route('staff.blacklist.index')
-                ->with('success', 'Customer has been blacklisted successfully.');
+            return redirect()->route('staff.blacklist.index')->with('success', 'Customer has been blacklisted successfully.');
         }
-
         return back()->with('error', 'Customer not found in database.');
     }
 
-    /**
-     * Remove Customer from Blacklist
-     */
     public function destroyBlacklist($matricNum)
     {
         $customer = Customer::where('matricNum', $matricNum)->first();
-
         if ($customer) {
             $customer->accStatus = 'active'; 
             $customer->blacklistReason = null;
             $customer->save();
-
-            return redirect()->route('staff.blacklist.index')
-                ->with('success', 'Customer has been removed from the blacklist.');
+            return redirect()->route('staff.blacklist.index')->with('success', 'Customer has been removed from the blacklist.');
         }
-
         return back()->with('error', 'Customer not found.');
     }
 
-    /**
-     * API: Search Customer by Matric No
-     */
     public function searchCustomer($matric)
     {
         $customer = Customer::where('matricNum', $matric)->first();
-        
         if ($customer) {
             return response()->json([
                 'name' => $customer->name,
-                'faculty' => $customer->faculty ?? 'N/A',           
+                'faculty' => $customer->faculty ?? 'N/A',            
                 'collegeAddress' => $customer->collegeAddress ?? 'N/A',
                 'icNum_passport' => $customer->icNum_passport,
                 'email' => $customer->email
@@ -743,17 +624,12 @@ public function monthlyIncome(): \Illuminate\View\View
 
     public function missionsIndex(Request $request)
     {
-        // FIXED: Added safety check. If user is not logged in, 'auth()->user()' is null and this line would crash.
         if (!Auth::guard('staff')->check()) {
             return redirect()->route('login');
         }
-
         $status = $request->query('status');
         $staffID = auth()->guard('staff')->user()->staffID;
-
         $query = Mission::query();
-
-        // Filtering logic
         if ($status === 'available') {
             $query->where('status', 'Available');
         } elseif ($status === 'ongoing') {
@@ -761,32 +637,20 @@ public function monthlyIncome(): \Illuminate\View\View
         } elseif ($status === 'completed') {
             $query->where('status', 'Completed')->where('assigned_to', $staffID);
         }
-
         $missions = $query->latest()->get();
-
         return view('staff.missions', compact('missions'));
     }
 
     public function missionStore(Request $request) 
     {
-        Mission::create([
-            'title' => $request->title,
-            'requirements' => $request->req,
-            'description' => $request->desc,
-            'commission' => $request->commission,
-            'remarks' => $request->remarks,
-            'status' => 'Available'
-        ]);
+        Mission::create(['title' => $request->title, 'requirements' => $request->req, 'description' => $request->desc, 'commission' => $request->commission, 'remarks' => $request->remarks, 'status' => 'Available']);
         return back()->with('success', 'Task published successfully!');
     }
 
     public function missionAccept($id) 
     {
         $mission = Mission::findOrFail($id);
-        $mission->update([
-            'status' => 'Ongoing',
-            'assigned_to' => auth()->user()->staffID
-        ]);
+        $mission->update(['status' => 'Ongoing', 'assigned_to' => auth()->user()->staffID]);
         return back()->with('success', 'Task accepted! Check your ongoing records.');
     }
 
@@ -798,41 +662,30 @@ public function monthlyIncome(): \Illuminate\View\View
     public function missionComplete($id)
     {
         $mission = Mission::findOrFail($id);
-
         if ($mission->assigned_to !== auth()->user()->staffID) {
             return back()->with('error', 'You are not authorized to complete this task.');
         }
-
-        $mission->update([
-            'status' => 'Completed'
-        ]);
-
+        $mission->update(['status' => 'Completed']);
         return back()->with('success', 'Task marked as completed! Commission earned.');
     }
+
     public function pickupReturnSchedule()
     {
-        // 1. PENDING PICKUPS
-        // Logic: Booking is CONFIRMED + Pickup Form is EMPTY
         $todayPickups = \App\Models\Booking::with(['fleet', 'customer'])
             ->where('bookingStat', 'approved')
             ->where(function ($query) {
-                $query->whereNull('pickupForm')
-                      ->orWhere('pickupForm', '');
+                $query->whereNull('pickupForm')->orWhere('pickupForm', '');
             })
-            ->orderBy('pickupDate', 'asc') // Show oldest/most urgent first
+            ->orderBy('pickupDate', 'asc')
             ->get();
 
-        // 2. PENDING RETURNS
-        // Logic: Booking is CONFIRMED (Active) + Pickup IS done + Return is EMPTY
         $todayReturns = \App\Models\Booking::with(['fleet', 'customer'])
-            ->where('bookingStat', 'approved') // Only confirmed bookings are "active" on the road
+            ->where('bookingStat', 'approved')
             ->where(function ($query) {
-                $query->whereNotNull('pickupForm')
-                      ->where('pickupForm', '!=', '');
+                $query->whereNotNull('pickupForm')->where('pickupForm', '!=', '');
             })
             ->where(function ($query) {
-                $query->whereNull('returnForm')
-                      ->orWhere('returnForm', '');
+                $query->whereNull('returnForm')->orWhere('returnForm', '');
             })
             ->orderBy('returnDate', 'asc')
             ->get();
@@ -840,17 +693,83 @@ public function monthlyIncome(): \Illuminate\View\View
         return view('staff.pickup-return', compact('todayPickups', 'todayReturns'));
     }
 
-    public function showBooking($bookingID)
+    /**
+     * Show Booking Details (Full page or Modal)
+     */
+    public function showBooking(Request $request, $bookingID)
     {
-        // 1. Fetch the Booking with relationships
         $booking = Booking::with(['fleet', 'customer'])->where('bookingID', $bookingID)->firstOrFail();
-
-        // 2. Fetch Inspection Forms (if they exist)
         $pickupInspection = Inspection::where('bookingID', $bookingID)->where('type', 'pickup')->first();
         $returnInspection = Inspection::where('bookingID', $bookingID)->where('type', 'return')->first();
 
-        // 3. Return the view
+        if ($request->ajax()) {
+            return view('staff.partials.bookingmodal', compact('booking', 'pickupInspection', 'returnInspection'))->render();
+        }
+
         return view('staff.viewdetails', compact('booking', 'pickupInspection', 'returnInspection'));
     }
 
+    /**
+     * NEW: AJAX Edit Form
+     * Returns the HTML for the edit form inside the modal
+     */
+    public function editBooking(Request $request, $bookingID)
+    {
+        $booking = Booking::with(['fleet', 'customer'])->where('bookingID', $bookingID)->firstOrFail();
+        $fleets = Fleet::orderBy('plateNumber')->get();
+
+        if ($request->ajax()) {
+            return view('staff.partials.editbooking-form', compact('booking', 'fleets'))->render();
+        }
+
+        return abort(404);
+    }
+
+    /**
+     * Update Booking
+     * Handles logic for saving edits and checking vehicle availability
+     */
+    public function updateBooking(Request $request, $bookingID)
+    {
+        $booking = Booking::where('bookingID', $bookingID)->firstOrFail();
+
+        $validated = $request->validate([
+            'plateNumber' => ['required', 'string', 'exists:fleet,plateNumber'],
+            'pickupDate'  => ['required', 'date'],
+            'returnDate'  => ['required', 'date', 'after_or_equal:pickupDate'],
+            'bookingStat' => ['required', 'string'],
+            'totalPrice'  => ['nullable', 'numeric'],
+        ]);
+
+        $newPlate = $validated['plateNumber'];
+        $pickup = $validated['pickupDate'];
+        $return = $validated['returnDate'];
+
+        // Check for overlapping bookings (Conflict Check)
+        $conflict = Booking::where('plateNumber', $newPlate)
+            ->where('bookingID', '!=', $booking->bookingID)
+            ->whereIn('bookingStat', ['approved', 'confirmed', 'active'])
+            ->where(function($q) use ($pickup, $return) {
+                $q->where(function($q2) use ($pickup, $return) {
+                    $q2->where('pickupDate', '<=', $return)
+                       ->where('returnDate', '>=', $pickup);
+                });
+            })
+            ->exists();
+
+        if ($conflict) {
+            return back()->with('error', 'This vehicle is already booked for the selected period.');
+        }
+
+        // Apply updates
+        $booking->update([
+            'plateNumber' => $newPlate,
+            'pickupDate'  => $pickup,
+            'returnDate'  => $return,
+            'bookingStat' => $validated['bookingStat'],
+            'totalPrice'  => $validated['totalPrice'] ?? $booking->totalPrice,
+        ]);
+
+        return redirect()->route('staff.bookingmanagement')->with('success', 'Booking updated successfully.');
+    }
 }

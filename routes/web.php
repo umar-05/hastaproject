@@ -92,8 +92,8 @@ Route::middleware(['auth:staff', 'prevent-back'])->prefix('staff')->name('staff.
     Route::get('/staff/bookingmanagement', [StaffController::class, 'bookingManagement'])
         ->name('staff.bookingmanagement');
     Route::put('/staff/bookingmanagement/{id}', [StaffController::class, 'updateBooking'])
-        ->name('staff.bookingmanagement.update');
-    
+        ->name('bookings.update');
+    Route::get('/bookings/{bookingID}/edit', [StaffController::class, 'editBooking'])->name('bookings.edit');
     Route::resource('mission', MissionController::class);
     Route::get('/fleet/check', [StaffController::class, 'checkAvailability'])->name('fleet.check');
     Route::get('/pickup-return', [StaffController::class, 'pickupReturnSchedule'])->name('pickup-return');
