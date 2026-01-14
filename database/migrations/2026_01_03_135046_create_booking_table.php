@@ -30,13 +30,13 @@ return new class extends Migration
             
             // FK
             $table->string('plateNumber')->nullable();
-            $table->foreign('plateNumber')->references('plateNumber')->on('fleet');
+            $table->foreign('plateNumber')->references('plateNumber')->on('fleet')->onDelete('cascade');
 
             $table->string('matricNum')->nullable();
             $table->foreign('matricNum')->references('matricNum')->on('customer')->onDelete('cascade');
             
             $table->string('rewardID')->nullable();
-            $table->foreign('rewardID')->references('rewardID')->on('reward');
+            $table->foreign('rewardID')->references('rewardID')->on('reward')->onDelete('cascade');
 
             $table->timestamps();
         });

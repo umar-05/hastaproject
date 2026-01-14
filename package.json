@@ -19,6 +19,6 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "xlsx": "^0.18.5"
+        "exceljs": "^4.4.0"
     }
 }
