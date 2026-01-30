@@ -20,6 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('app.env') === 'production') {
+        URL::forceScheme('https');
+        }
         // Now this line will work correctly
         Blade::component('layouts.staff', 'layouts.staff');
     }
