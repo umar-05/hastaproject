@@ -279,9 +279,9 @@ private function extractUTMMatricCard($text, $imagePath = null)
             $ocr->executable($windowsPath);
             return;
         }
-
-        // 2. For Railway (Linux), we simply call 'tesseract'. 
-        // Nixpacks adds it to the system $PATH, so it works globally.
+    
+        // 2. For Railway (Linux), simply use the global command name.
+        // Nixpacks adds the binary to the system $PATH automatically.
         $ocr->executable('tesseract');
     }
 }
