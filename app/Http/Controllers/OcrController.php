@@ -272,17 +272,21 @@ private function extractUTMMatricCard($text, $imagePath = null)
 }
 
     private function setTesseractPath($ocr)
-    {
-        $tesseractPaths = [
-            'C:\\Program Files\\Tesseract-OCR\\tesseract.exe',
-            'C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe',
-        ];
-        
-        foreach ($tesseractPaths as $path) {
-            if (file_exists($path)) {
-                $ocr->executable($path);
-                break;
-            }
+{
+    $tesseractPaths = [
+        '/usr/bin/tesseract', // Standard Linux path
+        '/usr/local/bin/tesseract',
+        'C:\\Program Files\\Tesseract-OCR\\tesseract.exe', // Keep for local Windows dev
+    ];
+    
+    foreach ($tesseractPaths as $path) {
+        if (file_exists($path)) {
+            $ocr->executable($path);
+            return; // Exit once found
         }
+    }
+
+    // Default: assume it's in the system PATH (works for Railway/Nixpacks)
+        $ocr->executable('tesseract');
     }
 }
